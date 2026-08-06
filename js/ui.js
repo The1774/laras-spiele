@@ -236,7 +236,7 @@ const UI = {
         // Unter den Herzen: ablaufender Sternen-Turbo-Balken
         // (bella ist die globale Spielfigur aus game.js)
         if (bella.turbo > 0) {
-            const anteil = Math.max(0, bella.turbo / KONFIG.TURBO_DAUER);
+            const anteil = Math.min(1, Math.max(0, bella.turbo / KONFIG.TURBO_DAUER));
             ctx.font = '20px ' + KONFIG.SCHRIFT;
             ctx.fillText('⭐', 20, 64);
             ctx.fillStyle = 'rgba(43, 43, 58, 0.15)'; // Hintergrund des Balkens

@@ -547,6 +547,7 @@ class Bella {
         this.feder = 0;         // kurzes "Federn" nach der Landung
         this.turbo = 0;         // Restzeit des Sternen-Turbos in Frames
         this.gleitet = false;   // Funkel-Gleiten (Sprungtaste in der Luft halten)
+        this.spur = [];         // Punkte des Regenbogen-Bands (Turbo/Gleiten)
     }
 
     aktualisiere(dt, eingabe, levelLaenge, plattformen, schwebe, schwimmen, autorennen) {
@@ -662,6 +663,36 @@ class Bella {
 
     zeichne(ctx, kamera, zeit) {
         const sx = this.x - kamera;
+
+        // ---------- Regenbogen-Band (Turbo & Gleiten) ----------
+        // Solange Bella mit Sternen-Turbo rennt oder mit den Zauber-
+        // Flügeln gleitet, zieht sie ein buntes Band hinter sich her,
+        // das sanft verblasst. Pure Einhorn-Magie!
+        const bandAktiv = this.turbo > 0 || this.gleitet;
+        const letzter = this.spur[0];
+        if (bandAktiv && (!letzter || Math.abs(this.x - letzter.x) > 2.5)) {
+            this.spur.unshift({ x: this.x - this.richtung * 18, y: this.y - 6 });
+            if (this.spur.length > 24) this.spur.pop();
+        } else if (this.spur.length) {
+            this.spur.length = Math.max(0, this.spur.length - 2);
+        }
+        if (this.spur.length > 1) {
+            ctx.save();
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 3;
+            for (let b = 0; b < REGENBOGEN.length; b++) {
+                const dy = (b - 2.5) * 3;
+                ctx.strokeStyle = REGENBOGEN[b];
+                for (let i = 0; i < this.spur.length - 1; i++) {
+                    ctx.globalAlpha = 0.5 * (1 - i / this.spur.length);
+                    ctx.beginPath();
+                    ctx.moveTo(this.spur[i].x - kamera, this.spur[i].y + dy);
+                    ctx.lineTo(this.spur[i + 1].x - kamera, this.spur[i + 1].y + dy);
+                    ctx.stroke();
+                }
+            }
+            ctx.restore();
+        }
 
         // ---------- goldenes Turbo-Leuchten ----------
         // Pulsiert sanft und blendet zum Ende hin aus, damit das

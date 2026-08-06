@@ -49,6 +49,7 @@ const spiel = {
     plattformen: [],  // schwebende Inseln des aktuellen Levels
     deko: null,       // Wolken, Schmetterlinge, Boden-Schmuck
     partikel: [],
+    popups: [],       // "+10"-Belohnungen, die beim Einsammeln aufsteigen
     boss: null,       // nur im Boss-Level gesetzt (Wolke/Biene/Krake)
     fohlenBlase: null,// das gefangene Einhorn-Fohlen im Boss-Level
     introT: 0,        // Zeit-Zähler der Intro-Szene
@@ -95,6 +96,7 @@ function ladeLevel(nr) {
     spiel.plattformen = spiel.level.plattformen || [];
     spiel.deko = erzeugeDeko(spiel.level);
     spiel.partikel = [];
+    spiel.popups = [];
     spiel.strahlen = [];
     spiel.tropfen = [];
     spiel.funken = [];
@@ -271,6 +273,7 @@ function aktualisiere(dt) {
     // Deko und Partikel laufen auch hinter den Menüs weiter (wirkt lebendig)
     if (spiel.deko) aktualisiereDeko(spiel.deko, dt, spiel.level);
     aktualisierePartikel(spiel.partikel, dt);
+    aktualisierePopups(spiel.popups, dt);
 
     // Konfetti-Regen auf dem "Geschafft"-Bildschirm
     if (spiel.zustand === 'geschafft' && Math.random() < 0.25) {
@@ -309,8 +312,14 @@ function aktualisiere(dt) {
     // Eisrutsche: ab rutschAb geht es automatisch nur noch vorwärts
     const autorennen = !!(spiel.level.eis && bella.x >= spiel.level.rutschAb);
 
+    const warAmBoden = bella.amBoden;
     bella.aktualisiere(dt, Eingabe, spiel.level.laenge, spiel.plattformen, spiel.level.schwebe, spiel.level.schwimmen, autorennen);
     if (spiel.level.schwimmen) pruefeSpalten();
+
+    // Lande-Sternchen: Bei jeder Landung stiebt ein wenig Glitzer auf
+    if (bella.amBoden && !warAmBoden && !spiel.level.schwimmen) {
+        erzeugePartikel(spiel.partikel, bella.x, bella.y + 16, 3, ['✨', '⭐']);
+    }
 
     // Beim ersten Erreichen der Rutsche: Schnee-Wirbel + Sound
     if (autorennen && !spiel.rutschBegonnen) {
@@ -905,6 +914,7 @@ function pruefeObjekte() {
             spiel.punkte += KONFIG.PUNKTE_BLUME;
             Sound.sammeln();
             erzeugePartikel(spiel.partikel, obj.x, obj.y, 6, KONFIG.SPRITES.glitzer);
+            erzeugePopup(spiel.popups, obj.x, obj.y, '+' + KONFIG.PUNKTE_BLUME, '#ff6fb0');
 
         } else if (obj.typ === 'stern') {
             obj.eingesammelt = true;
@@ -912,12 +922,14 @@ function pruefeObjekte() {
             bella.turbo = KONFIG.TURBO_DAUER; // Sternen-Turbo: kurz schneller rennen!
             Sound.stern();
             erzeugePartikel(spiel.partikel, obj.x, obj.y, 14, ['⭐', '✨', '🌟']);
+            erzeugePopup(spiel.popups, obj.x, obj.y, '+' + KONFIG.PUNKTE_STERN + ' ⭐', '#f5a11a');
 
         } else if (obj.typ === 'herz') {
             obj.eingesammelt = true;
             if (spiel.herzen < spiel.maxHerzen) spiel.herzen += 1;
             Sound.extraherz();
             erzeugePartikel(spiel.partikel, obj.x, obj.y, 10, ['💖', '💗', '✨']);
+            erzeugePopup(spiel.popups, obj.x, obj.y, '+ 💗', '#ff5d8f');
 
         } else if (obj.typ === 'sonne') {
             obj.eingesammelt = true;
@@ -936,6 +948,7 @@ function pruefeObjekte() {
                 const dankeSaetze = ['Danke, Lara!', 'Juchhu, ich bin frei!', 'Danke! Du bist die Beste!'];
                 Stimme.sprich(dankeSaetze[Math.floor(Math.random() * dankeSaetze.length)], 'freund');
                 erzeugePartikel(spiel.partikel, obj.x, obj.y, 18, ['🫧', '💖', '✨', '🌟', '💜']);
+                erzeugePopup(spiel.popups, obj.x, obj.y - 20, '+' + KONFIG.PUNKTE_FREUND + ' 💖', '#9b7bea');
             }
 
         } else if (obj.typ === 'hindernis' || obj.typ === 'gegner') {
@@ -1240,7 +1253,7 @@ function zeichne() {
         }
 
         zeichneBoden();
-        zeichneBodenDeko(ctx, spiel.deko, spiel.kamera);
+        zeichneBodenDeko(ctx, spiel.deko, spiel.kamera, spiel.zeit);
 
         for (const p of spiel.plattformen) {
             zeichnePlattform(ctx, p, spiel.kamera, spiel.level);
@@ -1276,6 +1289,9 @@ function zeichne() {
         if (spiel.zustand === 'intro') zeichneIntro(ctx);
 
         zeichnePartikel(ctx, spiel.partikel, spiel.kamera);
+
+        // "+10"-Belohnungen steigen über den Partikeln auf
+        zeichnePopups(ctx, spiel.popups, spiel.kamera);
 
         // Zauberstaub funkelt über der ganzen Szene
         zeichneZauberstaub(ctx, spiel.deko, spiel.zeit);

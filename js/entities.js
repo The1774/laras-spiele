@@ -307,8 +307,8 @@ function zeichneHimmelDeko(ctx, deko, kamera, zeit, level) {
         }
     }
 
-    // Warmes Glühen um Sonne, Mond und Regenbogen (mehr Magie!)
-    if ('☀️🌙🌕🌈'.includes(level.himmelskoerper)) {
+    // Warmes Glühen um Sonne und Mond (mehr Magie!)
+    if ('☀️🌙🌕'.includes(level.himmelskoerper) && level.himmelskoerper) {
         const warm = level.nachts || level.himmelskoerper === '🌙';
         const glowFarbe = warm ? '255, 250, 215' : '255, 225, 120';
         const glow = ctx.createRadialGradient(KONFIG.BREITE - 90, 80, 8, KONFIG.BREITE - 90, 80, 95);
@@ -339,19 +339,27 @@ function zeichneHimmelDeko(ctx, deko, kamera, zeit, level) {
         }
     }
 
-    // Himmelskörper (Sonne/Mond/Segelboot/…) bleibt fest am Bildschirm.
-    // Im Gewitter-Level wird die Sturmwolke beim Auflösen sanft gegen
-    // eine aufgehende Sonne ausgetauscht.
-    ctx.font = '64px ' + KONFIG.SCHRIFT;
+    // Himmelskörper bleibt fest am Bildschirm. Sonne und Mond werden
+    // mit freundlichem Gesicht GEZEICHNET; der 🌈 der Wolkenwelt wird
+    // ein echter großer Regenbogen am Himmel. Im Gewitter-Level wird
+    // die Sturmwolke beim Auflösen sanft gegen die Sonne ausgetauscht.
     if (level.regen && deko.gewitter && deko.gewitter.t > 0) {
         const t = deko.gewitter.t;
         const altA = ctx.globalAlpha;
         ctx.globalAlpha = altA * (1 - t);
+        ctx.font = '64px ' + KONFIG.SCHRIFT;
         ctx.fillText('⛈️', KONFIG.BREITE - 90, 80);
         ctx.globalAlpha = altA * t;
-        ctx.fillText('☀️', KONFIG.BREITE - 90, 80);
+        zeichneSonneGesicht(ctx, KONFIG.BREITE - 90, 80);
         ctx.globalAlpha = altA;
-    } else {
+    } else if (level.himmelskoerper === '☀️') {
+        zeichneSonneGesicht(ctx, KONFIG.BREITE - 90, 80);
+    } else if (level.himmelskoerper === '🌙' || level.himmelskoerper === '🌕') {
+        zeichneMondGesicht(ctx, KONFIG.BREITE - 90, 80);
+    } else if (level.himmelskoerper === '🌈') {
+        zeichneHimmelsRegenbogen(ctx);
+    } else if (level.himmelskoerper) {
+        ctx.font = '64px ' + KONFIG.SCHRIFT;
         ctx.fillText(level.himmelskoerper, KONFIG.BREITE - 90, 80);
     }
 
@@ -383,6 +391,125 @@ function zeichneHimmelDeko(ctx, deko, kamera, zeit, level) {
         const sy = tier.y + Math.sin(zeit * 0.08 + tier.phase) * 18;
         ctx.fillText(tier.emoji || KONFIG.SPRITES.schmetterling, sx, sy);
     }
+}
+
+// =====================================================
+// Lächelnde Sonne mit rosigen Wangen – der freundliche
+// Blickfang am Himmel (die Strahlen drehen sich in
+// zeichneHimmelDeko schon von selbst dahinter).
+// =====================================================
+function zeichneSonneGesicht(ctx, x, y) {
+    const G = KONFIG.FARBEN.gesicht;
+
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    // Sonnen-Körper
+    ctx.beginPath();
+    ctx.arc(x, y, 30, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffd24a';
+    ctx.fill();
+    ctx.strokeStyle = kontur('#ffd24a', 0.25);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Geschlossene, glückliche Augen + Lächeln
+    ctx.strokeStyle = G;
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.arc(x - 10, y - 4, 4, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + 10, y - 4, 4, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x, y + 5, 8, Math.PI * 0.15, Math.PI * 0.85);
+    ctx.stroke();
+
+    // Rosige Wangen
+    ctx.fillStyle = 'rgba(255, 140, 170, 0.5)';
+    ctx.beginPath();
+    ctx.arc(x - 17, y + 6, 4.5, 0, Math.PI * 2);
+    ctx.arc(x + 17, y + 6, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+// =====================================================
+// Schlafender Mond mit friedlichem Gesicht und Kratern
+// (für die Nacht-Level – niedlicher als das Emoji!)
+// =====================================================
+function zeichneMondGesicht(ctx, x, y) {
+    const G = KONFIG.FARBEN.gesicht;
+
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    // Mond-Körper
+    ctx.beginPath();
+    ctx.arc(x, y, 28, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff3c9';
+    ctx.fill();
+    ctx.strokeStyle = kontur('#fff3c9', 0.22);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Ein paar sanfte Krater
+    ctx.fillStyle = 'rgba(226, 205, 150, 0.55)';
+    ctx.beginPath();
+    ctx.arc(x - 12, y - 10, 4.5, 0, Math.PI * 2);
+    ctx.arc(x + 14, y - 14, 3, 0, Math.PI * 2);
+    ctx.arc(x + 17, y + 10, 3.6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Schlafendes Gesicht: geschlossene Augen (nach unten gebogen)
+    // und ein kleines zufriedenes Lächeln
+    ctx.strokeStyle = G;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.arc(x - 9, y - 2, 4, Math.PI * 0.15, Math.PI * 0.85);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + 9, y - 2, 4, Math.PI * 0.15, Math.PI * 0.85);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x, y + 8, 5, Math.PI * 0.2, Math.PI * 0.8);
+    ctx.stroke();
+
+    // Kleines "z z" – der Mond schlummert friedlich
+    ctx.fillStyle = 'rgba(255, 250, 220, 0.85)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '700 13px ' + KONFIG.SCHRIFT;
+    ctx.fillText('z', x + 34, y - 26);
+    ctx.font = '700 10px ' + KONFIG.SCHRIFT;
+    ctx.fillText('z', x + 42, y - 36);
+
+    ctx.restore();
+}
+
+// =====================================================
+// Großer, sanfter Regenbogen quer über den Himmel
+// (Wolkenwelt-Finale – statt des kleinen Emojis)
+// =====================================================
+function zeichneHimmelsRegenbogen(ctx) {
+    const cx = KONFIG.BREITE * 0.72;
+    const cy = KONFIG.BODEN_Y + 60;
+    const r0 = 300;
+    const band = 12;
+
+    ctx.save();
+    ctx.globalAlpha = ctx.globalAlpha * 0.5;
+    ctx.lineCap = 'butt';
+    for (let i = 0; i < REGENBOGEN.length; i++) {
+        ctx.strokeStyle = REGENBOGEN[i];
+        ctx.lineWidth = band;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r0 - band / 2 - i * band, Math.PI, Math.PI * 2);
+        ctx.stroke();
+    }
+    ctx.restore();
 }
 
 // =====================================================
@@ -594,16 +721,68 @@ function zeichnePlattform(ctx, p, kamera, level) {
     ctx.stroke();
 }
 
-// Deko-Emojis, die auf dem Boden stehen (nach dem Boden zeichnen)
-function zeichneBodenDeko(ctx, deko, kamera) {
+// Deko-Emojis, die auf dem Boden stehen (nach dem Boden zeichnen).
+// Sie wiegen sich sanft hin und her, als würde ein Windhauch wehen.
+function zeichneBodenDeko(ctx, deko, kamera, zeit) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const teil of deko.boden) {
         const sx = teil.x - kamera;
         if (sx < -60 || sx > KONFIG.BREITE + 60) continue;
+        ctx.save();
+        ctx.translate(sx, KONFIG.BODEN_Y + 6);
+        ctx.rotate(Math.sin((zeit || 0) * 0.025 + teil.x * 0.05) * 0.07);
         ctx.font = Math.round(teil.groesse) + 'px ' + KONFIG.SCHRIFT;
-        ctx.fillText(teil.emoji, sx, KONFIG.BODEN_Y - teil.groesse / 2 + 6);
+        ctx.fillText(teil.emoji, 0, -teil.groesse / 2);
+        ctx.restore();
     }
+}
+
+// ---------- Punkte-Popups (+10, 💗, …) ----------
+// Beim Einsammeln steigt eine kleine bunte Belohnung auf und am
+// Einsammel-Ort "ploppt" ein kurzer Ring – so SIEHT das Kind sofort,
+// dass sich das Sammeln gelohnt hat.
+
+function erzeugePopup(liste, x, y, text, farbe) {
+    liste.push({ x: x, y0: y, text: text, farbe: farbe || '#ff6fb0', leben: 55, start: 55 });
+}
+
+function aktualisierePopups(liste, dt) {
+    for (let i = liste.length - 1; i >= 0; i--) {
+        liste[i].leben -= dt;
+        if (liste[i].leben <= 0) liste.splice(i, 1);
+    }
+}
+
+function zeichnePopups(ctx, liste, kamera) {
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (const p of liste) {
+        const sx = p.x - kamera;
+        const t = 1 - p.leben / p.start; // 0 → 1 über die Lebenszeit
+
+        // Pop-Ring, der sich am Einsammel-Ort kurz ausdehnt
+        if (t < 0.4) {
+            ctx.globalAlpha = (1 - t / 0.4) * 0.75;
+            ctx.strokeStyle = p.farbe;
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.arc(sx, p.y0, 10 + t * 90, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // Aufsteigender Text: ploppt kurz groß auf, weißer Rand = lesbar
+        const ty = p.y0 - 14 - t * 44;
+        const groesse = t < 0.15 ? 16 + t * 60 : 25;
+        ctx.globalAlpha = Math.min(1, p.leben / 18);
+        ctx.font = '700 ' + Math.round(groesse) + 'px ' + KONFIG.SCHRIFT;
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.strokeText(p.text, sx, ty);
+        ctx.fillStyle = p.farbe;
+        ctx.fillText(p.text, sx, ty);
+    }
+    ctx.globalAlpha = 1;
 }
 
 // ---------- Level-Objekte zeichnen ----------

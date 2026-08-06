@@ -1161,12 +1161,58 @@ function zeichneBoden() {
         wiese = mischeFarben(spiel.level.farben.wiese, spiel.level.farbenSonne.wiese, g.t);
     }
 
-    ctx.fillStyle = wiese;
+    // Sanfter Verlauf statt flacher Fläche: oben hell und saftig,
+    // nach unten satter/dunkler – gibt dem Boden richtig Tiefe
+    const verlauf = ctx.createLinearGradient(0, KONFIG.BODEN_Y, 0, KONFIG.HOEHE);
+    verlauf.addColorStop(0, toneFarbe(wiese, 0.16));
+    verlauf.addColorStop(1, toneFarbe(wiese, -0.22));
+    ctx.fillStyle = verlauf;
     ctx.fillRect(0, KONFIG.BODEN_Y, KONFIG.BREITE, KONFIG.HOEHE - KONFIG.BODEN_Y);
 
     // Heller Streifen als Wiesen-Oberkante
     ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
     ctx.fillRect(0, KONFIG.BODEN_Y, KONFIG.BREITE, 6);
+
+    if (spiel.level.eis) {
+        // Eis glänzt: schräge helle Schlieren, die mit der Welt scrollen
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        for (let wx = Math.floor(spiel.kamera / 130) * 130; wx < spiel.kamera + KONFIG.BREITE + 130; wx += 130) {
+            const sx = wx - spiel.kamera + pseudoZufall(wx) * 60;
+            const y = KONFIG.BODEN_Y + 18 + pseudoZufall(wx + 7) * 46;
+            ctx.moveTo(sx, y);
+            ctx.lineTo(sx + 34, y - 9);
+        }
+        ctx.stroke();
+        return;
+    }
+
+    // Kleine Grasbüschel entlang der Oberkante (scrollen mit der Welt;
+    // unter Wasser wächst stattdessen Seegras auf dem Sand). In der
+    // Wolkenwelt (fest) wächst kein Gras auf den Wolken!
+    if (spiel.level.fest) return;
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = spiel.level.wasser ? '#4da894' : toneFarbe(wiese, -0.22);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let wx = Math.floor(spiel.kamera / 46) * 46; wx < spiel.kamera + KONFIG.BREITE + 46; wx += 46) {
+        const sx = wx - spiel.kamera + pseudoZufall(wx) * 34;
+        const h = 5 + pseudoZufall(wx + 3) * 5;
+        // Drei kurze Halme, die fächerförmig auseinanderneigen
+        for (let k = -1; k <= 1; k++) {
+            const neig = k * (3 + pseudoZufall(wx + k * 17) * 2.5);
+            ctx.moveTo(sx, KONFIG.BODEN_Y + 6);
+            ctx.quadraticCurveTo(
+                sx + neig * 0.3, KONFIG.BODEN_Y + 6 - h * 0.6,
+                sx + neig, KONFIG.BODEN_Y + 4 - h - (k === 0 ? 2 : 0));
+        }
+    }
+    ctx.stroke();
+    ctx.restore();
 }
 
 function zeichne() {
@@ -1185,7 +1231,7 @@ function zeichne() {
                 nah: mischeFarben(spiel.level.huegel.nah, spiel.level.huegelSonne.nah, gw.t)
             };
         }
-        zeichneHuegel(ctx, spiel.kamera, huegel);
+        zeichneHuegel(ctx, spiel.kamera, huegel, spiel.level);
 
         // Boss-Level: Wolke bzw. Biene schwebt am Himmel (+ Bonus-Sonne)
         if (spiel.boss) {
@@ -1245,6 +1291,9 @@ function zeichne() {
         if (spiel.level.nachts) {
             zeichneNachtLicht();
         }
+
+        // Sanfte Vignette über der ganzen Szene (unter dem HUD)
+        zeichneVignette(ctx);
 
         if (spiel.zustand === 'spiel' || spiel.zustand === 'pause') {
             UI.zeichneHUD(ctx, spiel);

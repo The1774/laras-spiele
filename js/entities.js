@@ -13,6 +13,38 @@ function pruefeKollision(ax, ay, aBreite, aHoehe, bx, by, bBreite, bHoehe) {
            Math.abs(ay - by) < (aHoehe + bHoehe) / 2;
 }
 
+// ---------- Farb-Helfer ----------
+
+// Versteht '#rrggbb' und 'rgb(r,g,b)' und liefert [r, g, b]
+function farbeZuRGB(f) {
+    if (f[0] === '#') {
+        const p = parseInt(f.slice(1), 16);
+        return [(p >> 16) & 255, (p >> 8) & 255, p & 255];
+    }
+    const m = f.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    return m ? [+m[1], +m[2], +m[3]] : [255, 255, 255];
+}
+
+// Hellt eine Farbe auf (t > 0, Richtung Weiß) oder dunkelt sie ab
+// (t < 0, Richtung fast-Schwarz). t zwischen -1 und 1.
+function toneFarbe(f, t) {
+    const rgb = farbeZuRGB(f);
+    const ziel = t >= 0 ? 255 : 18;
+    const s = Math.abs(t);
+    return 'rgb(' +
+        Math.round(rgb[0] + (ziel - rgb[0]) * s) + ',' +
+        Math.round(rgb[1] + (ziel - rgb[1]) * s) + ',' +
+        Math.round(rgb[2] + (ziel - rgb[2]) * s) + ')';
+}
+
+// Fester Pseudo-Zufall aus einer Zahl: liefert für dieselbe Zahl immer
+// denselben Wert (0..1). So steht z. B. jeder Grashalm jeden Frame
+// exakt gleich, ohne dass wir Positionen speichern müssen.
+function pseudoZufall(n) {
+    const s = Math.sin(n * 127.1) * 43758.5453;
+    return s - Math.floor(s);
+}
+
 // ---------- Partikel (Glitzer & Konfetti) ----------
 
 function erzeugePartikel(liste, x, y, anzahl, emojis) {
@@ -278,6 +310,25 @@ function zeichneHimmelDeko(ctx, deko, kamera, zeit, level) {
         ctx.beginPath();
         ctx.arc(KONFIG.BREITE - 90, 80, 95, 0, Math.PI * 2);
         ctx.fill();
+
+        // Langsam drehende, weiche Strahlen rund um die Sonne
+        if (level.himmelskoerper === '☀️') {
+            ctx.save();
+            ctx.translate(KONFIG.BREITE - 90, 80);
+            ctx.rotate(zeit * 0.003);
+            ctx.fillStyle = 'rgba(255, 225, 120, 0.14)';
+            for (let i = 0; i < 8; i++) {
+                ctx.rotate(Math.PI / 4);
+                ctx.beginPath();
+                ctx.moveTo(-4, -42);
+                ctx.lineTo(-12, -118);
+                ctx.lineTo(12, -118);
+                ctx.lineTo(4, -42);
+                ctx.closePath();
+                ctx.fill();
+            }
+            ctx.restore();
+        }
     }
 
     // Himmelskörper (Sonne/Mond/Segelboot/…) bleibt fest am Bildschirm.
@@ -297,16 +348,22 @@ function zeichneHimmelDeko(ctx, deko, kamera, zeit, level) {
     }
 
     // Wolken mit Parallaxe (scrollen langsamer als die Welt);
-    // nachts nur schemenhaft, unter Wasser sind es Luftblasen
-    const wolkeEmoji = level.wolke || KONFIG.SPRITES.wolke;
+    // nachts nur schemenhaft, unter Wasser sind es Luftblasen.
+    // Am Himmel werden fluffige Cartoon-Wolken GEZEICHNET (statt Emoji) –
+    // im Regen-Level trüb-grau, sonst strahlend weiß.
     const spanne = KONFIG.BREITE + 240;
     const altAlpha = ctx.globalAlpha;
     if (level.nachts) ctx.globalAlpha = altAlpha * 0.4;
+    const truebe = !!(level.regen && !(deko.gewitter && deko.gewitter.t > 0.5));
     for (const wolke of deko.wolken) {
         let sx = (wolke.x - kamera * 0.4) % spanne;
         if (sx < -120) sx += spanne;
-        ctx.font = Math.round(level.wasser ? wolke.groesse * 0.5 : wolke.groesse) + 'px ' + KONFIG.SCHRIFT;
-        ctx.fillText(wolkeEmoji, sx, wolke.y);
+        if (level.wasser) {
+            ctx.font = Math.round(wolke.groesse * 0.5) + 'px ' + KONFIG.SCHRIFT;
+            ctx.fillText(level.wolke || KONFIG.SPRITES.wolke, sx, wolke.y);
+        } else {
+            zeichneCartoonWolke(ctx, sx, wolke.y, wolke.groesse, truebe);
+        }
     }
     ctx.globalAlpha = altAlpha;
 
@@ -321,14 +378,142 @@ function zeichneHimmelDeko(ctx, deko, kamera, zeit, level) {
 }
 
 // =====================================================
-// Sanfte Parallax-Hügel am Horizont – zwei Schichten, die
-// langsamer scrollen als die Welt (Tiefenwirkung!). Die
+// Fluffige Cartoon-Wolke: weiche, überlappende Ballen mit
+// zart getönter Unterseite. Wirkt viel gemalter als das
+// alte Wolken-Emoji. truebe = graue Regenwolke.
+// =====================================================
+function zeichneCartoonWolke(ctx, x, y, groesse, truebe) {
+    const r = groesse * 0.4;
+    const hell = truebe ? 'rgba(213, 219, 231, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+    const schatten = truebe ? 'rgba(130, 140, 162, 0.45)' : 'rgba(184, 176, 224, 0.35)';
+    const ballen = [
+        [-1.05 * r, 0.12 * r, 0.50 * r],
+        [-0.45 * r, -0.28 * r, 0.62 * r],
+        [0.25 * r, -0.34 * r, 0.58 * r],
+        [0.95 * r, 0.10 * r, 0.46 * r],
+        [0.10 * r, 0.16 * r, 0.60 * r]
+    ];
+
+    // Alle Ballen in EINEM Pfad füllen: So bleibt die Wolke auch
+    // halbtransparent (z. B. nachts) eine gleichmäßige Fläche, statt
+    // dass die Überlappungen der Kreise durchscheinen.
+    ctx.fillStyle = schatten;
+    ctx.beginPath();
+    for (const b of ballen) {
+        ctx.moveTo(x + b[0] + b[2], y + b[1] + r * 0.2);
+        ctx.arc(x + b[0], y + b[1] + r * 0.2, b[2], 0, Math.PI * 2);
+    }
+    ctx.fill();
+    ctx.fillStyle = hell;
+    ctx.beginPath();
+    for (const b of ballen) {
+        ctx.moveTo(x + b[0] + b[2], y + b[1]);
+        ctx.arc(x + b[0], y + b[1], b[2], 0, Math.PI * 2);
+    }
+    ctx.fill();
+}
+
+// =====================================================
+// Sanfte Parallax-Hügel am Horizont – drei Schichten, die
+// unterschiedlich langsam scrollen (Tiefenwirkung!). Die
 // Farben bestimmt jedes Level selbst (level.huegel).
 // =====================================================
-function zeichneHuegel(ctx, kamera, huegel) {
+function zeichneHuegel(ctx, kamera, huegel, level) {
     if (!huegel) return;
+
+    // Ganz ferne dritte Schicht: halbtransparent, verschmilzt mit dem
+    // Himmel dahinter – das wirkt wie Luftperspektive
+    const altA = ctx.globalAlpha;
+    ctx.globalAlpha = altA * 0.45;
+    zeichneHuegelSchicht(ctx, kamera * 0.12, huegel.fern, KONFIG.BODEN_Y - 92, 40, 330);
+    ctx.globalAlpha = altA;
+
     zeichneHuegelSchicht(ctx, kamera * 0.25, huegel.fern, KONFIG.BODEN_Y - 58, 46, 230);
+
+    // Knubbelige Bäume und Büsche auf den fernen Hügeln – rundliche
+    // Silhouetten in einem etwas dunkleren Hügel-Ton, wie in liebevollen
+    // Kinderserien-Hintergründen (unter Wasser: keine Bäume im Meer!)
+    if (!level || !level.wasser) {
+        zeichneHuegelBaeume(ctx, kamera * 0.25, huegel.fern, KONFIG.BODEN_Y - 58, 46, 230,
+            !!(level && level.fest));
+    }
+
     zeichneHuegelSchicht(ctx, kamera * 0.5, huegel.nah, KONFIG.BODEN_Y - 24, 34, 150);
+
+    // Zarter Lichtschleier am Horizont (nachts bleibt es dunkel)
+    if (!level || !level.nachts) {
+        const dunst = ctx.createLinearGradient(0, KONFIG.BODEN_Y - 95, 0, KONFIG.BODEN_Y);
+        dunst.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        dunst.addColorStop(1, 'rgba(255, 255, 255, 0.20)');
+        ctx.fillStyle = dunst;
+        ctx.fillRect(0, KONFIG.BODEN_Y - 95, KONFIG.BREITE, 95);
+    }
+}
+
+// Die Hügel-Höhenformel (gleich wie in zeichneHuegelSchicht):
+// zwei überlagerte Wellen ergeben rundliche Kuppen
+function huegelOberkante(wx, basisY, amp, welle) {
+    const hoehe = 0.55 + 0.3 * Math.sin(wx / welle) + 0.15 * Math.sin(wx / (welle * 0.37) + 2);
+    return basisY - amp * hoehe;
+}
+
+// Rundliche Blob-Bäume und Büsche, fest auf der Hügelkuppe verankert.
+// Position, Größe und Form kommen aus pseudoZufall – jeder Baum steht
+// also jeden Frame exakt gleich, ohne dass wir etwas speichern.
+function zeichneHuegelBaeume(ctx, versatz, farbe, basisY, amp, welle, nurBuesche) {
+    const blatt = toneFarbe(farbe, -0.14);
+    const stamm = toneFarbe(farbe, -0.32);
+    const start = Math.floor(versatz / 230) * 230 - 230;
+
+    for (let twx = start; twx < versatz + KONFIG.BREITE + 230; twx += 230) {
+        const jitter = pseudoZufall(twx) * 130;
+        const wx = twx + jitter;
+        const sx = wx - versatz;
+        if (sx < -60 || sx > KONFIG.BREITE + 60) continue;
+
+        const fussY = huegelOberkante(wx, basisY, amp, welle) + 6;
+        const s = 0.75 + pseudoZufall(twx + 5) * 0.55; // Größe variiert
+
+        if (nurBuesche || pseudoZufall(twx + 9) < 0.35) {
+            // Busch: drei runde Hubbel nebeneinander
+            ctx.fillStyle = blatt;
+            ctx.beginPath();
+            ctx.arc(sx - 9 * s, fussY - 5 * s, 8 * s, 0, Math.PI * 2);
+            ctx.arc(sx, fussY - 9 * s, 10 * s, 0, Math.PI * 2);
+            ctx.arc(sx + 9 * s, fussY - 5 * s, 8 * s, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            // Baum: kurzer Stamm + fluffige runde Krone
+            const h = 26 * s;
+            ctx.fillStyle = stamm;
+            ctx.fillRect(sx - 2.5 * s, fussY - h, 5 * s, h);
+            ctx.fillStyle = blatt;
+            ctx.beginPath();
+            ctx.arc(sx, fussY - h - 9 * s, 13 * s, 0, Math.PI * 2);
+            ctx.arc(sx - 9 * s, fussY - h - 3 * s, 9 * s, 0, Math.PI * 2);
+            ctx.arc(sx + 9 * s, fussY - h - 3 * s, 9 * s, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
+// =====================================================
+// Sanfte Vignette: dunkelt die Bildränder ganz leicht ab
+// und lenkt den Blick in die Mitte – die Szene wirkt
+// sofort "gerahmter" und gemalter. Der Verlauf wird nur
+// einmal erzeugt und dann jeden Frame wiederverwendet.
+// =====================================================
+let _vignette = null;
+function zeichneVignette(ctx) {
+    if (!_vignette) {
+        _vignette = ctx.createRadialGradient(
+            KONFIG.BREITE / 2, KONFIG.HOEHE * 0.45, KONFIG.HOEHE * 0.55,
+            KONFIG.BREITE / 2, KONFIG.HOEHE * 0.45, KONFIG.HOEHE * 1.1);
+        _vignette.addColorStop(0, 'rgba(70, 40, 110, 0)');
+        _vignette.addColorStop(1, 'rgba(70, 40, 110, 0.18)');
+    }
+    ctx.fillStyle = _vignette;
+    ctx.fillRect(0, 0, KONFIG.BREITE, KONFIG.HOEHE);
 }
 
 function zeichneHuegelSchicht(ctx, versatz, farbe, basisY, amp, welle) {
@@ -476,6 +661,21 @@ function zeichneObjekt(ctx, obj, kamera, zeit) {
     let dy = 0;
     if (obj.typ === 'blume') dy = Math.sin(zeit * 0.05 + obj.x) * 3;
     if (obj.typ === 'stern' || obj.typ === 'herz') dy = Math.sin(zeit * 0.08 + obj.x) * 6;
+
+    // Sterne und Herzen bekommen einen pulsierenden Leucht-Schein –
+    // die wertvollsten Sammel-Objekte sollen richtig strahlen!
+    if (obj.typ === 'stern' || obj.typ === 'herz') {
+        const gy = obj.y + dy;
+        const farbe = obj.typ === 'stern' ? '255, 220, 110' : '255, 160, 205';
+        const radius = 26 + Math.sin(zeit * 0.1 + obj.x) * 5;
+        const glow = ctx.createRadialGradient(sx, gy, 3, sx, gy, radius);
+        glow.addColorStop(0, 'rgba(' + farbe + ', 0.55)');
+        glow.addColorStop(1, 'rgba(' + farbe + ', 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(sx, gy, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
     // Seesterne (Unterwasser-Level) werden gezeichnet statt als Emoji
     if (obj.seestern) {

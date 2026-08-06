@@ -128,9 +128,13 @@ const KONFIG = {
         sonne: '#ffe066',
         textDunkel: '#7c3aed',
 
+        // Warmes Dunkellila für Augen, Münder und Brauen aller Figuren
+        // (Bluey-Stil: weiche Gesichter statt harter schwarzer Striche)
+        gesicht: '#5d5378',
+
         // Farben des gezeichneten Cartoon-Einhorns (player.js)
         einhorn: {
-            outline: '#2b2b3a',        // kräftige dunkle Kontur (Cartoon-Look)
+            outline: '#9e93b8',        // weiche Lavendel-Kontur (Bluey-Look)
             koerper: '#ffffff',
             koerperSchatten: '#ece5f7', // ferne Beine etwas dunkler (Tiefe)
             huf: '#b59bd6',

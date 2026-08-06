@@ -82,6 +82,14 @@ function drawBella(ctx, x, y, scale, facing, pose) {
         ? Object.assign({}, KONFIG.FARBEN.einhorn, pose.stil)
         : KONFIG.FARBEN.einhorn;
 
+    // Weiche Bluey-Konturen: jeder Teil bekommt einen Rand in einer
+    // dunkleren Variante seiner EIGENEN Farbe (statt hartem Schwarz).
+    // Bei den Fohlen entstehen so automatisch passende Konturen.
+    const randKoerper = kontur(F.koerper, 0.42);
+    const randHuf = kontur(F.huf);
+    const randMaehne = kontur(F.maehnePink);
+    const GESICHT = KONFIG.FARBEN.gesicht;
+
     // Leichtes Auf-und-Ab-Wippen beim Laufen
     let wippen = 0;
     if (laeuft && amBoden) wippen = -Math.abs(Math.sin(zeit * 0.35)) * 3 * scale;
@@ -133,13 +141,14 @@ function drawBella(ctx, x, y, scale, facing, pose) {
         pfadRundesRechteck(ctx, -4.5, -3, 9, 16, 4);
         ctx.fillStyle = fern ? F.koerperSchatten : F.koerper;
         ctx.fill();
-        ctx.strokeStyle = F.outline;
+        ctx.strokeStyle = randKoerper;
         ctx.lineWidth = 2.5;
         ctx.stroke();
         // Huf
         pfadRundesRechteck(ctx, -4.5, 11, 9, 7, 3);
         ctx.fillStyle = F.huf;
         ctx.fill();
+        ctx.strokeStyle = randHuf;
         ctx.stroke();
         ctx.restore();
     };
@@ -165,8 +174,8 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     ctx.quadraticCurveTo(-34, -6 + wehen * 0.5, -46, -16);
     ctx.stroke();
     ctx.restore();
-    pfadSchweif(ctx, wehen); // Outline um den ganzen Schweif
-    ctx.strokeStyle = F.outline;
+    pfadSchweif(ctx, wehen); // weiche Kontur um den ganzen Schweif
+    ctx.strokeStyle = randMaehne;
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -196,7 +205,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     ctx.stroke();
     ctx.restore();
     pfadMaehne(ctx, wehen);
-    ctx.strokeStyle = F.outline;
+    ctx.strokeStyle = randMaehne;
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -224,12 +233,12 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     bein(-16, 4, winkel[0], true);
     bein(14, 4, winkel[1], true);
 
-    // ---------- Körper: weiß, rundlich, mit Outline ----------
+    // ---------- Körper: weiß, rundlich, mit weicher Kontur ----------
     ctx.beginPath();
     ctx.ellipse(0, -8, 26, 16, 0, 0, Math.PI * 2);
     ctx.fillStyle = F.koerper;
     ctx.fill();
-    ctx.strokeStyle = F.outline;
+    ctx.strokeStyle = randKoerper;
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -290,7 +299,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
         ctx.beginPath();
         ctx.ellipse(9.5, 13.5, 4, 2.8, 0.3, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = F.outline;
+        ctx.strokeStyle = kontur(L.schuh);
         ctx.lineWidth = 1.8;
         ctx.stroke();
 
@@ -304,7 +313,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
         ctx.closePath();
         ctx.fillStyle = L.kleid;
         ctx.fill();
-        ctx.strokeStyle = F.outline;
+        ctx.strokeStyle = kontur(L.kleid);
         ctx.lineWidth = 2.2;
         ctx.stroke();
 
@@ -321,7 +330,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
         ctx.arc(1, -19, 6.5, 0, Math.PI * 2);
         ctx.fillStyle = L.haut;
         ctx.fill();
-        ctx.strokeStyle = F.outline;
+        ctx.strokeStyle = toneFarbe(L.haut, -0.25);
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -348,7 +357,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
         }
 
         // Gesicht: geschlossenes frohes Auge + Lächeln + Wange
-        ctx.strokeStyle = F.outline;
+        ctx.strokeStyle = GESICHT;
         ctx.lineWidth = 1.6;
         ctx.beginPath();
         ctx.arc(4, -19, 1.8, Math.PI, Math.PI * 2);
@@ -376,7 +385,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     ctx.closePath();
     ctx.fillStyle = F.koerper;
     ctx.fill();
-    ctx.strokeStyle = F.outline;
+    ctx.strokeStyle = randKoerper;
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -417,7 +426,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     ctx.fillStyle = hornVerlauf;
     ctx.fill();
     ctx.lineWidth = 2.5;
-    ctx.strokeStyle = F.outline;
+    ctx.strokeStyle = kontur(F.hornPink);
     ctx.stroke();
     // Spiral-/Querlinien auf dem Horn
     ctx.lineWidth = 1.5;
@@ -437,6 +446,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     ctx.closePath();
     ctx.fillStyle = F.maehnePink;
     ctx.fill();
+    ctx.strokeStyle = randMaehne;
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
@@ -445,6 +455,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     ctx.ellipse(38, -33.5, 7, 5.5, 0.1, 0, Math.PI * 2);
     ctx.fillStyle = F.koerper;
     ctx.fill();
+    ctx.strokeStyle = randKoerper;
     ctx.lineWidth = 2.5;
     ctx.stroke();
     ctx.beginPath();
@@ -455,7 +466,7 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     ctx.beginPath();
     ctx.arc(38, -31.5, 3, Math.PI * 0.15, Math.PI * 0.85);
     ctx.lineWidth = 1.8;
-    ctx.strokeStyle = F.outline;
+    ctx.strokeStyle = GESICHT;
     ctx.stroke();
 
     // ---------- geschlossenes, glückliches Auge mit Wimpern ----------

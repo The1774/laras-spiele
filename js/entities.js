@@ -26,15 +26,23 @@ function farbeZuRGB(f) {
 }
 
 // Hellt eine Farbe auf (t > 0, Richtung Weiß) oder dunkelt sie ab
-// (t < 0, Richtung fast-Schwarz). t zwischen -1 und 1.
+// (t < 0, Richtung dunkles Violett statt Schwarz – das hält die
+// ganze Palette warm und freundlich). t zwischen -1 und 1.
 function toneFarbe(f, t) {
     const rgb = farbeZuRGB(f);
-    const ziel = t >= 0 ? 255 : 18;
+    const ziel = t >= 0 ? [255, 255, 255] : [40, 32, 64];
     const s = Math.abs(t);
     return 'rgb(' +
-        Math.round(rgb[0] + (ziel - rgb[0]) * s) + ',' +
-        Math.round(rgb[1] + (ziel - rgb[1]) * s) + ',' +
-        Math.round(rgb[2] + (ziel - rgb[2]) * s) + ')';
+        Math.round(rgb[0] + (ziel[0] - rgb[0]) * s) + ',' +
+        Math.round(rgb[1] + (ziel[1] - rgb[1]) * s) + ',' +
+        Math.round(rgb[2] + (ziel[2] - rgb[2]) * s) + ')';
+}
+
+// Weiche Kontur im Bluey-Stil: statt einer harten schwarzen Outline
+// bekommt jede Form einen Rand in einer DUNKLEREN VARIANTE ihrer
+// eigenen Füllfarbe. staerke (optional) regelt, wie dunkel.
+function kontur(f, staerke) {
+    return toneFarbe(f, -(staerke || 0.35));
 }
 
 // Fester Pseudo-Zufall aus einer Zahl: liefert für dieselbe Zahl immer
@@ -559,7 +567,6 @@ function zeichnePlattform(ctx, p, kamera, level) {
         koerper: '#c9b6ec', deckel: '#a7e3a0', halme: '#6fae67'
     };
     const links = sx - p.breite / 2;
-    const outline = KONFIG.FARBEN.einhorn.outline;
 
     ctx.lineJoin = 'round';
 
@@ -567,7 +574,7 @@ function zeichnePlattform(ctx, p, kamera, level) {
     pfadRundesRechteck(ctx, links, p.y, p.breite, 26, 13);
     ctx.fillStyle = farben.koerper;
     ctx.fill();
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur(farben.koerper);
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -896,7 +903,6 @@ function zeichneHindernis(ctx, obj, sx, zeit) {
 // Freundlicher Seestern zum Einsammeln (Unterwasser-Level) –
 // orange, mit lächelndem Gesicht, wackelt sanft hin und her
 function zeichneSeestern(ctx, sx, sy, zeit, phase) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
     ctx.save();
     ctx.translate(sx, sy);
     ctx.rotate(Math.sin(zeit * 0.05 + phase) * 0.15);
@@ -905,16 +911,17 @@ function zeichneSeestern(ctx, sx, sy, zeit, phase) {
     pfadStern(ctx, 0, 0, 18);
     ctx.fillStyle = '#ff9a62';
     ctx.fill();
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur('#ff9a62');
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
     // fröhliches Gesicht (Sammel-Objekte lächeln!)
-    ctx.fillStyle = outline;
+    ctx.fillStyle = KONFIG.FARBEN.gesicht;
     ctx.beginPath();
     ctx.arc(-3.5, -1, 1.6, 0, Math.PI * 2);
     ctx.arc(3.5, -1, 1.6, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = KONFIG.FARBEN.gesicht;
     ctx.lineWidth = 1.8;
     ctx.beginPath();
     ctx.arc(0, 1.5, 3, Math.PI * 0.15, Math.PI * 0.85);
@@ -925,10 +932,8 @@ function zeichneSeestern(ctx, sx, sy, zeit, phase) {
 
 // Stacheliger See-Igel (Unterwasser-Hindernis, art = 3)
 function zeichneSeeigel(ctx) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
-
     // Stacheln rundherum
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur('#7d6bb0', 0.5);
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     for (let i = 0; i < 12; i++) {
@@ -951,13 +956,13 @@ function zeichneSeeigel(ctx) {
 
 // Kleines grummeliges Gesicht (zwei Augen + Schmollmund)
 function zeichneGrummelGesicht(ctx, x, y) {
-    ctx.fillStyle = KONFIG.FARBEN.einhorn.outline;
+    ctx.fillStyle = KONFIG.FARBEN.gesicht;
     ctx.beginPath();
     ctx.arc(x - 5, y, 1.9, 0, Math.PI * 2);
     ctx.arc(x + 5, y, 1.9, 0, Math.PI * 2);
     ctx.fill();
     // Schmollmund (nach oben gewölbter Bogen = grummelig)
-    ctx.strokeStyle = KONFIG.FARBEN.einhorn.outline;
+    ctx.strokeStyle = KONFIG.FARBEN.gesicht;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(x, y + 9, 3.5, Math.PI * 1.15, Math.PI * 1.85);
@@ -966,13 +971,11 @@ function zeichneGrummelGesicht(ctx, x, y) {
 
 // Roter Fliegenpilz (Ursprung: Mitte unten am Boden)
 function zeichnePilz(ctx) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
-
     // Stiel
     pfadRundesRechteck(ctx, -10, -30, 20, 30, 7);
     ctx.fillStyle = '#fff4e0';
     ctx.fill();
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur('#fff4e0');
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -985,6 +988,7 @@ function zeichnePilz(ctx) {
     ctx.closePath();
     ctx.fillStyle = '#ff6b81';
     ctx.fill();
+    ctx.strokeStyle = kontur('#ff6b81');
     ctx.stroke();
 
     // Weiße Punkte auf dem Hut
@@ -1000,8 +1004,7 @@ function zeichnePilz(ctx) {
 
 // Grüner Kaktus mit zwei Armen und Stacheln
 function zeichneKaktus(ctx) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur('#79c46f');
     ctx.lineWidth = 3;
     ctx.fillStyle = '#79c46f';
 
@@ -1056,8 +1059,6 @@ function zeichneKaktus(ctx) {
 
 // Grauer Felsbrocken
 function zeichneStein(ctx) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
-
     ctx.beginPath();
     ctx.moveTo(-28, 0);
     ctx.quadraticCurveTo(-34, -20, -18, -30);
@@ -1067,7 +1068,7 @@ function zeichneStein(ctx) {
     ctx.closePath();
     ctx.fillStyle = '#b9c0cf';
     ctx.fill();
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur('#b9c0cf');
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -1179,7 +1180,6 @@ function zeichneFohlenBlase(ctx, blase, zeit, fohlenSchluessel) {
 // Bewegung/Angriff nutzt die Wolken-Logik (game.js).
 // =====================================================
 function zeichneKrakenBoss(ctx, boss, zeit) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
     const phase = Math.floor(boss.treffer / 3);
 
     const ruck = boss.zittern > 0 ? Math.sin(zeit * 1.4) * 3 : 0;
@@ -1202,7 +1202,6 @@ function zeichneKrakenBoss(ctx, boss, zeit) {
     ctx.fill();
 
     // Acht wabernde Arme (hinter dem Kopf)
-    ctx.strokeStyle = outline;
     for (let i = 0; i < 8; i++) {
         const seite = i < 4 ? -1 : 1;
         const idx = i % 4;
@@ -1217,9 +1216,9 @@ function zeichneKrakenBoss(ctx, boss, zeit) {
             ax + seite * (20 + idx * 9) + schwung * seite, y + 58 - Math.abs(schwung) * 0.4
         );
         ctx.stroke();
-        // dünne dunkle Kontur je Arm
+        // dünne, weiche Kontur je Arm (dunklere Körperfarbe)
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'rgba(43,43,58,0.45)';
+        ctx.strokeStyle = kontur(koerper);
         ctx.stroke();
     }
 
@@ -1232,7 +1231,7 @@ function zeichneKrakenBoss(ctx, boss, zeit) {
     ctx.closePath();
     ctx.fillStyle = koerper;
     ctx.fill();
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur(koerper);
     ctx.lineWidth = 3.5;
     ctx.stroke();
 
@@ -1244,13 +1243,13 @@ function zeichneKrakenBoss(ctx, boss, zeit) {
 
     // ---------- Gesicht ----------
     const fx = x, fy = y + 2;
-    ctx.fillStyle = outline;
+    ctx.fillStyle = KONFIG.FARBEN.gesicht;
     ctx.beginPath();
     ctx.arc(fx - 16, fy - 4, 4, 0, Math.PI * 2);
     ctx.arc(fx + 16, fy - 4, 4, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = KONFIG.FARBEN.gesicht;
     ctx.lineWidth = 3;
     if (boss.besiegt) {
         ctx.beginPath();
@@ -1301,7 +1300,6 @@ function zeichneBonusSonne(ctx, boss) {
 // Treffer bunter und am Ende ganz fröhlich wird.
 function zeichneWolkenBoss(ctx, boss, zeit) {
     const phase = Math.floor(boss.treffer / 3);
-    const outline = KONFIG.FARBEN.einhorn.outline;
 
     // Beim Treffer kurz wackeln
     const ruck = boss.zittern > 0 ? Math.sin(zeit * 1.4) * 3 : 0;
@@ -1322,10 +1320,10 @@ function zeichneWolkenBoss(ctx, boss, zeit) {
     ctx.ellipse(x, y, 100, 74, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Wolken-Ballen (überlappende Kreise). Outline = dunkle, etwas
-    // größere Ballen DAHINTER (so entsteht eine saubere, fluffige Kontur).
+    // Wolken-Ballen (überlappende Kreise). Kontur = leicht dunklere,
+    // etwas größere Ballen DAHINTER (weiche, fluffige Silhouette).
     const ballen = [[-50, 8, 26], [-24, -10, 33], [12, -16, 35], [46, 0, 28], [26, 18, 30], [-10, 20, 31]];
-    ctx.fillStyle = outline;
+    ctx.fillStyle = kontur(koerper);
     for (const b of ballen) {
         ctx.beginPath();
         ctx.arc(x + b[0], y + b[1], b[2] + 3.5, 0, Math.PI * 2);
@@ -1349,13 +1347,13 @@ function zeichneWolkenBoss(ctx, boss, zeit) {
     const fx = x, fy = y + 4;
 
     // Augen
-    ctx.fillStyle = outline;
+    ctx.fillStyle = KONFIG.FARBEN.gesicht;
     ctx.beginPath();
     ctx.arc(fx - 16, fy - 3, 4, 0, Math.PI * 2);
     ctx.arc(fx + 16, fy - 3, 4, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = KONFIG.FARBEN.gesicht;
     ctx.lineWidth = 3;
     if (boss.besiegt) {
         // Großes Lächeln + rosige Wangen
@@ -1384,7 +1382,7 @@ function zeichneWolkenBoss(ctx, boss, zeit) {
 // Korallen-Spalte: obere und untere Säule mit einer Lücke dazwischen.
 // Die hellen Ränder markieren deutlich, wo der offene Spalt ist.
 function zeichneSpalt(ctx, obj, sx) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
+    const outline = kontur('#c98a5e');
     const w = obj.breite;
     const links = sx - w / 2;
     const gapTop = obj.gapY - obj.gapHeight / 2;
@@ -1480,17 +1478,17 @@ function zeichneBienenBoss(ctx, boss, zeit) {
         ctx.stroke();
     }
 
-    // Körper (rundlich) mit Outline
+    // Körper (rundlich) mit weicher Kontur
     ctx.beginPath();
     ctx.ellipse(x, y, 46, 38, 0, 0, Math.PI * 2);
     ctx.fillStyle = koerper;
     ctx.fill();
     ctx.lineWidth = 3.5;
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur(koerper);
     ctx.stroke();
 
-    // Schwarze Streifen
-    ctx.fillStyle = '#2b2b3a';
+    // Dunkle Streifen (warmes Dunkellila statt Schwarz)
+    ctx.fillStyle = '#4d4368';
     for (const dx of [-14, 8]) {
         ctx.beginPath();
         ctx.ellipse(x + dx + 12, y, 7, 34, 0, 0, Math.PI * 2);
@@ -1498,7 +1496,7 @@ function zeichneBienenBoss(ctx, boss, zeit) {
     }
 
     // Stachel hinten unten
-    ctx.fillStyle = '#2b2b3a';
+    ctx.fillStyle = '#4d4368';
     ctx.beginPath();
     ctx.moveTo(x - 44, y + 6);
     ctx.lineTo(x - 60, y + 14);
@@ -1507,13 +1505,13 @@ function zeichneBienenBoss(ctx, boss, zeit) {
     ctx.fill();
 
     // Fühler
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = KONFIG.FARBEN.gesicht;
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.moveTo(x + 10, y - 34); ctx.lineTo(x + 16, y - 50);
     ctx.moveTo(x + 22, y - 32); ctx.lineTo(x + 32, y - 46);
     ctx.stroke();
-    ctx.fillStyle = outline;
+    ctx.fillStyle = KONFIG.FARBEN.gesicht;
     ctx.beginPath();
     ctx.arc(x + 16, y - 50, 3, 0, Math.PI * 2);
     ctx.arc(x + 32, y - 46, 3, 0, Math.PI * 2);
@@ -1521,13 +1519,13 @@ function zeichneBienenBoss(ctx, boss, zeit) {
 
     // Gesicht (vorne rechts)
     const fx = x + 20, fy = y - 2;
-    ctx.fillStyle = outline;
+    ctx.fillStyle = KONFIG.FARBEN.gesicht;
     ctx.beginPath();
     ctx.arc(fx - 8, fy - 4, 3.5, 0, Math.PI * 2);
     ctx.arc(fx + 8, fy - 4, 3.5, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = KONFIG.FARBEN.gesicht;
     ctx.lineWidth = 3;
     if (boss.besiegt) {
         ctx.beginPath();
@@ -1586,11 +1584,12 @@ function zeichneMinibienen(ctx, liste, kamera, zeit) {
         ctx.ellipse(0, 0, 11, 9, 0, 0, Math.PI * 2);
         ctx.fillStyle = '#ffd84a';
         ctx.fill();
+        ctx.strokeStyle = kontur('#ffd84a');
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Streifen
-        ctx.fillStyle = '#2b2b3a';
+        // Streifen (warmes Dunkellila statt Schwarz)
+        ctx.fillStyle = '#4d4368';
         ctx.beginPath();
         ctx.ellipse(2, 0, 2, 8, 0, 0, Math.PI * 2);
         ctx.ellipse(-4, 0, 2, 7, 0, 0, Math.PI * 2);
@@ -1738,7 +1737,7 @@ function zeichneFunken(ctx, liste, kamera, zeit) {
 
 // Graue Grummel-Tropfen, die die Wolke fallen lässt (zum Ausweichen)
 function zeichneTropfen(ctx, liste, kamera) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
+    const outline = kontur('#8b94a8');
     for (const t of liste) {
         const sx = t.x - kamera;
         ctx.beginPath();
@@ -1778,10 +1777,9 @@ function zeichneGegner(ctx, obj, sx, zeit) {
 // Watschelnder Pinguin (Eis-Level): schwarz-weiß, oranger Schnabel & Füße
 function zeichnePinguin(ctx, obj, sx, zeit) {
     const boden = KONFIG.BODEN_Y;
-    const outline = KONFIG.FARBEN.einhorn.outline;
 
     // Schatten
-    ctx.fillStyle = 'rgba(43,43,58,0.15)';
+    ctx.fillStyle = 'rgba(64,52,96,0.15)';
     ctx.beginPath();
     ctx.ellipse(sx, boden + 4, 18, 6, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -1795,7 +1793,7 @@ function zeichnePinguin(ctx, obj, sx, zeit) {
     // Watschel-Füße
     const w = Math.sin(zeit * 0.3) * 3;
     ctx.fillStyle = '#ffa14a';
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur('#ffa14a');
     ctx.lineWidth = 2.5;
     for (const s of [-1, 1]) {
         ctx.beginPath();
@@ -1810,7 +1808,7 @@ function zeichnePinguin(ctx, obj, sx, zeit) {
     ctx.fillStyle = '#3a3550';
     ctx.fill();
     ctx.lineWidth = 3;
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur('#3a3550', 0.5);
     ctx.stroke();
 
     // Weißer Bauch
@@ -1827,7 +1825,7 @@ function zeichnePinguin(ctx, obj, sx, zeit) {
     ctx.fill();
 
     // Augen
-    ctx.fillStyle = outline;
+    ctx.fillStyle = KONFIG.FARBEN.gesicht;
     ctx.beginPath();
     ctx.arc(-4, -32, 2, 0, Math.PI * 2);
     ctx.arc(4, -32, 2, 0, Math.PI * 2);
@@ -1841,6 +1839,7 @@ function zeichnePinguin(ctx, obj, sx, zeit) {
     ctx.lineTo(0, -24);
     ctx.closePath();
     ctx.fill();
+    ctx.strokeStyle = kontur('#ffa14a');
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
@@ -1850,11 +1849,11 @@ function zeichnePinguin(ctx, obj, sx, zeit) {
 // Kleiner watschelnder Boden-Krabbler
 function zeichneKrabbler(ctx, obj, sx, zeit) {
     const boden = KONFIG.BODEN_Y;
-    const outline = KONFIG.FARBEN.einhorn.outline;
     const farbe = obj.farbe || '#9b7bea';
+    const rand = kontur(farbe);
 
     // Schatten
-    ctx.fillStyle = 'rgba(43,43,58,0.15)';
+    ctx.fillStyle = 'rgba(64,52,96,0.15)';
     ctx.beginPath();
     ctx.ellipse(sx, boden + 4, 20, 6, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -1867,7 +1866,7 @@ function zeichneKrabbler(ctx, obj, sx, zeit) {
 
     // Watschelnde Beinchen
     const b = Math.sin(zeit * 0.3) * 3;
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = rand;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(-9, -5); ctx.lineTo(-13, 1 + b);
@@ -1880,7 +1879,7 @@ function zeichneKrabbler(ctx, obj, sx, zeit) {
     ctx.moveTo(-6, -34); ctx.lineTo(-11, -44);
     ctx.moveTo(6, -34);  ctx.lineTo(11, -44);
     ctx.stroke();
-    ctx.fillStyle = outline;
+    ctx.fillStyle = rand;
     ctx.beginPath();
     ctx.arc(-11, -44, 2.5, 0, Math.PI * 2);
     ctx.arc(11, -44, 2.5, 0, Math.PI * 2);
@@ -1891,7 +1890,7 @@ function zeichneKrabbler(ctx, obj, sx, zeit) {
     ctx.arc(0, -18, 17, 0, Math.PI * 2);
     ctx.fillStyle = farbe;
     ctx.fill();
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = rand;
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -1907,7 +1906,6 @@ function zeichneKrabbler(ctx, obj, sx, zeit) {
 
 // Flatternder Luft-Gegner
 function zeichneFlieger(ctx, obj, sx, sy, zeit) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
     const farbe = obj.farbe || '#6e7bd6';
 
     ctx.save();
@@ -1919,7 +1917,7 @@ function zeichneFlieger(ctx, obj, sx, sy, zeit) {
     // Flügel schlagen (oben/unten)
     const flap = Math.sin(zeit * 0.5) * 7;
     ctx.fillStyle = farbe;
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur(farbe);
     ctx.lineWidth = 2.5;
     for (const s of [-1, 1]) {
         ctx.beginPath();
@@ -1952,7 +1950,6 @@ function zeichneFlieger(ctx, obj, sx, sy, zeit) {
 // Fledermaus mit schlagenden, gezackten Flügeln und leuchtenden Augen
 // (gut sichtbar im dunklen Level)
 function zeichneFledermaus(ctx, obj, sx, sy, zeit) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
     const farbe = obj.farbe || '#5b4a86';
 
     ctx.save();
@@ -1963,7 +1960,7 @@ function zeichneFledermaus(ctx, obj, sx, sy, zeit) {
 
     const flap = Math.sin(zeit * 0.5) * 6;
     ctx.fillStyle = farbe;
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur(farbe, 0.5);
     ctx.lineWidth = 2.5;
 
     // Gezackte Flügel links und rechts
@@ -2004,7 +2001,7 @@ function zeichneFledermaus(ctx, obj, sx, sy, zeit) {
     ctx.arc(-3.5, -1, 2.2, 0, Math.PI * 2);
     ctx.arc(3.5, -1, 2.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = outline;
+    ctx.fillStyle = KONFIG.FARBEN.gesicht;
     ctx.beginPath();
     ctx.arc(-3.5, -1, 1, 0, Math.PI * 2);
     ctx.arc(3.5, -1, 1, 0, Math.PI * 2);
@@ -2016,12 +2013,11 @@ function zeichneFledermaus(ctx, obj, sx, sy, zeit) {
 // Dicker Boden-Werfer mit großem Maul (öffnet sich kurz vorm Wurf)
 function zeichneWerfer(ctx, obj, sx, zeit) {
     const boden = KONFIG.BODEN_Y;
-    const outline = KONFIG.FARBEN.einhorn.outline;
     const farbe = obj.farbe || '#6fae67';
     const gleichBereit = obj.wurfTimer < 22; // Maul auf, gleich kommt ein Wurf
 
     // Schatten
-    ctx.fillStyle = 'rgba(43,43,58,0.15)';
+    ctx.fillStyle = 'rgba(64,52,96,0.15)';
     ctx.beginPath();
     ctx.ellipse(sx, boden + 4, 24, 7, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -2037,7 +2033,7 @@ function zeichneWerfer(ctx, obj, sx, zeit) {
     pfadRundesRechteck(ctx, -22, -34, 44, 34, 16);
     ctx.fillStyle = farbe;
     ctx.fill();
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur(farbe);
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -2050,16 +2046,17 @@ function zeichneWerfer(ctx, obj, sx, zeit) {
         ctx.ellipse(0, -10, 11, 3.5, 0, 0, Math.PI * 2); // grummelige Linie
     }
     ctx.fill();
-    ctx.strokeStyle = outline;
+    ctx.strokeStyle = kontur(farbe);
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
     // Augen oben drauf (mit grummeligen Brauen)
-    ctx.fillStyle = outline;
+    ctx.fillStyle = KONFIG.FARBEN.gesicht;
     ctx.beginPath();
     ctx.arc(-9, -30, 2.6, 0, Math.PI * 2);
     ctx.arc(9, -30, 2.6, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = KONFIG.FARBEN.gesicht;
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.moveTo(-14, -36); ctx.lineTo(-5, -33);
@@ -2071,7 +2068,6 @@ function zeichneWerfer(ctx, obj, sx, zeit) {
 
 // Geworfene Matschbälle (drehen sich im Flug)
 function zeichneGeschosse(ctx, liste, kamera) {
-    const outline = KONFIG.FARBEN.einhorn.outline;
     for (const g of liste) {
         const sx = g.x - kamera;
         ctx.save();
@@ -2081,7 +2077,7 @@ function zeichneGeschosse(ctx, liste, kamera) {
         ctx.arc(0, 0, 9, 0, Math.PI * 2);
         ctx.fillStyle = '#9c7b5a';
         ctx.fill();
-        ctx.strokeStyle = outline;
+        ctx.strokeStyle = kontur('#9c7b5a');
         ctx.lineWidth = 2.5;
         ctx.stroke();
         // ein paar dunkle Matsch-Flecken

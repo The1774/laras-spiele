@@ -96,6 +96,13 @@ function extraHerz(objekte, x, y) {
     objekte.push({ typ: 'herz', x: x, y: y || HOEHE_MITTEL, emoji: KONFIG.SPRITES.herz });
 }
 
+// Gefangener Freund in einer Zauberblase: Berührt Lara die Blase,
+// zerplatzt sie und der Freund ist gerettet (Geschichte des Spiels!).
+// Der gerettete Freund bleibt fröhlich im Level stehen.
+function freund(objekte, x, y, emoji, name) {
+    objekte.push({ typ: 'freund', x: x, y: y || HOEHE_MITTEL, emoji: emoji, name: name, gerettet: false, feier: 0 });
+}
+
 // Schwebende Insel: x = Mitte, y = Oberkante (zum Drauflanden)
 function plattform(liste, x, y, breite) {
     liste.push({ x: x, y: y, breite: breite });
@@ -165,11 +172,19 @@ function baueLevel1() {
     krabbler(o, 2100, 120);
     flieger(o, 4400, HOEHE_HOCH, 100);
 
+    // Der gefangene Freund dieses Levels
+    freund(o, 3550, HOEHE_MITTEL, '🦋', 'Mia, der Schmetterling');
+
     return {
         name: 'Blumenwiese', laenge: laenge, objekte: o,
         farben: { himmelOben: '#e9d5ff', himmelUnten: '#fce7f3', wiese: '#a7e3a0' },
+        huegel: { fern: '#cdeec8', nah: '#b8e8b1' },
         himmelskoerper: '☀️',
-        bodenDeko: ['🌼', '🌿']
+        bodenDeko: ['🌼', '🌿'],
+        freundEmoji: '🦋', freundName: 'Mia, der Schmetterling',
+        geschichte: 'Die Grummel-Blasen haben eure Einhorn-Fohlen entführt! 🫧<br>' +
+            'Über die Blumenwiese sind sie davongeschwebt – reitet hinterher!<br>' +
+            'Und rettet unterwegs Mia, den Schmetterling!'
     };
 }
 
@@ -200,11 +215,19 @@ function baueLevel2() {
     flieger(o, 2100, HOEHE_MITTEL, 110);
     werfer(o, 4350);
 
+    // Der gefangene Freund dieses Levels
+    freund(o, 4870, HOEHE_MITTEL, '🐰', 'Hoppel, das Häschen');
+
     return {
         name: 'Zauberwald', laenge: laenge, objekte: o,
         farben: { himmelOben: '#c7f0d8', himmelUnten: '#f0fce7', wiese: '#7fcf8a' },
+        huegel: { fern: '#a9e0b4', nah: '#92d89c' },
         himmelskoerper: '☀️',
-        bodenDeko: ['🌳', '🌲', '🍀']
+        bodenDeko: ['🌳', '🌲', '🍀'],
+        freundEmoji: '🐰', freundName: 'Hoppel, das Häschen',
+        geschichte: 'Die Spur der Grummel-Blasen führt in den Zauberwald!<br>' +
+            'Hoppel, das Häschen, hat sie gesehen – doch jetzt steckt er selbst in einer Blase. 🫧<br>' +
+            'Befreie ihn, dann zeigt er euch den Weg!'
     };
 }
 
@@ -237,11 +260,19 @@ function baueLevel3() {
     krabbler(o, 4900, 140);
     werfer(o, 5950);
 
+    // Der gefangene Freund dieses Levels
+    freund(o, 3380, HOEHE_MITTEL, '🦌', 'Rosa, das Reh');
+
     return {
         name: 'Abendhimmel', laenge: laenge, objekte: o,
         farben: { himmelOben: '#fbc2eb', himmelUnten: '#fde68a', wiese: '#9d8fd6' },
+        huegel: { fern: '#c3b4e6', nah: '#b0a1de' },
         himmelskoerper: '🌙',
-        bodenDeko: ['🌷', '⭐']
+        bodenDeko: ['🌷', '⭐'],
+        freundEmoji: '🦌', freundName: 'Rosa, das Reh',
+        geschichte: 'Rosalie ist gerettet – aber zwei Fohlen fehlen noch! 🦄🦄<br>' +
+            'Die Reise geht weiter in den rosa Abendhimmel.<br>' +
+            'Auch Rosa, das Reh, wartet dort in einer Zauberblase. 🫧'
     };
 }
 
@@ -282,8 +313,13 @@ function baueLevel4() {
     return {
         name: 'Wolkenwelt', laenge: laenge, objekte: o,
         farben: { himmelOben: '#dbeafe', himmelUnten: '#fce7f3', wiese: '#f3effd' },
+        huegel: { fern: '#ece4fb', nah: '#e0d6f8' },
         himmelskoerper: '🌈',
-        bodenDeko: ['☁️', '✨']
+        bodenDeko: ['☁️', '✨'],
+        fest: true,   // die drei geretteten Fohlen feiern am Ziel-Regenbogen mit!
+        geschichte: 'Alle Einhorn-Fohlen sind gerettet! 🦄🦄🦄<br>' +
+            'Jetzt feiert das ganze Zauberland über den Wolken.<br>' +
+            'Lauft gemeinsam zum großen Regenbogen-Fest! 🌈🎉'
     };
 }
 
@@ -329,11 +365,19 @@ function baueLevel5() {
     werfer(o, 4000);
     krabbler(o, 5200, 140);
 
+    // Der gefangene Freund schwebt über einer Insel (Bonus-Weg!)
+    freund(o, 3850, B - 165, '🐦', 'Pips, der Vogel');
+
     return {
         name: 'Schwebende Inseln', laenge: laenge, objekte: o, plattformen: pl,
         farben: { himmelOben: '#cfe8ff', himmelUnten: '#ffe3f3', wiese: '#a7e3a0' },
+        huegel: { fern: '#cdeec8', nah: '#b8e8b1' },
         himmelskoerper: '☀️',
-        bodenDeko: ['🌼', '🍀']
+        bodenDeko: ['🌼', '🍀'],
+        freundEmoji: '🐦', freundName: 'Pips, der Vogel',
+        geschichte: 'Von den schwebenden Inseln könnt ihr weit sehen:<br>' +
+            'Da vorne brummt es laut – dort muss ein Fohlen sein! 🦄<br>' +
+            'Rettet erst Pips, den Vogel, aus seiner Blase! 🫧'
     };
 }
 
@@ -380,13 +424,21 @@ function baueLevel6() {
     fledermaus(o, 5300, 200);
     krabbler(o, 5900, 140);
 
+    // Der gefangene Freund dieses Levels
+    freund(o, 4080, HOEHE_MITTEL, '🧚', 'Luna, die Sternenfee');
+
     return {
         name: 'Sternennacht', laenge: laenge, objekte: o, plattformen: pl,
         farben: { himmelOben: '#221c44', himmelUnten: '#5b4490', wiese: '#2e5044' },
+        huegel: { fern: '#3a3f68', nah: '#31564b' },
         himmelskoerper: '🌕',
         nachts: true,      // aktiviert Dunkelheit + leuchtendes Horn
         tier: '✨',         // Glühwürmchen statt Schmetterlinge
-        bodenDeko: ['🌷', '✨']
+        bodenDeko: ['🌷', '✨'],
+        freundEmoji: '🧚', freundName: 'Luna, die Sternenfee',
+        geschichte: 'Es ist Nacht im Zauberland – Bellas Horn leuchtet euch den Weg! ✨<br>' +
+            'Luna, die Sternenfee, ist in einer Zauberblase gefangen. 🫧<br>' +
+            'Ohne sie funkeln die Sterne nicht. Findet sie!'
     };
 }
 
@@ -447,9 +499,13 @@ function baueLevel7() {
     spalt(o, 4250, KONFIG.BODEN_Y - 150, 185);
     spalt(o, 5550, KONFIG.BODEN_Y - 250, 165);
 
+    // Der gefangene Freund schwebt mitten im Wasser
+    freund(o, 4550, 230, '🐬', 'Finn, der Delfin');
+
     return {
         name: 'Unterwasserwelt', laenge: laenge, objekte: o, plattformen: pl,
         farben: { himmelOben: '#a8e7f7', himmelUnten: '#2f9fd0', wiese: '#edd49b' },
+        huegel: { fern: '#57b4d9', nah: '#3fa5cd' },
         himmelskoerper: '⛵',          // Segelboot an der Wasseroberfläche
         wasser: true,                  // Lichtstrahlen + aufsteigende Blasen
         schwimmen: true,               // Frei-Schwimmen statt Springen!
@@ -459,7 +515,11 @@ function baueLevel7() {
         plattformFarben: { koerper: '#e2a86f', deckel: '#79c9b4', halme: '#4da894' },
         sammelIcon: '🐚',
         sammelName: 'Muscheln & Seesterne',
-        bodenDeko: ['🐚', '🪸']
+        bodenDeko: ['🐚', '🪸'],
+        freundEmoji: '🐬', freundName: 'Finn, der Delfin',
+        geschichte: 'Eine Grummel-Blase wurde am Meer gesehen! Platsch – taucht hinab!<br>' +
+            'Bella zaubert Wasser-Magie: Sprung-Knopf drücken = auftauchen, loslassen = sinken.<br>' +
+            'Und Finn, der Delfin, braucht unterwegs eure Hilfe! 🫧'
     };
 }
 
@@ -477,6 +537,9 @@ function baueEis() {
     pinguin(o, 1100, 90);
     hindernis(o, 1500, 2);
     for (let i = 0; i < 3; i++) kristall(o, 1750 + i * 85, HOEHE_MITTEL);
+    // Der gefangene Freund – noch VOR der Rutsch-Kante, damit man ihn
+    // in Ruhe retten kann
+    freund(o, 2035, HOEHE_MITTEL, '🐥', 'Flöckchen, das Pinguin-Küken');
     stern(o, 2150, HOEHE_HOCH);
     pinguin(o, 2350, 70);
 
@@ -498,10 +561,15 @@ function baueEis() {
         name: 'Eisrutsche', laenge: laenge, objekte: o,
         eis: true, rutschAb: 2600, schnee: true,
         farben: { himmelOben: '#cfeeff', himmelUnten: '#eaf6ff', wiese: '#dff1fb' },
+        huegel: { fern: '#d8ebf7', nah: '#c9e2f2' },
         himmelskoerper: '🏔️',
         tier: '❄️',
         bodenDeko: ['⛄', '🧊', '❄️'],
-        sammelIcon: '💎', sammelName: 'Kristalle 💎'
+        sammelIcon: '💎', sammelName: 'Kristalle 💎',
+        freundEmoji: '🐥', freundName: 'Flöckchen, das Pinguin-Küken',
+        geschichte: 'Brrr, wie kalt es im Eisland ist! ❄️<br>' +
+            'Flöckchen, das Pinguin-Küken, zittert in seiner Zauberblase. 🫧<br>' +
+            'Rette es schnell – und dann: Festhalten, gleich kommt die große Eisrutsche!'
     };
 }
 
@@ -547,14 +615,23 @@ function baueGewitter() {
     fledermaus(o, 4500, 210);
     krabbler(o, 5100, 150);
 
+    // Der gefangene Freund dieses Levels
+    freund(o, 4430, HOEHE_MITTEL, '🐿️', 'Nussi, das Eichhörnchen');
+
     return {
         name: 'Gewittersturm', laenge: laenge, objekte: o,
         farben:      { himmelOben: '#566173', himmelUnten: '#93a0b2', wiese: '#5f8f6a' },
         farbenSonne: { himmelOben: '#bfe3ff', himmelUnten: '#fff3c4', wiese: '#7fcf7a' }, // nach dem Auflösen
+        huegel:      { fern: '#7d9a85', nah: '#6e9476' },
+        huegelSonne: { fern: '#a4cf9e', nah: '#8fc487' }, // Hügel nach dem Auflösen
         himmelskoerper: '⛈️',
         regen: true,
         gewitter: true,
-        bodenDeko: ['🪨', '🌿', '💧']
+        bodenDeko: ['🪨', '🌿', '💧'],
+        freundEmoji: '🐿️', freundName: 'Nussi, das Eichhörnchen',
+        geschichte: 'Ein Gewitter tobt über dem Zauberland! ⛈️<br>' +
+            'Nussi, das Eichhörnchen, hat große Angst in seiner Zauberblase. 🫧<br>' +
+            'Rette es und finde die Zauber-Sonne – sie vertreibt den Sturm!'
     };
 }
 
@@ -574,9 +651,15 @@ function baueBoss() {
         boss: true,
         farben:     { himmelOben: '#8f97ad', himmelUnten: '#c3aecb', wiese: '#8fbf8a' },
         farbenSieg: { himmelOben: '#bfe3ff', himmelUnten: '#ffe0f2', wiese: '#a7e3a0' }, // Himmel hellt nach dem Sieg auf
+        huegel: { fern: '#a8cfa4', nah: '#9cc797' },
         himmelskoerper: '',      // kein Sonne/Mond – die Wolke ist der Star
         bodenDeko: ['🌿', '🪨'],
-        sammelIcon: '🌈'
+        sammelIcon: '🌈',
+        fohlen: 'sternchen',     // das goldene Fohlen in der großen Blase
+        freundEmoji: '🦄', freundName: 'Sternchen, das Einhorn-Fohlen',
+        geschichte: 'Da ist Sternchen! 🦄 Die Grummelwolke hält seine Blase fest –<br>' +
+            'SIE hat auch das Gewitter gemacht! Fang die bunten Funken und<br>' +
+            'schieß Regenbogen-Strahlen. Lacht die Wolke, platzt die Blase!'
     };
 }
 
@@ -593,11 +676,65 @@ function baueBienenBoss() {
         bossArt: 'biene',
         farben:     { himmelOben: '#bfe3ff', himmelUnten: '#fff3c4', wiese: '#a7e3a0' },
         farbenSieg: { himmelOben: '#d6f0ff', himmelUnten: '#fff7df', wiese: '#b6ecae' },
+        huegel: { fern: '#c3e8bd', nah: '#b4e0ae' },
         himmelskoerper: '☀️',
         bodenDeko: ['🌻', '🌼', '🍯'],
-        sammelIcon: '🌈'
+        sammelIcon: '🌈',
+        fohlen: 'rosalie',       // das rosa Fohlen in der großen Blase
+        freundEmoji: '🦄', freundName: 'Rosalie, das Einhorn-Fohlen',
+        geschichte: 'Da ist Rosalie! 🦄 Die brummige Brummel-Biene bewacht ihre Blase!<br>' +
+            'Fang die bunten Funken und schieß Regenbogen-Strahlen aus Bellas Horn.<br>' +
+            'Wird die Biene wieder froh, platzt die Zauberblase! 🫧'
     };
 }
 
-// Alle Level in Spiel-Reihenfolge (die Boss-Level bilden das Finale)
-const LEVELS = [baueLevel1(), baueLevel2(), baueLevel3(), baueLevel4(), baueLevel5(), baueLevel6(), baueLevel7(), baueEis(), baueGewitter(), baueBoss(), baueBienenBoss()];
+// Boss 2: Grummel-Krake – bewacht am Strand die Blase von
+// Blaubeere, dem blauen Fohlen. Bewegung und Angriff nutzen die
+// Wolken-Logik (game.js: art !== 'biene' → aktualisiereWolke),
+// gezeichnet wird sie als lila Tintenfisch (entities.js).
+function baueKrakenBoss() {
+    return {
+        name: 'Grummel-Krake',
+        laenge: KONFIG.BREITE,   // ein Bildschirm → keine Kamerafahrt
+        objekte: [],
+        boss: true,
+        bossArt: 'krake',
+        farben:     { himmelOben: '#8fc7e8', himmelUnten: '#cdeef7', wiese: '#edd49b' }, // Strand!
+        farbenSieg: { himmelOben: '#bfe3ff', himmelUnten: '#e8f8ff', wiese: '#f5e3b0' },
+        huegel: { fern: '#a5d8ee', nah: '#7ec9e6' },   // Meereswellen am Horizont
+        himmelskoerper: '☀️',
+        tier: ['🦀', '🐚'],
+        bodenDeko: ['🐚', '⭐', '🪸'],
+        sammelIcon: '🌈',
+        fohlen: 'blaubeere',     // das blaue Fohlen in der großen Blase
+        freundEmoji: '🦄', freundName: 'Blaubeere, das Einhorn-Fohlen',
+        geschichte: 'Am Strand sitzt die Grummel-Krake – und hält Blaubeeres Blase fest! 🦄<br>' +
+            'Weiche ihren grauen Tintentropfen aus, fang die bunten Funken<br>' +
+            'und mach sie mit Regenbogen-Strahlen wieder fröhlich!'
+    };
+}
+
+// =====================================================
+// Laras Reise durch das Zauberland – drei Kapitel:
+// Nach jeweils ~3 Leveln wartet ein Boss, der eines der
+// drei entführten Einhorn-Fohlen in seiner Blase bewacht.
+// Das Regenbogen-Fest in der Wolkenwelt ist das Finale.
+// =====================================================
+const LEVELS = [
+    // --- Kapitel 1: Die Suche beginnt ---
+    baueLevel1(),      //  1  Blumenwiese     – sanfter Einstieg
+    baueLevel2(),      //  2  Zauberwald
+    baueLevel5(),      //  3  Schwebende Inseln
+    baueBienenBoss(),  //  4  BOSS: Brummel-Biene  → Rosalie 🦄 (rosa)
+    // --- Kapitel 2: Durch Nacht und Meer ---
+    baueLevel3(),      //  5  Abendhimmel
+    baueLevel6(),      //  6  Sternennacht
+    baueLevel7(),      //  7  Unterwasserwelt
+    baueKrakenBoss(),  //  8  BOSS: Grummel-Krake  → Blaubeere 🦄 (blau)
+    // --- Kapitel 3: Eis und Sturm ---
+    baueEis(),         //  9  Eisrutsche
+    baueGewitter(),    // 10  Gewittersturm
+    baueBoss(),        // 11  BOSS: Grummelwolke   → Sternchen 🦄 (gold)
+    // --- Finale ---
+    baueLevel4()       // 12  Wolkenwelt – das Regenbogen-Fest 🌈
+];

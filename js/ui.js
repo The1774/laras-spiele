@@ -11,14 +11,24 @@ const UI = {
 
     init() {
         this.bildschirme = {
-            start:     document.getElementById('start-bildschirm'),
-            pause:     document.getElementById('pause-bildschirm'),
-            geschafft: document.getElementById('geschafft-bildschirm'),
-            nochmal:   document.getElementById('nochmal-bildschirm')
+            start:      document.getElementById('start-bildschirm'),
+            intro:      document.getElementById('intro-bildschirm'),
+            geschichte: document.getElementById('geschichte-bildschirm'),
+            pause:      document.getElementById('pause-bildschirm'),
+            geschafft:  document.getElementById('geschafft-bildschirm'),
+            nochmal:    document.getElementById('nochmal-bildschirm')
         };
         this.muteKnopf = document.getElementById('mute-knopf');
         this.pauseKnopf = document.getElementById('pause-knopf');
         this.vorschauCtx = document.getElementById('bella-vorschau').getContext('2d');
+        this.geschichteFohlenCtx = document.getElementById('geschichte-fohlen').getContext('2d');
+        this.geschichteFohlen = null; // Fohlen-Schlüssel des aktuellen Boss-Levels
+    },
+
+    // Erzähltext der Intro-Szene setzen (nur bei Änderung)
+    setzeIntroText(text) {
+        const el = document.getElementById('intro-text');
+        if (el.innerHTML !== text) el.innerHTML = text;
     },
 
     // Zeichnet die große, animierte Bella auf dem Startbildschirm.
@@ -65,6 +75,43 @@ const UI = {
         anzeige.textContent = fortschritt.highscore > 0
             ? '⭐ Beste Punkte: ' + fortschritt.highscore
             : '';
+
+        // Gerettete Freunde als kleine Emoji-Reihe anzeigen
+        // (das Fest-Finale hat keinen eigenen Freund → zählt nicht mit)
+        const freundeBox = document.getElementById('freunde-anzeige');
+        const freunde = fortschritt.freunde || {};
+        const gesamt = LEVELS.filter(function (l) { return l.freundEmoji; }).length;
+        const gerettet = LEVELS.map(function (l) { return freunde[l.name]; }).filter(Boolean);
+        freundeBox.innerHTML = gerettet.length
+            ? '💞 Gerettete Freunde: ' + gerettet.join(' ') +
+              ' <small>(' + gerettet.length + ' von ' + gesamt + ')</small>'
+            : '💞 Rette deine Freunde aus den Zauberblasen! 🫧';
+    },
+
+    // Füllt den Geschichte-Bildschirm vor einem Level.
+    // In Boss-Leveln wird statt des Emojis das gefangene Fohlen
+    // live in seine Blase gezeichnet (zeichneGeschichteFohlen).
+    zeigeGeschichte(nummer, level) {
+        document.getElementById('geschichte-titel').textContent = '✨ Level ' + nummer + ' ✨';
+        document.getElementById('geschichte-name').textContent = level.name;
+        document.getElementById('geschichte-text').innerHTML =
+            level.geschichte || 'Auf geht\'s ins nächste Abenteuer!';
+
+        this.geschichteFohlen = level.fohlen || null;
+        document.getElementById('geschichte-freund').style.display = this.geschichteFohlen ? 'none' : 'block';
+        document.getElementById('geschichte-fohlen').style.display = this.geschichteFohlen ? 'block' : 'none';
+        document.getElementById('geschichte-freund').textContent = level.freundEmoji || '🎉';
+    },
+
+    // Zeichnet das gefangene Fohlen (animiert) auf dem Geschichte-
+    // Bildschirm eines Boss-Levels. Wird vom Game-Loop aufgerufen.
+    zeichneGeschichteFohlen(zeit) {
+        if (!this.geschichteFohlen) return;
+        const ctx = this.geschichteFohlenCtx;
+        ctx.clearRect(0, 0, 170, 140);
+        const y = 64 + Math.sin(zeit * 0.04) * 6;
+        drawFohlen(ctx, 84, y + 14, 0.5, 1, this.geschichteFohlen, { zeit: zeit });
+        zeichneGrummelBlase(ctx, 85, y, 54);
     },
 
     // Schwierigkeits-Knöpfe (Leicht/Normal/Schwer) bauen.
@@ -89,12 +136,21 @@ const UI = {
         this.muteKnopf.textContent = stumm ? '🔇' : '🔊';
     },
 
+    // Symbol des Stimmen-Knopfes (🗣️ = an, 🤐 = aus)
+    setzeStimmeKnopf(aus) {
+        document.getElementById('stimme-knopf').textContent = aus ? '🤐' : '🗣️';
+    },
+
     // Texte auf dem "Geschafft"-Bildschirm füllen
     // (sammelName z. B. "Blumen 🌸" oder "Muscheln & Seesterne")
     // eigenerText überschreibt den Standardtext (z. B. im Boss-Level).
-    zeigeGeschafft(blumen, punkte, istLetztesLevel, sammelName, eigenerText) {
-        document.getElementById('geschafft-text').innerHTML = eigenerText ||
+    // freundText erzählt, ob der Zauberblasen-Freund gerettet wurde.
+    zeigeGeschafft(blumen, punkte, istLetztesLevel, sammelName, eigenerText, freundText) {
+        let text = eigenerText ||
             ('Du hast <b>' + blumen + ' ' + (sammelName || 'Blumen 🌸') + '</b> gesammelt!<br>Punkte: <b>' + punkte + '</b> ⭐');
+        if (freundText) text = freundText + '<br>' + text;
+        if (istLetztesLevel) text += '<br>🎉 Das ganze Zauberland ist gerettet! 🎉';
+        document.getElementById('geschafft-text').innerHTML = text;
         document.getElementById('naechstes-level-knopf').textContent =
             istLetztesLevel ? 'Zum Menü 🏠' : 'Weiter ▶';
     },
@@ -131,7 +187,8 @@ const UI = {
         ctx.font = '600 16px ' + KONFIG.SCHRIFT;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        const ziel = (boss.art === 'biene') ? 'die Biene' : 'die Wolke';
+        const ziel = (boss.art === 'biene') ? 'die Biene'
+                   : (boss.art === 'krake') ? 'die Krake' : 'die Wolke';
         ctx.fillText('🌈 Fang die bunten Funken – dann schieß sie auf ' + ziel + '!', KONFIG.BREITE / 2, y + hoehe + 13);
     },
 

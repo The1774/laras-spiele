@@ -66,7 +66,10 @@ function pfadMaehne(ctx, wehen) {
 
 // =====================================================
 // drawBella – zeichnet das komplette Einhorn
-// pose (optional): { zeit, laeuft, amBoden, vy, feder }
+// pose (optional): { zeit, laeuft, amBoden, vy, feder,
+//   gleitet, stil, ohneReiterin }
+//   stil         = Farb-Überschreibungen (für die Fohlen!)
+//   ohneReiterin = true → Lara wird nicht mitgezeichnet
 // =====================================================
 function drawBella(ctx, x, y, scale, facing, pose) {
     pose = pose || {};
@@ -75,7 +78,9 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     const amBoden = pose.amBoden !== false;
     const vy = pose.vy || 0;
     const feder = pose.feder || 0;
-    const F = KONFIG.FARBEN.einhorn;
+    const F = pose.stil
+        ? Object.assign({}, KONFIG.FARBEN.einhorn, pose.stil)
+        : KONFIG.FARBEN.einhorn;
 
     // Leichtes Auf-und-Ab-Wippen beim Laufen
     let wippen = 0;
@@ -195,6 +200,26 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     ctx.lineWidth = 3;
     ctx.stroke();
 
+    // ---------- Zauber-Flügel beim Funkel-Gleiten ----------
+    // Halb durchsichtige Glitzer-Flügel auf dem Rücken, die sanft
+    // schlagen – sie erscheinen nur, solange Bella gleitet.
+    if (pose.gleitet) {
+        const flap = Math.sin(zeit * 0.45) * 0.28;
+        for (const fluegel of [{ x: -10, y: -28, w: -1.05 }, { x: -3, y: -32, w: -0.65 }]) {
+            ctx.save();
+            ctx.translate(fluegel.x, fluegel.y);
+            ctx.rotate(fluegel.w + flap);
+            ctx.beginPath();
+            ctx.ellipse(0, -12, 7, 14, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 210, 74, 0.85)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+        }
+    }
+
     // ---------- ferne Beine (hinter dem Körper) ----------
     bein(-16, 4, winkel[0], true);
     bein(14, 4, winkel[1], true);
@@ -216,6 +241,131 @@ function drawBella(ctx, x, y, scale, facing, pose) {
     // ---------- nahe Beine (vor dem Körper) ----------
     bein(-14, 6, winkel[2], false);
     bein(16, 6, winkel[3], false);
+
+    // ---------- Lara, die kleine Reiterin 👧 ----------
+    // Sitzt auf Bellas Rücken und hält sich an der Mähne fest.
+    // Wird VOR Hals und Kopf gezeichnet, damit sie hinter der
+    // Mähne sitzt (schöne Tiefenwirkung).
+    // Bei den Einhorn-Fohlen (ohneReiterin) entfällt sie.
+    if (!pose.ohneReiterin) {
+        const L = {
+            haut: '#ffdfc4', haar: '#f0c96a', // helles Blond
+            kleid: '#ff8fcf', schuh: '#b388eb'
+        };
+        ctx.save();
+        ctx.translate(-4, -24); // Hüftpunkt auf Bellas Rücken
+        ctx.rotate(-0.06);
+        ctx.lineCap = 'round';
+
+        // Zopf, der hinter ihr weht (mit Haargummi)
+        ctx.strokeStyle = L.haar;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-4, -22);
+        ctx.quadraticCurveTo(-10, -20 + wehen * 0.6, -13, -13 + wehen);
+        ctx.stroke();
+        ctx.fillStyle = L.haar;
+        ctx.beginPath();
+        ctx.arc(-13, -13 + wehen, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = F.maehnePink;
+        ctx.beginPath();
+        ctx.arc(-8.5, -19.5 + wehen * 0.6, 1.7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // hinterer Arm (greift zur Mähne)
+        ctx.strokeStyle = L.haut;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(2, -9);
+        ctx.quadraticCurveTo(9, -8, 13, -4);
+        ctx.stroke();
+
+        // Bein (hängt seitlich an Bellas Flanke herab) + Schühchen
+        ctx.beginPath();
+        ctx.moveTo(3, 2);
+        ctx.quadraticCurveTo(7, 7, 8, 12);
+        ctx.stroke();
+        ctx.fillStyle = L.schuh;
+        ctx.beginPath();
+        ctx.ellipse(9.5, 13.5, 4, 2.8, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = F.outline;
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        // Kleidchen (kleines rosa Dreieck mit rundem Saum)
+        ctx.beginPath();
+        ctx.moveTo(-6, 3);
+        ctx.quadraticCurveTo(-4, -8, -2, -13);
+        ctx.lineTo(4, -13);
+        ctx.quadraticCurveTo(7, -8, 8, 3);
+        ctx.quadraticCurveTo(1, 6, -6, 3);
+        ctx.closePath();
+        ctx.fillStyle = L.kleid;
+        ctx.fill();
+        ctx.strokeStyle = F.outline;
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        // vorderer Arm (hält sich an der Mähne fest)
+        ctx.strokeStyle = L.haut;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(3, -10);
+        ctx.quadraticCurveTo(10, -9, 14, -6);
+        ctx.stroke();
+
+        // Kopf
+        ctx.beginPath();
+        ctx.arc(1, -19, 6.5, 0, Math.PI * 2);
+        ctx.fillStyle = L.haut;
+        ctx.fill();
+        ctx.strokeStyle = F.outline;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Haare: Pony über der Stirn + Haarschopf oben
+        ctx.fillStyle = L.haar;
+        ctx.beginPath();
+        ctx.arc(1, -20.5, 6.6, Math.PI * 0.85, Math.PI * 1.95);
+        ctx.quadraticCurveTo(6, -24.5, 6.5, -21);
+        ctx.quadraticCurveTo(2, -22.5, -1, -20);
+        ctx.closePath();
+        ctx.fill();
+
+        // Blümchen im Haar
+        ctx.fillStyle = '#ffd24a';
+        ctx.beginPath();
+        ctx.arc(-3.5, -24.5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = F.maehnePink;
+        for (let bi = 0; bi < 5; bi++) {
+            const bw = bi * Math.PI * 2 / 5;
+            ctx.beginPath();
+            ctx.arc(-3.5 + Math.cos(bw) * 2.6, -24.5 + Math.sin(bw) * 2.6, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Gesicht: geschlossenes frohes Auge + Lächeln + Wange
+        ctx.strokeStyle = F.outline;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(4, -19, 1.8, Math.PI, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(4, -16.5, 1.8, Math.PI * 0.15, Math.PI * 0.85);
+        ctx.stroke();
+        const laAlpha = ctx.globalAlpha;
+        ctx.globalAlpha = laAlpha * 0.6;
+        ctx.fillStyle = F.wange;
+        ctx.beginPath();
+        ctx.arc(6, -17.5, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = laAlpha;
+
+        ctx.restore();
+    }
 
     // ---------- Hals ----------
     ctx.beginPath();
@@ -351,6 +501,20 @@ function drawBella(ctx, x, y, scale, facing, pose) {
 }
 
 // =====================================================
+// drawFohlen – zeichnet eines der drei Einhorn-Fohlen
+// (drawBella in eigenen Farben, ohne Reiterin)
+// schluessel = 'rosalie' | 'blaubeere' | 'sternchen'
+// =====================================================
+function drawFohlen(ctx, x, y, scale, facing, schluessel, pose) {
+    const fohlen = KONFIG.FOHLEN[schluessel];
+    if (!fohlen) return;
+    drawBella(ctx, x, y, scale, facing, Object.assign({}, pose || {}, {
+        stil: fohlen.stil,
+        ohneReiterin: true
+    }));
+}
+
+// =====================================================
 // Spielfigur: Physik + Aufruf von drawBella
 // =====================================================
 
@@ -371,6 +535,7 @@ class Bella {
         this.unverwundbar = 0;  // Restzeit in Frames
         this.feder = 0;         // kurzes "Federn" nach der Landung
         this.turbo = 0;         // Restzeit des Sternen-Turbos in Frames
+        this.gleitet = false;   // Funkel-Gleiten (Sprungtaste in der Luft halten)
     }
 
     aktualisiere(dt, eingabe, levelLaenge, plattformen, schwebe, schwimmen, autorennen) {
@@ -437,6 +602,17 @@ class Bella {
         // bleibt man oben stehen. Wer daneben springt, landet einfach
         // weich auf der Wiese – es gibt keine Abgründe.
         this.vy += KONFIG.SCHWERKRAFT * schwebe * dt;
+
+        // ---------- Funkel-Gleiten ----------
+        // Hält man die Sprungtaste in der Luft gedrückt, breitet Bella
+        // ihre Zauber-Flügel aus und segelt ganz langsam nach unten.
+        // Das macht Sprünge verzeihender und fühlt sich magisch an!
+        this.gleitet = false;
+        if (!this.amBoden && this.vy > 0 && eingabe.springen) {
+            this.vy = Math.min(this.vy, KONFIG.GLEIT_SINKEN * schwebe);
+            this.gleitet = true;
+        }
+
         const halbeHoehe = KONFIG.HITBOX.spieler.hoehe / 2;
         const fuesseVorher = this.y + halbeHoehe;
         this.y += this.vy * dt;
@@ -512,7 +688,8 @@ class Bella {
             laeuft: this.laeuft,
             amBoden: this.amBoden,
             vy: this.vy,
-            feder: this.feder
+            feder: this.feder,
+            gleitet: this.gleitet
         });
         ctx.restore();
     }

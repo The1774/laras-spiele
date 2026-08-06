@@ -117,6 +117,14 @@ h2 {
     opacity: 0.8;
 }
 
+/* Untertitel mit der Rahmen-Geschichte auf dem Startbildschirm */
+.untertitel {
+    font-size: 15px !important;
+    font-weight: 600;
+    color: #c76eb4 !important;
+    margin-top: -4px;
+}
+
 .bella-gross {
     font-size: 90px;
     animation: winken 2s ease-in-out infinite;
@@ -130,22 +138,22 @@ h2 {
 /* ---------- Startbildschirm kompakter (viele Knöpfe) ---------- */
 
 #start-bildschirm {
-    gap: 9px;
+    gap: 7px;
 }
 
 #start-bildschirm h1 {
-    font-size: 32px;
+    font-size: 28px;
 }
 
 /* Vorschau-Bella kleiner anzeigen (interne Auflösung bleibt 220×170) */
 #bella-vorschau.bella-gross {
-    width: 150px;
-    height: 116px;
+    width: 132px;
+    height: 102px;
 }
 
 #start-bildschirm .gross-knopf {
-    padding: 12px 40px;
-    font-size: 24px;
+    padding: 10px 38px;
+    font-size: 23px;
 }
 
 #start-bildschirm .hinweis {
@@ -273,8 +281,79 @@ h2 {
 }
 
 #highscore-anzeige {
-    font-size: 18px !important;
+    font-size: 16px !important;
     color: #b388eb;
+}
+
+/* Reihe der geretteten Freunde auf dem Startbildschirm */
+#freunde-anzeige {
+    font-size: 15px !important;
+    color: #c76eb4;
+    margin-top: -6px;
+}
+
+#freunde-anzeige small {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* ---------- Geschichte-Bildschirm (vor jedem Level) ---------- */
+
+/* Halbdurchsichtig, damit das Level dahinter als Kulisse zu sehen ist */
+#geschichte-bildschirm {
+    background: rgba(255, 240, 250, 0.88);
+}
+
+#geschichte-freund {
+    font-size: 64px;
+    line-height: 1.1;
+    animation: freund-schweben 2.4s ease-in-out infinite;
+}
+
+@keyframes freund-schweben {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+}
+
+#geschichte-text {
+    max-width: 660px;
+    font-size: 21px !important;
+}
+
+/* Das gefangene Fohlen auf dem Boss-Geschichte-Bildschirm */
+#geschichte-fohlen {
+    display: none;
+    animation: freund-schweben 2.4s ease-in-out infinite;
+}
+
+/* ---------- Intro-Szene ---------- */
+/* Transparent: Die Animation läuft im Spielfeld dahinter.
+   Text und Knopf sitzen unten, tippen stört das Spiel nicht. */
+#intro-bildschirm {
+    background: none;
+    justify-content: flex-end;
+    padding-bottom: 26px;
+    pointer-events: none;
+}
+
+#intro-bildschirm > * {
+    pointer-events: auto;
+}
+
+#intro-text {
+    max-width: 720px;
+    background: rgba(255, 240, 250, 0.92);
+    border-radius: 20px;
+    padding: 12px 26px;
+    font-size: 21px !important;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.2);
+}
+
+/* kleiner Zusatz-Knopf ("Geschichte ansehen") */
+.klein-knopf.mini {
+    font-size: 14px;
+    padding: 6px 18px;
+    margin-top: -4px;
 }
 
 /* ---------- Touch-Steuerung (nur auf Touch-Geräten) ---------- */

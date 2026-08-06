@@ -40,6 +40,11 @@ const KONFIG = {
     TURBO_DAUER: 240,
     TURBO_FAKTOR: 1.5,
 
+    // Funkel-Gleiten: Hält man die Sprungtaste in der Luft gedrückt,
+    // sinkt Bella nur noch ganz langsam und segelt mit Zauber-Flügeln
+    // sanft zu Boden. So werden Sprünge verzeihender (kindgerecht!).
+    GLEIT_SINKEN: 1.5,
+
     MAX_HERZEN: 3, // Standard (Normal); je Schwierigkeit überschrieben
 
     // ---------- Schwierigkeitsstufen ----------
@@ -72,6 +77,7 @@ const KONFIG = {
     PUNKTE_STERN: 50,
     PUNKTE_BOSS_TREFFER: 20, // Punkte je Regenbogen-Treffer auf die Wolke
     PUNKTE_LEVEL: 100, // Bonus für ein geschafftes Level
+    PUNKTE_FREUND: 100, // Bonus für einen befreiten Zauberblasen-Freund
 
     // ---------- Sprites (Emojis) ----------
     SPRITES: {
@@ -110,7 +116,8 @@ const KONFIG = {
         ziel:        { breite: 90, hoehe: 150 },
         gegnerBoden: { breite: 26, hoehe: 30 }, // Krabbler & Werfer
         gegnerFlug:  { breite: 30, hoehe: 24 }, // Flatterer
-        geschoss:    { breite: 18, hoehe: 18 }  // geworfene Matschbälle
+        geschoss:    { breite: 18, hoehe: 18 }, // geworfene Matschbälle
+        freund:      { breite: 64, hoehe: 64 }  // Zauberblase (extra großzügig!)
     },
 
     // ---------- Farben ----------
@@ -136,6 +143,39 @@ const KONFIG = {
             hornGelb: '#ffd24a',
             hornPink: '#ff8fb0',
             stern: '#ff9ec2'
+        }
+    },
+
+    // ---------- Die drei entführten Einhorn-Fohlen ----------
+    // Sie werden mit drawBella() gezeichnet – jedes in eigenen Farben.
+    // "stil" überschreibt die Farben aus FARBEN.einhorn.
+    FOHLEN: {
+        rosalie: {
+            name: 'Rosalie',
+            stil: {
+                koerper: '#ffd6e7', koerperSchatten: '#f3c2da', huf: '#e58ab4',
+                maehnePink: '#ff6fb0', maehneGold: '#ffd24a', maehneBlau: '#c084fc',
+                maehneLila: '#ff9ec2', hornGelb: '#ffe08a', hornPink: '#ff8fb0',
+                stern: '#ffffff'
+            }
+        },
+        blaubeere: {
+            name: 'Blaubeere',
+            stil: {
+                koerper: '#dcebff', koerperSchatten: '#c9ddf6', huf: '#8fb7e6',
+                maehnePink: '#7cc4f5', maehneGold: '#b388eb', maehneBlau: '#5ec6f0',
+                maehneLila: '#9b7bea', hornGelb: '#bfe3ff', hornPink: '#9b7bea',
+                stern: '#ffffff', wange: '#9fcdf2', nuester: '#9fcdf2'
+            }
+        },
+        sternchen: {
+            name: 'Sternchen',
+            stil: {
+                koerper: '#fff2cf', koerperSchatten: '#f4e2ae', huf: '#e6b85c',
+                maehnePink: '#ffd24a', maehneGold: '#ffa14a', maehneBlau: '#ff8fbf',
+                maehneLila: '#ffc06e', hornGelb: '#fff3b0', hornPink: '#ffd24a',
+                stern: '#ffffff'
+            }
         }
     },
 

@@ -29,24 +29,46 @@
         <!-- Das eigentliche Spielfeld (feste interne Auflösung) -->
         <canvas id="spiel-canvas" width="960" height="540"></canvas>
 
-        <!-- Kleine Knöpfe oben rechts: Pause + Ton -->
+        <!-- Kleine Knöpfe oben rechts: Pause + Ton + Stimmen -->
         <div id="hud-knoepfe">
             <button id="pause-knopf" title="Pause (P)">⏸️</button>
             <button id="mute-knopf" title="Ton an/aus (M)">🔊</button>
+            <button id="stimme-knopf" title="Stimmen an/aus (S)">🗣️</button>
         </div>
 
         <!-- ===== Startbildschirm ===== -->
         <div class="overlay sichtbar" id="start-bildschirm">
             <h1>🌸 Lara und die Zauberwiese 🌸</h1>
-            <!-- Bella wird hier live mit drawBella() gezeichnet (ui.js) -->
+            <p class="untertitel">Ein Grummel-Zauber liegt über dem Zauberland – rette deine Freunde! 🫧</p>
+            <!-- Lara auf Bella wird hier live mit drawBella() gezeichnet (ui.js) -->
             <canvas id="bella-vorschau" class="bella-gross" width="220" height="170"></canvas>
             <button class="gross-knopf" id="spielen-knopf">Spielen ▶</button>
-            <p class="hinweis">⬅️ ➡️ laufen &nbsp;·&nbsp; Leertaste springen</p>
+            <p class="hinweis">⬅️ ➡️ laufen &nbsp;·&nbsp; Leertaste springen &nbsp;·&nbsp; in der Luft halten = ✨ gleiten</p>
             <p class="auswahl-titel">Schwierigkeit</p>
             <div id="schwierigkeit-auswahl"></div>
             <p class="auswahl-titel">Level</p>
             <div id="level-auswahl"></div>
             <p id="highscore-anzeige"></p>
+            <p id="freunde-anzeige"></p>
+            <button class="klein-knopf mini" id="intro-knopf">📖 Geschichte ansehen</button>
+        </div>
+
+        <!-- ===== Intro-Szene: Die Fohlen werden entführt ===== -->
+        <!-- Transparent, damit die Animation im Spielfeld sichtbar ist -->
+        <div class="overlay" id="intro-bildschirm">
+            <p id="intro-text"></p>
+            <button class="klein-knopf" id="intro-weiter-knopf">Weiter ⏭</button>
+        </div>
+
+        <!-- ===== Geschichte vor jedem Level ===== -->
+        <div class="overlay" id="geschichte-bildschirm">
+            <p class="auswahl-titel" id="geschichte-titel"></p>
+            <h2 id="geschichte-name"></h2>
+            <div id="geschichte-freund"></div>
+            <!-- In Boss-Leveln: das gefangene Fohlen, live gezeichnet -->
+            <canvas id="geschichte-fohlen" width="170" height="140"></canvas>
+            <p id="geschichte-text"></p>
+            <button class="gross-knopf" id="geschichte-los-knopf">Los geht's! 🦄</button>
         </div>
 
         <!-- ===== Pause ===== -->
@@ -87,6 +109,8 @@
      damit das Spiel per Doppelklick (file://) ohne Server startet. -->
 <script src="js/config.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/musik.js"></script>
+<script src="js/stimme.js"></script>
 <script src="js/input.js"></script>
 <script src="js/entities.js"></script>
 <script src="js/player.js"></script>

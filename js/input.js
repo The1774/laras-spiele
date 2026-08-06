@@ -11,12 +11,13 @@ const Eingabe = {
     // Erkennen, ob wir auf einem Touch-Gerät sind
     istTouchGeraet: ('ontouchstart' in window) || navigator.maxTouchPoints > 0,
 
-    // rueckrufe = { beiPause: fn, beiStumm: fn } – kommt aus game.js
+    // rueckrufe = { beiPause: fn, beiStumm: fn, beiStimme: fn } – kommt aus game.js
     init(rueckrufe) {
 
         // ---------- Tastatur ----------
         window.addEventListener('keydown', (e) => {
-            Sound.init(); // AudioContext braucht eine Nutzer-Interaktion
+            Sound.init();  // AudioContext braucht eine Nutzer-Interaktion
+            Stimme.init(); // ebenso die Sprachausgabe
 
             switch (e.key) {
                 case 'ArrowLeft':  this.links = true;  e.preventDefault(); break;
@@ -25,6 +26,7 @@ const Eingabe = {
                 case ' ':          this.springen = true; e.preventDefault(); break;
                 case 'p': case 'P': rueckrufe.beiPause(); break;
                 case 'm': case 'M': rueckrufe.beiStumm(); break;
+                case 's': case 'S': rueckrufe.beiStimme(); break;
             }
         });
 
@@ -51,7 +53,7 @@ const Eingabe = {
     bindeTouchKnopf(id, setze) {
         const knopf = document.getElementById(id);
 
-        const runter = (e) => { e.preventDefault(); Sound.init(); setze(true); };
+        const runter = (e) => { e.preventDefault(); Sound.init(); Stimme.init(); setze(true); };
         const hoch = (e) => { e.preventDefault(); setze(false); };
 
         knopf.addEventListener('pointerdown', runter);

@@ -12,13 +12,19 @@ const ctx = canvas.getContext('2d');
 // ---------- Gespeicherter Fortschritt ----------
 
 function ladeFortschritt() {
+    let fortschritt = null;
     try {
         const roh = localStorage.getItem(KONFIG.SPEICHER_SCHLUESSEL);
-        if (roh) return JSON.parse(roh);
+        if (roh) fortschritt = JSON.parse(roh);
     } catch (e) {
         // localStorage blockiert? Dann einfach ohne Speichern spielen.
     }
-    return { freigeschaltet: 1, highscore: 0, schwierigkeit: KONFIG.SCHWIERIGKEIT_STANDARD };
+    if (!fortschritt) {
+        fortschritt = { freigeschaltet: 1, highscore: 0, schwierigkeit: KONFIG.SCHWIERIGKEIT_STANDARD };
+    }
+    // freunde = { levelName: emoji } aller schon geretteten Freunde
+    if (!fortschritt.freunde) fortschritt.freunde = {};
+    return fortschritt;
 }
 
 // Die aktuell gewählte Schwierigkeitsstufe (Objekt aus KONFIG)
@@ -43,7 +49,9 @@ const spiel = {
     plattformen: [],  // schwebende Inseln des aktuellen Levels
     deko: null,       // Wolken, Schmetterlinge, Boden-Schmuck
     partikel: [],
-    boss: null,       // nur im Boss-Level gesetzt (Grummelwolke)
+    boss: null,       // nur im Boss-Level gesetzt (Wolke/Biene/Krake)
+    fohlenBlase: null,// das gefangene Einhorn-Fohlen im Boss-Level
+    introT: 0,        // Zeit-Zähler der Intro-Szene
     strahlen: [],     // Regenbogen-Strahlen aus Bellas Horn
     tropfen: [],      // graue Grummel-Tropfen der Wolke
     funken: [],       // bunte Energie-Funken zum Einsammeln (Boss-Level)
@@ -95,6 +103,8 @@ function ladeLevel(nr) {
     spiel.minibienen = [];
     spiel.rutschBegonnen = false;
     spiel.boss = spiel.level.boss ? erzeugeBoss(spiel.level.bossArt) : null;
+    // Im Boss-Level schwebt das entführte Fohlen in seiner großen Blase
+    spiel.fohlenBlase = spiel.level.fohlen ? { befreit: false } : null;
     spiel.kamera = 0;
     spiel.punkte = 0;
     spiel.blumen = 0;
@@ -103,13 +113,137 @@ function ladeLevel(nr) {
     bella.reset();
 }
 
+// Dateiname-Schlüssel für eigene Aufnahmen (siehe stimme.js):
+// "Zauberwald" → "zauberwald", "Brummel-Biene" → "brummel-biene"
+function stimmSchluessel(name) {
+    return name.toLowerCase()
+        .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+// Level starten – zuerst wird die kleine Geschichte des Levels
+// gezeigt (das Level ist dahinter schon als Kulisse zu sehen)
+// und vom Erzähler vorgelesen.
 function starteLevel(nr) {
+    ladeLevel(nr);
+    spiel.zustand = 'geschichte';
+    UI.zeigeGeschichte(nr + 1, spiel.level);
+    UI.zeigeBildschirm('geschichte');
+    Stimme.sprich(spiel.level.geschichte, 'erzaehler', 'geschichte-' + stimmSchluessel(spiel.level.name));
+}
+
+// Welcher Musik-Stil passt zum Level?
+function musikStil(level) {
+    if (level.fest) return 'fest';
+    if (level.boss) return 'boss';
+    if (level.schwimmen || level.wasser) return 'wasser';
+    if (level.nachts) return 'nacht';
+    if (level.eis || level.schnee) return 'eis';
+    if (level.gewitter || level.regen) return 'sturm';
+    return 'wiese';
+}
+
+// "Los geht's!"-Knopf auf dem Geschichte-Bildschirm
+function geschichteWeiter() {
+    Stimme.stopp(); // falls der Erzähler noch mittendrin ist
+    spiel.zustand = 'spiel';
+    UI.zeigeBildschirm(null);
+    Musik.start(musikStil(spiel.level));
+}
+
+// Neustart nach "Nochmal?" – OHNE die Geschichte noch einmal zu zeigen
+function starteLevelOhneGeschichte(nr) {
     ladeLevel(nr);
     spiel.zustand = 'spiel';
     UI.zeigeBildschirm(null);
+    Musik.start(musikStil(spiel.level));
+}
+
+// =====================================================
+// Die Intro-Szene: Lara und Bella spielen mit den drei
+// Einhorn-Fohlen – da kommen Grummel-Blasen vom Himmel
+// und tragen die Fohlen davon! Läuft als kleine Animation
+// direkt im Spielfeld (Level 1 als Kulisse).
+// =====================================================
+
+const INTRO_FOHLEN = ['rosalie', 'blaubeere', 'sternchen'];
+
+function starteIntro() {
+    ladeLevel(0);
+    spiel.zustand = 'intro';
+    spiel.introT = 0;
+    spiel.introPhase = -1; // damit der erste Erzähltext gesprochen wird
+    UI.zeigeBildschirm('intro');
+}
+
+function beendeIntro() {
+    Stimme.stopp();
+    spiel.fortschritt.introGesehen = true;
+    speichereFortschritt();
+    starteLevel(spiel.fortschritt.freigeschaltet - 1);
+}
+
+// Nummer der aktuellen Intro-Phase (für Text + Sprache)
+function introPhase(t) {
+    if (t < 150) return 0;
+    if (t < 270) return 1;
+    if (t < 480) return 2;
+    return 3;
+}
+
+// Der passende Erzähl-Text zur aktuellen Intro-Phase
+function introText(t) {
+    if (t < 150) return '🌸 Lara und Bella spielen mit ihren Einhorn-Freunden auf der Zauberwiese.';
+    if (t < 270) return '🫧 Doch plötzlich... Grummel-Zauberblasen kommen vom Himmel!';
+    if (t < 480) return '😢 Die Blasen schnappen sich die Fohlen und tragen sie davon!';
+    return '💪 Rettet die Fohlen! Eure Reise durch das Zauberland beginnt...';
+}
+
+// Zeichnet die Intro-Szene (nach der Spielwelt aufgerufen)
+function zeichneIntro(ctx) {
+    const t = spiel.introT;
+    for (let i = 0; i < INTRO_FOHLEN.length; i++) {
+        const x = 330 + i * 115;
+        const ti = t - i * 22;             // jedes Fohlen etwas versetzt
+        const bodenY = KONFIG.BODEN_Y - 14;
+
+        if (ti < 150) {
+            // fröhlich auf der Wiese hüpfen
+            const hops = Math.abs(Math.sin((spiel.zeit + i * 17) * 0.1)) * 8;
+            drawFohlen(ctx, x, bodenY - hops, 0.55, i === 1 ? -1 : 1, INTRO_FOHLEN[i], { zeit: spiel.zeit });
+        } else if (ti < 270) {
+            // die Grummel-Blase senkt sich über das Fohlen
+            drawFohlen(ctx, x, bodenY, 0.55, 1, INTRO_FOHLEN[i], { zeit: spiel.zeit });
+            const anteil = (ti - 150) / 120;
+            const by = -80 + anteil * (KONFIG.BODEN_Y - 44 + 80);
+            zeichneGrummelBlase(ctx, x, by, 46);
+        } else {
+            // gefangen! Die Blase steigt schwankend davon
+            const by = (KONFIG.BODEN_Y - 44) - (ti - 270) * 1.7;
+            if (by > -90) {
+                const bx = x + Math.sin(ti * 0.05) * 14;
+                drawFohlen(ctx, bx, by + 12, 0.42, 1, INTRO_FOHLEN[i], { zeit: spiel.zeit });
+                zeichneGrummelBlase(ctx, bx, by, 46);
+            }
+        }
+    }
+}
+
+// Im Finale (Wolkenwelt, fest:true) feiern die drei geretteten
+// Fohlen am Ziel-Regenbogen mit!
+function zeichneFestFohlen(ctx, kamera, zeit, laenge) {
+    const plaetze = [laenge - 530, laenge - 430, laenge - 340];
+    for (let i = 0; i < INTRO_FOHLEN.length; i++) {
+        const sx = plaetze[i] - kamera;
+        if (sx < -80 || sx > KONFIG.BREITE + 80) continue;
+        const hops = Math.abs(Math.sin(zeit * 0.11 + i * 1.4)) * 10;
+        drawFohlen(ctx, sx, KONFIG.BODEN_Y - 14 - hops, 0.55, i === 2 ? -1 : 1, INTRO_FOHLEN[i], { zeit: zeit });
+    }
 }
 
 function zeigeStartbildschirm() {
+    Stimme.stopp();
+    Musik.stopp();
     spiel.zustand = 'start';
     UI.baueLevelAuswahl(spiel.fortschritt, function (nr) {
         Sound.init(); Sound.klick();
@@ -149,6 +283,27 @@ function aktualisiere(dt) {
         );
     }
 
+    // Intro-Szene: Zeitachse weiterlaufen lassen, Erzähltext setzen
+    // und jede neue Phase vom Erzähler sprechen lassen.
+    // WICHTIG: Die nächste Phase wartet, bis der Erzähler den Satz
+    // zu Ende gesprochen hat – sonst wird er mittendrin abgebrochen.
+    if (spiel.zustand === 'intro') {
+        spiel.introT += dt;
+        const grenzen = [150, 270, 480, 660];
+        const grenze = grenzen[Math.max(0, spiel.introPhase)];
+        if (Stimme.sprichtGerade() && spiel.introT >= grenze - 1) {
+            spiel.introT = grenze - 1; // kurz vor der Phasengrenze warten
+        }
+        UI.setzeIntroText(introText(spiel.introT));
+        const phase = introPhase(spiel.introT);
+        if (phase !== spiel.introPhase) {
+            spiel.introPhase = phase;
+            Stimme.sprich(introText(spiel.introT), 'erzaehler', 'intro-' + (phase + 1));
+        }
+        if (spiel.introT > 660) beendeIntro();
+        return;
+    }
+
     if (spiel.zustand !== 'spiel') return;
 
     // Eisrutsche: ab rutschAb geht es automatisch nur noch vorwärts
@@ -166,6 +321,22 @@ function aktualisiere(dt) {
     // Schnee-Wirbel an den Hufen während der Rutsche
     if (autorennen && bella.amBoden && Math.random() < 0.4) {
         erzeugePartikel(spiel.partikel, bella.x - 22, KONFIG.BODEN_Y - 8, 1, ['❄️', '✨']);
+    }
+
+    // Funkel-Gleiten: Glitzer rieselt unter Bellas Zauber-Flügeln
+    if (bella.gleitet && Math.random() < 0.4) {
+        erzeugePartikel(spiel.partikel, bella.x - 18 * bella.richtung, bella.y + 8, 1, ['✨', '⭐', '💫']);
+    }
+
+    // Gerettete Freunde feiern noch einen Moment (Sprechblasen-Timer).
+    // Gefangene Freunde rufen einmal um Hilfe, sobald Lara näher kommt.
+    for (const o of spiel.objekte) {
+        if (o.typ !== 'freund') continue;
+        if (o.feier > 0) o.feier -= dt;
+        if (!o.gerettet && !o.gerufen && Math.abs(bella.x - o.x) < 420) {
+            o.gerufen = true;
+            Stimme.sprich('Hilfe! Hilf mir, Lara!', 'freund');
+        }
     }
 
     // Kleine Glitzer-Spur an den Hufen, wenn Bella galoppiert –
@@ -534,7 +705,22 @@ function trefferAufBoss(x, y) {
         spiel.funken = [];  // ebenso die Energie-Funken
         spiel.bonusHerzen = [];
         spiel.minibienen = [];
+        // Das befreite Fohlen zählt als geretteter Freund!
+        spiel.fortschritt.freunde[spiel.level.name] = spiel.level.freundEmoji || '💖';
+        speichereFortschritt();
+        // Die große Zauberblase platzt – das Fohlen ist frei! 🫧
+        if (spiel.fohlenBlase) {
+            spiel.fohlenBlase.befreit = true;
+            Sound.rettung();
+            const fohlen = KONFIG.FOHLEN[spiel.level.fohlen];
+            if (fohlen) {
+                Stimme.sprich('Danke, Lara! Ihr habt mich gerettet!', 'fohlen',
+                    'befreit-' + stimmSchluessel(fohlen.name));
+            }
+            erzeugePartikel(spiel.partikel, 92, 195, 20, ['🫧', '💖', '✨', '🌟', '💜']);
+        }
         Sound.sieg();
+        Musik.start('fest'); // Jubel-Musik zur Sieges-Feier!
         erzeugePartikel(spiel.partikel, boss.x, boss.y, 46, ['🌈', '💖', '🌸', '✨', '💗', '⭐', '🎉', '🌟']);
     }
 }
@@ -704,6 +890,7 @@ function pruefeObjekte() {
         if (obj.typ === 'hindernis') box = hb.hindernis;
         else if (obj.typ === 'ziel') box = hb.ziel;
         else if (obj.typ === 'gegner') box = (obj.art === 'flieger' || obj.art === 'fledermaus') ? hb.gegnerFlug : hb.gegnerBoden;
+        else if (obj.typ === 'freund') box = hb.freund;
         else box = hb.sammel;
 
         const trifft = pruefeKollision(
@@ -736,6 +923,20 @@ function pruefeObjekte() {
             obj.eingesammelt = true;
             spiel.punkte += KONFIG.PUNKTE_STERN;
             loeseGewitterAuf();
+
+        } else if (obj.typ === 'freund') {
+            // Die Zauberblase zerplatzt – der Freund ist gerettet! 🫧
+            if (!obj.gerettet) {
+                obj.gerettet = true;
+                obj.feier = 220; // so lange bleibt die "Danke, Lara!"-Sprechblase
+                spiel.punkte += KONFIG.PUNKTE_FREUND;
+                spiel.fortschritt.freunde[spiel.level.name] = obj.emoji;
+                speichereFortschritt();
+                Sound.rettung();
+                const dankeSaetze = ['Danke, Lara!', 'Juchhu, ich bin frei!', 'Danke! Du bist die Beste!'];
+                Stimme.sprich(dankeSaetze[Math.floor(Math.random() * dankeSaetze.length)], 'freund');
+                erzeugePartikel(spiel.partikel, obj.x, obj.y, 18, ['🫧', '💖', '✨', '🌟', '💜']);
+            }
 
         } else if (obj.typ === 'hindernis' || obj.typ === 'gegner') {
             trefferDurchHindernis();
@@ -793,6 +994,10 @@ function trefferDurchHindernis() {
 function loeseGewitterAuf() {
     if (spiel.deko && spiel.deko.gewitter) spiel.deko.gewitter.aufloesen = true;
 
+    // Der Sturm weicht der Sonne – auch in der Musik!
+    // (beendet zugleich das Regenrauschen)
+    Musik.start('wiese');
+
     const hornX = bella.x + bella.richtung * 25;
     const hornY = bella.y - 58;
 
@@ -845,11 +1050,24 @@ function levelGeschafft() {
     const istLetztesLevel = spiel.levelNr >= LEVELS.length - 1;
     let bossText = null;
     if (spiel.level.boss) {
-        bossText = (spiel.boss && spiel.boss.art === 'biene')
-            ? 'Die Brummel-Biene summt jetzt ganz lieb! 🐝🌈<br>Du hast sie mit deinen Regenbogen-Strahlen besänftigt!<br>Punkte: <b>' + spiel.punkte + '</b> ⭐'
-            : 'Die Grummelwolke lacht wieder! 🌈<br>Du hast sie mit deinen Regenbogen-Strahlen ganz fröhlich gemacht!<br>Punkte: <b>' + spiel.punkte + '</b> ⭐';
+        let bossSatz = 'Die Grummelwolke lacht wieder! ⛅';
+        if (spiel.boss && spiel.boss.art === 'biene') bossSatz = 'Die Brummel-Biene summt jetzt ganz lieb! 🐝';
+        if (spiel.boss && spiel.boss.art === 'krake') bossSatz = 'Die Grummel-Krake winkt fröhlich mit allen Armen! 🐙';
+        const fohlen = spiel.level.fohlen && KONFIG.FOHLEN[spiel.level.fohlen];
+        bossText = (fohlen ? '🦄 <b>' + fohlen.name + '</b> ist frei – die Zauberblase ist geplatzt!<br>' : '') +
+            bossSatz + '<br>Punkte: <b>' + spiel.punkte + '</b> ⭐';
     }
-    UI.zeigeGeschafft(spiel.blumen, spiel.punkte, istLetztesLevel, spiel.level.sammelName || 'Blumen 🌸', bossText);
+
+    // Wurde der Zauberblasen-Freund gerettet – oder wartet er noch?
+    const levelFreund = spiel.objekte.find(function (o) { return o.typ === 'freund'; });
+    let freundText = null;
+    if (levelFreund) {
+        freundText = levelFreund.gerettet
+            ? '🫧 ' + levelFreund.name + ' ist wieder frei! 💖'
+            : '🫧 ' + levelFreund.name + ' wartet noch in der Zauberblase – probier es gleich nochmal!';
+    }
+
+    UI.zeigeGeschafft(spiel.blumen, spiel.punkte, istLetztesLevel, spiel.level.sammelName || 'Blumen 🌸', bossText, freundText);
     spiel.zustand = 'geschafft';
     UI.zeigeBildschirm('geschafft');
 }
@@ -868,6 +1086,15 @@ function pauseUmschalten() {
 
 function stummUmschalten() {
     UI.setzeStummKnopf(Sound.stummUmschalten());
+}
+
+// Stimmen an/aus – die Wahl wird gespeichert, damit sie beim
+// nächsten Spielstart erhalten bleibt
+function stimmeUmschalten() {
+    const aus = Stimme.stummUmschalten();
+    UI.setzeStimmeKnopf(aus);
+    spiel.fortschritt.stimmeAus = aus;
+    speichereFortschritt();
 }
 
 // ---------- Zeichnen ----------
@@ -948,6 +1175,18 @@ function zeichne() {
     if (spiel.level) {
         zeichneHimmelDeko(ctx, spiel.deko, spiel.kamera, spiel.zeit, spiel.level);
 
+        // Parallax-Hügel am Horizont (im Gewitter-Level blenden sie
+        // beim Auflösen sanft zu den Sonnen-Farben über)
+        let huegel = spiel.level.huegel;
+        const gw = spiel.deko && spiel.deko.gewitter;
+        if (huegel && gw && gw.t > 0 && spiel.level.huegelSonne) {
+            huegel = {
+                fern: mischeFarben(spiel.level.huegel.fern, spiel.level.huegelSonne.fern, gw.t),
+                nah: mischeFarben(spiel.level.huegel.nah, spiel.level.huegelSonne.nah, gw.t)
+            };
+        }
+        zeichneHuegel(ctx, spiel.kamera, huegel);
+
         // Boss-Level: Wolke bzw. Biene schwebt am Himmel (+ Bonus-Sonne)
         if (spiel.boss) {
             zeichneBoss(ctx, spiel.boss, spiel.zeit);
@@ -967,17 +1206,33 @@ function zeichne() {
 
         // Fallende Grummel-Tropfen + bunte Energie-Funken + Bonus-Herzen
         if (spiel.boss) {
+            // Das entführte Fohlen in seiner großen Blase (bzw. befreit)
+            if (spiel.fohlenBlase) {
+                zeichneFohlenBlase(ctx, spiel.fohlenBlase, spiel.zeit, spiel.level.fohlen);
+            }
             zeichneTropfen(ctx, spiel.tropfen, spiel.kamera);
             zeichneFunken(ctx, spiel.funken, spiel.kamera, spiel.zeit);
             zeichneBonusHerzen(ctx, spiel.bonusHerzen, spiel.kamera, spiel.zeit);
             zeichneMinibienen(ctx, spiel.minibienen, spiel.kamera, spiel.zeit);
         }
 
+        // Finale: die drei geretteten Fohlen feiern am Regenbogen mit
+        if (spiel.level.fest) {
+            zeichneFestFohlen(ctx, spiel.kamera, spiel.zeit, spiel.level.laenge);
+        }
+
         // Geworfene Matschbälle der Werfer-Gegner
         if (spiel.geschosse.length) zeichneGeschosse(ctx, spiel.geschosse, spiel.kamera);
 
         bella.zeichne(ctx, spiel.kamera, spiel.zeit);
+
+        // Intro-Szene: die Fohlen und die Grummel-Blasen
+        if (spiel.zustand === 'intro') zeichneIntro(ctx);
+
         zeichnePartikel(ctx, spiel.partikel, spiel.kamera);
+
+        // Zauberstaub funkelt über der ganzen Szene
+        zeichneZauberstaub(ctx, spiel.deko, spiel.zeit);
 
         // Regenbogen-Strahlen liegen über allem (Boss-Strahlen wie auch
         // der Sonnen-Strahl im Gewitter-Level)
@@ -1003,6 +1258,11 @@ function zeichne() {
     // Animierte Bella auf dem Startbildschirm
     if (spiel.zustand === 'start') {
         UI.zeichneVorschau(spiel.zeit);
+    }
+
+    // Boss-Geschichte: das gefangene Fohlen in seiner Blase (animiert)
+    if (spiel.zustand === 'geschichte') {
+        UI.zeichneGeschichteFohlen(spiel.zeit);
     }
 }
 
@@ -1038,27 +1298,40 @@ function init() {
 
     Eingabe.init({
         beiPause: pauseUmschalten,
-        beiStumm: stummUmschalten
+        beiStumm: stummUmschalten,
+        beiStimme: stimmeUmschalten
     });
+
+    // Gespeicherte Stimmen-Einstellung wiederherstellen
+    Stimme.aus = !!spiel.fortschritt.stimmeAus;
+    UI.setzeStimmeKnopf(Stimme.aus);
 
     // Menü-Knöpfe verdrahten
     function knopf(id, aktion) {
         document.getElementById(id).addEventListener('click', function () {
             Sound.init();
+            Stimme.init();
             Sound.klick();
             aktion();
         });
     }
 
-    // "Spielen" startet das höchste freigeschaltete Level
+    // "Spielen": Beim allerersten Mal läuft die Intro-Szene,
+    // danach geht es direkt ins höchste freigeschaltete Level.
     knopf('spielen-knopf', function () {
-        starteLevel(spiel.fortschritt.freigeschaltet - 1);
+        if (!spiel.fortschritt.introGesehen) starteIntro();
+        else starteLevel(spiel.fortschritt.freigeschaltet - 1);
     });
+    knopf('intro-knopf', starteIntro);
+    knopf('intro-weiter-knopf', beendeIntro);
     knopf('pause-knopf', pauseUmschalten);
     knopf('mute-knopf', stummUmschalten);
+    knopf('stimme-knopf', stimmeUmschalten);
     knopf('weiter-spielen-knopf', pauseUmschalten);
     knopf('pause-menue-knopf', zeigeStartbildschirm);
-    knopf('nochmal-knopf', function () { starteLevel(spiel.levelNr); });
+    knopf('geschichte-los-knopf', geschichteWeiter);
+    // Nach "Ohje" direkt neu starten – die Geschichte kennt das Kind schon
+    knopf('nochmal-knopf', function () { starteLevelOhneGeschichte(spiel.levelNr); });
     knopf('nochmal-menue-knopf', zeigeStartbildschirm);
     knopf('naechstes-level-knopf', function () {
         if (spiel.levelNr >= LEVELS.length - 1) {

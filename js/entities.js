@@ -124,6 +124,21 @@ function erzeugeDeko(level) {
         }
     }
 
+    // Zauberstaub: kleine leuchtende Pünktchen, die überall im
+    // Zauberland langsam nach oben schweben und funkeln (reine Magie!)
+    const funkeln = [];
+    const staubFarben = ['255,255,255', '255,220,130', '255,170,220', '190,160,255'];
+    for (let i = 0; i < 26; i++) {
+        funkeln.push({
+            x: Math.random() * KONFIG.BREITE,
+            y: Math.random() * KONFIG.BODEN_Y,
+            tempo: 0.12 + Math.random() * 0.25,
+            phase: Math.random() * Math.PI * 2,
+            groesse: 1 + Math.random() * 1.6,
+            farbe: staubFarben[Math.floor(Math.random() * staubFarben.length)]
+        });
+    }
+
     // Gewitter: zählt bis zum nächsten Blitz herunter, "schein" ist
     // die Helligkeit des Aufleuchtens (klingt nach jedem Blitz ab).
     // aufloesen/t steuern das Ende: Sammelt Bella die Zauber-Sonne ein,
@@ -136,7 +151,7 @@ function erzeugeDeko(level) {
     return {
         wolken: wolken, schmetterlinge: schmetterlinge, boden: boden,
         nachtSterne: nachtSterne, regen: regen, gewitter: gewitter,
-        schnee: !!level.schnee
+        schnee: !!level.schnee, funkeln: funkeln
     };
 }
 
@@ -147,6 +162,18 @@ function aktualisiereDeko(deko, dt, level) {
         if (level && level.wasser) {
             wolke.y -= wolke.tempo * 3 * dt;
             if (wolke.y < -30) wolke.y = KONFIG.BODEN_Y - 40 + Math.random() * 30;
+        }
+    }
+
+    // Zauberstaub schwebt langsam nach oben und wird unten neu eingesetzt
+    if (deko.funkeln) {
+        for (const f of deko.funkeln) {
+            f.y -= f.tempo * dt;
+            f.x += Math.sin(f.y * 0.02 + f.phase) * 0.2 * dt;
+            if (f.y < -6) {
+                f.y = KONFIG.BODEN_Y + Math.random() * 40;
+                f.x = Math.random() * KONFIG.BREITE;
+            }
         }
     }
 
@@ -240,6 +267,19 @@ function zeichneHimmelDeko(ctx, deko, kamera, zeit, level) {
         }
     }
 
+    // Warmes Glühen um Sonne, Mond und Regenbogen (mehr Magie!)
+    if ('☀️🌙🌕🌈'.includes(level.himmelskoerper)) {
+        const warm = level.nachts || level.himmelskoerper === '🌙';
+        const glowFarbe = warm ? '255, 250, 215' : '255, 225, 120';
+        const glow = ctx.createRadialGradient(KONFIG.BREITE - 90, 80, 8, KONFIG.BREITE - 90, 80, 95);
+        glow.addColorStop(0, 'rgba(' + glowFarbe + ', 0.5)');
+        glow.addColorStop(1, 'rgba(' + glowFarbe + ', 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(KONFIG.BREITE - 90, 80, 95, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
     // Himmelskörper (Sonne/Mond/Segelboot/…) bleibt fest am Bildschirm.
     // Im Gewitter-Level wird die Sturmwolke beim Auflösen sanft gegen
     // eine aufgehende Sonne ausgetauscht.
@@ -277,6 +317,45 @@ function zeichneHimmelDeko(ctx, deko, kamera, zeit, level) {
         if (sx < -60 || sx > KONFIG.BREITE + 60) continue;
         const sy = tier.y + Math.sin(zeit * 0.08 + tier.phase) * 18;
         ctx.fillText(tier.emoji || KONFIG.SPRITES.schmetterling, sx, sy);
+    }
+}
+
+// =====================================================
+// Sanfte Parallax-Hügel am Horizont – zwei Schichten, die
+// langsamer scrollen als die Welt (Tiefenwirkung!). Die
+// Farben bestimmt jedes Level selbst (level.huegel).
+// =====================================================
+function zeichneHuegel(ctx, kamera, huegel) {
+    if (!huegel) return;
+    zeichneHuegelSchicht(ctx, kamera * 0.25, huegel.fern, KONFIG.BODEN_Y - 58, 46, 230);
+    zeichneHuegelSchicht(ctx, kamera * 0.5, huegel.nah, KONFIG.BODEN_Y - 24, 34, 150);
+}
+
+function zeichneHuegelSchicht(ctx, versatz, farbe, basisY, amp, welle) {
+    ctx.fillStyle = farbe;
+    ctx.beginPath();
+    ctx.moveTo(-6, KONFIG.BODEN_Y + 6);
+    for (let x = -6; x <= KONFIG.BREITE + 6; x += 12) {
+        const wx = x + versatz;
+        // Zwei überlagerte Wellen = natürlich-rundliche Hügelkuppen
+        const hoehe = 0.55 + 0.3 * Math.sin(wx / welle) + 0.15 * Math.sin(wx / (welle * 0.37) + 2);
+        ctx.lineTo(x, basisY - amp * hoehe);
+    }
+    ctx.lineTo(KONFIG.BREITE + 6, KONFIG.BODEN_Y + 6);
+    ctx.closePath();
+    ctx.fill();
+}
+
+// Zauberstaub über der ganzen Szene (in Bildschirm-Koordinaten).
+// Wird NACH der Welt gezeichnet, damit die Pünktchen überall funkeln.
+function zeichneZauberstaub(ctx, deko, zeit) {
+    if (!deko || !deko.funkeln) return;
+    for (const f of deko.funkeln) {
+        const puls = 0.25 + 0.55 * Math.abs(Math.sin(zeit * 0.05 + f.phase));
+        ctx.fillStyle = 'rgba(' + f.farbe + ', ' + puls.toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.groesse, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 
@@ -382,6 +461,18 @@ function zeichneObjekt(ctx, obj, kamera, zeit) {
         return;
     }
 
+    // Gefangener bzw. geretteter Freund (Zauberblase / Jubel)
+    if (obj.typ === 'freund') {
+        zeichneFreund(ctx, obj, sx, zeit);
+        return;
+    }
+
+    // Das Ziel: ein großes, gezeichnetes Regenbogen-Tor
+    if (obj.typ === 'ziel') {
+        zeichneZiel(ctx, sx, zeit);
+        return;
+    }
+
     let dy = 0;
     if (obj.typ === 'blume') dy = Math.sin(zeit * 0.05 + obj.x) * 3;
     if (obj.typ === 'stern' || obj.typ === 'herz') dy = Math.sin(zeit * 0.08 + obj.x) * 6;
@@ -397,12 +488,174 @@ function zeichneObjekt(ctx, obj, kamera, zeit) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(obj.emoji, sx, obj.y + dy);
+}
 
-    // Der Ziel-Regenbogen bekommt etwas Glitzer dazu
-    if (obj.typ === 'ziel') {
-        ctx.font = '26px ' + KONFIG.SCHRIFT;
-        ctx.fillText('✨', sx - 70, obj.y - 40 + Math.sin(zeit * 0.07) * 8);
-        ctx.fillText('✨', sx + 70, obj.y - 30 + Math.cos(zeit * 0.06) * 8);
+// =====================================================
+// Das Ziel: ein gezeichnetes Regenbogen-Tor mit Wölkchen-
+// Füßen, Glitzer und einem sanft schimmernden Zauber-Portal.
+// Deutlich magischer als das alte Emoji!
+// =====================================================
+function zeichneZiel(ctx, sx, zeit) {
+    const fussY = KONFIG.BODEN_Y;
+    const r0 = 88;         // äußerer Radius des Bogens
+    const band = 8;        // Breite eines Farbbandes
+
+    // Schimmerndes Portal in der Tor-Öffnung (pulsiert sanft)
+    const portalPuls = 0.10 + 0.06 * Math.sin(zeit * 0.06);
+    const portal = ctx.createRadialGradient(sx, fussY - 20, 5, sx, fussY - 20, r0 - band * REGENBOGEN.length);
+    portal.addColorStop(0, 'rgba(255, 255, 255, ' + (portalPuls + 0.15).toFixed(3) + ')');
+    portal.addColorStop(1, 'rgba(255, 255, 255, ' + portalPuls.toFixed(3) + ')');
+    ctx.fillStyle = portal;
+    ctx.beginPath();
+    ctx.arc(sx, fussY, r0 - band * REGENBOGEN.length, Math.PI, Math.PI * 2);
+    ctx.fill();
+
+    // Weiches Leuchten um den ganzen Bogen
+    const glow = ctx.createRadialGradient(sx, fussY, r0 - 20, sx, fussY, r0 + 34);
+    glow.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    glow.addColorStop(0.5, 'rgba(255, 255, 255, 0.28)');
+    glow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(sx, fussY, r0 + 34, Math.PI, Math.PI * 2);
+    ctx.fill();
+
+    // Die sechs Regenbogen-Bänder
+    ctx.lineCap = 'butt';
+    for (let i = 0; i < REGENBOGEN.length; i++) {
+        ctx.strokeStyle = REGENBOGEN[i];
+        ctx.lineWidth = band;
+        ctx.beginPath();
+        ctx.arc(sx, fussY, r0 - band / 2 - i * band, Math.PI, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // Fluffige Wölkchen an beiden Fuß-Enden
+    for (const seite of [-1, 1]) {
+        const wx = sx + seite * (r0 - band * REGENBOGEN.length / 2);
+        ctx.fillStyle = '#ffffff';
+        for (const b of [[-16, -4, 13], [0, -12, 16], [15, -4, 13], [0, 0, 17]]) {
+            ctx.beginPath();
+            ctx.arc(wx + b[0], fussY + b[1], b[2], 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Tanzende Glitzer-Funken um das Tor
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '24px ' + KONFIG.SCHRIFT;
+    ctx.fillText('✨', sx - r0 - 14, fussY - 60 + Math.sin(zeit * 0.07) * 9);
+    ctx.fillText('✨', sx + r0 + 14, fussY - 50 + Math.cos(zeit * 0.06) * 9);
+    ctx.font = '18px ' + KONFIG.SCHRIFT;
+    ctx.fillText('🌟', sx, fussY - r0 - 18 + Math.sin(zeit * 0.09) * 6);
+}
+
+// =====================================================
+// Der gefangene Freund in seiner Zauberblase 🫧
+// Vor der Rettung: traurig in der schimmernden Blase.
+// Nach der Rettung: hüpft fröhlich, Herzchen steigen auf,
+// und eine Sprechblase sagt "Danke, Lara!" (kurze Feier).
+// =====================================================
+function zeichneFreund(ctx, obj, sx, zeit) {
+    const outline = KONFIG.FARBEN.einhorn.outline;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    if (!obj.gerettet) {
+        // Die Blase schwebt sanft auf und ab und wabert dabei
+        const sy = obj.y + Math.sin(zeit * 0.045 + obj.x) * 6;
+        const wabern = 1 + 0.04 * Math.sin(zeit * 0.09 + obj.x);
+
+        // Rosa Zauber-Schein, damit die Blase sofort auffällt
+        const puls = 0.22 + 0.1 * Math.sin(zeit * 0.08 + obj.x);
+        const schein = ctx.createRadialGradient(sx, sy, 8, sx, sy, 62);
+        schein.addColorStop(0, 'rgba(255, 170, 220, ' + puls.toFixed(3) + ')');
+        schein.addColorStop(1, 'rgba(255, 170, 220, 0)');
+        ctx.fillStyle = schein;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 62, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Die Zauberblase selbst (leicht schillernd)
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.scale(wabern, 2 - wabern);
+        const blase = ctx.createRadialGradient(-8, -10, 4, 0, 0, 38);
+        blase.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+        blase.addColorStop(0.7, 'rgba(210, 235, 255, 0.25)');
+        blase.addColorStop(1, 'rgba(180, 200, 255, 0.45)');
+        ctx.fillStyle = blase;
+        ctx.beginPath();
+        ctx.arc(0, 0, 36, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        // Lichtreflex oben links
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.beginPath();
+        ctx.ellipse(-13, -15, 7, 4.5, -0.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Der traurige Freund in der Blase + kleine Träne
+        ctx.font = '34px ' + KONFIG.SCHRIFT;
+        ctx.fillText(obj.emoji, sx, sy + 2);
+        ctx.font = '13px ' + KONFIG.SCHRIFT;
+        ctx.fillText('💧', sx + 14, sy + 12 + Math.sin(zeit * 0.1) * 2);
+
+        // "Hilf mir!"-Ruf über der Blase
+        ctx.font = '600 14px ' + KONFIG.SCHRIFT;
+        ctx.fillStyle = KONFIG.FARBEN.textDunkel;
+        ctx.fillText('Hilf mir!', sx, sy - 52 + Math.sin(zeit * 0.06) * 3);
+        return;
+    }
+
+    // ---------- Gerettet: Jubel! ----------
+    // Der Freund landet auf der Wiese und hüpft dort vor Freude
+    const hops = Math.abs(Math.sin(zeit * 0.12 + obj.x)) * 12;
+    const sy = KONFIG.BODEN_Y - 22 - hops;
+
+    ctx.font = '36px ' + KONFIG.SCHRIFT;
+    ctx.fillText(obj.emoji, sx, sy);
+
+    // Kleine Herzchen, die um ihn herum aufsteigen
+    ctx.font = '14px ' + KONFIG.SCHRIFT;
+    const herzT = (zeit * 0.5 + obj.x) % 60;
+    ctx.globalAlpha = Math.max(0, 1 - herzT / 60);
+    ctx.fillText('💖', sx - 22, sy - 10 - herzT * 0.6);
+    ctx.fillText('💗', sx + 22, sy - 16 - ((herzT + 30) % 60) * 0.6);
+    ctx.globalAlpha = 1;
+
+    // Während der Feier: Sprechblase "Danke, Lara!"
+    if (obj.feier > 0) {
+        const bx = sx, by = sy - 58;
+        const alpha = Math.min(1, obj.feier / 30); // blendet am Ende sanft aus
+        ctx.globalAlpha = alpha;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = 2.5;
+        pfadRundesRechteck(ctx, bx - 62, by - 18, 124, 36, 16);
+        ctx.fill();
+        ctx.stroke();
+        // Sprechblasen-Zipfel
+        ctx.beginPath();
+        ctx.moveTo(bx - 8, by + 17);
+        ctx.lineTo(bx, by + 30);
+        ctx.lineTo(bx + 8, by + 17);
+        ctx.closePath();
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(bx - 9, by + 14, 18, 5); // Naht zwischen Blase und Zipfel kaschieren
+
+        ctx.fillStyle = KONFIG.FARBEN.textDunkel;
+        ctx.font = '600 15px ' + KONFIG.SCHRIFT;
+        ctx.fillText('Danke, Lara! 💖', bx, by + 1);
+        ctx.globalAlpha = 1;
     }
 }
 
@@ -638,7 +891,188 @@ const REGENBOGEN = ['#ff5d73', '#ffa14a', '#ffe14a', '#5ed17a', '#5ec6f0', '#9b7
 // Zeichnet den aktuellen Boss je nach Art.
 function zeichneBoss(ctx, boss, zeit) {
     if (boss.art === 'biene') zeichneBienenBoss(ctx, boss, zeit);
+    else if (boss.art === 'krake') zeichneKrakenBoss(ctx, boss, zeit);
     else zeichneWolkenBoss(ctx, boss, zeit);
+}
+
+// =====================================================
+// Grummel-Zauberblase: die dunklen Blasen, die die
+// Einhorn-Fohlen entführt haben. Wird über das gefangene
+// Fohlen gezeichnet (Glas-Effekt) – im Intro, im Boss-
+// Kampf und auf dem Geschichte-Bildschirm.
+// =====================================================
+function zeichneGrummelBlase(ctx, x, y, r) {
+    // leicht düsterer Schimmer
+    const blase = ctx.createRadialGradient(x - r * 0.25, y - r * 0.3, r * 0.1, x, y, r);
+    blase.addColorStop(0, 'rgba(255, 255, 255, 0.30)');
+    blase.addColorStop(0.65, 'rgba(150, 140, 190, 0.18)');
+    blase.addColorStop(1, 'rgba(95, 85, 140, 0.45)');
+    ctx.fillStyle = blase;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(110, 100, 160, 0.9)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Lichtreflex oben links
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.beginPath();
+    ctx.ellipse(x - r * 0.38, y - r * 0.42, r * 0.2, r * 0.12, -0.6, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// =====================================================
+// Die große Fohlen-Blase im Boss-Kampf: Das entführte
+// Einhorn-Fohlen schwebt gefangen am Rand der Arena.
+// Ist der Boss besiegt, platzt die Blase und das Fohlen
+// hüpft glücklich auf der Wiese.
+// =====================================================
+function zeichneFohlenBlase(ctx, blase, zeit, fohlenSchluessel) {
+    const x = 92;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    if (!blase.befreit) {
+        const y = 195 + Math.sin(zeit * 0.04) * 8;
+
+        // Trauriger rosa Schein, damit das Fohlen sofort auffällt
+        const puls = 0.18 + 0.08 * Math.sin(zeit * 0.08);
+        const schein = ctx.createRadialGradient(x, y, 10, x, y, 80);
+        schein.addColorStop(0, 'rgba(255, 170, 220, ' + puls.toFixed(3) + ')');
+        schein.addColorStop(1, 'rgba(255, 170, 220, 0)');
+        ctx.fillStyle = schein;
+        ctx.beginPath();
+        ctx.arc(x, y, 80, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Fohlen IN der Blase (erst Fohlen, dann Glas darüber)
+        drawFohlen(ctx, x - 2, y + 12, 0.45, 1, fohlenSchluessel, { zeit: zeit });
+        zeichneGrummelBlase(ctx, x, y, 50);
+
+        // Träne + Hilferuf
+        ctx.font = '14px ' + KONFIG.SCHRIFT;
+        ctx.fillText('💧', x + 20, y + 18 + Math.sin(zeit * 0.1) * 2);
+        ctx.font = '600 15px ' + KONFIG.SCHRIFT;
+        ctx.fillStyle = KONFIG.FARBEN.textDunkel;
+        ctx.fillText('Hilf mir!', x, y - 66 + Math.sin(zeit * 0.06) * 3);
+        return;
+    }
+
+    // ---------- Befreit: Das Fohlen hüpft vor Freude ----------
+    const hops = Math.abs(Math.sin(zeit * 0.12)) * 12;
+    drawFohlen(ctx, x, KONFIG.BODEN_Y - 16 - hops, 0.6, 1, fohlenSchluessel, { zeit: zeit });
+
+    ctx.font = '15px ' + KONFIG.SCHRIFT;
+    const herzT = (zeit * 0.5) % 60;
+    ctx.globalAlpha = Math.max(0, 1 - herzT / 60);
+    ctx.fillText('💖', x - 30, KONFIG.BODEN_Y - 70 - herzT * 0.6);
+    ctx.fillText('💗', x + 30, KONFIG.BODEN_Y - 80 - ((herzT + 30) % 60) * 0.6);
+    ctx.globalAlpha = 1;
+}
+
+// =====================================================
+// Die Grummel-Krake 🐙 – der Strand-Boss. Ein lila
+// Tintenfisch mit wabernden Armen, der mit jedem
+// Regenbogen-Treffer freundlicher (und rosiger) wird.
+// Bewegung/Angriff nutzt die Wolken-Logik (game.js).
+// =====================================================
+function zeichneKrakenBoss(ctx, boss, zeit) {
+    const outline = KONFIG.FARBEN.einhorn.outline;
+    const phase = Math.floor(boss.treffer / 3);
+
+    const ruck = boss.zittern > 0 ? Math.sin(zeit * 1.4) * 3 : 0;
+    const x = boss.x + ruck;
+    const y = boss.y;
+
+    // Körperfarbe wird mit jeder Phase freundlicher (lila → rosa)
+    const farben = ['#9b8ac2', '#b49ad0', '#d8aee0', '#f0c4ea'];
+    const koerper = boss.besiegt ? '#f0c4ea' : farben[Math.min(phase, 3)];
+
+    ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    // sanfter Schein
+    const puls = 0.16 + 0.07 * Math.sin(zeit * 0.1);
+    ctx.fillStyle = (boss.besiegt ? 'rgba(255,170,225,' : 'rgba(120,100,160,') + puls.toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.ellipse(x, y, 92, 78, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Acht wabernde Arme (hinter dem Kopf)
+    ctx.strokeStyle = outline;
+    for (let i = 0; i < 8; i++) {
+        const seite = i < 4 ? -1 : 1;
+        const idx = i % 4;
+        const ax = x + seite * (10 + idx * 13);
+        const schwung = Math.sin(zeit * 0.08 + i * 1.3) * 10;
+        ctx.lineWidth = 13;
+        ctx.strokeStyle = koerper;
+        ctx.beginPath();
+        ctx.moveTo(ax, y + 18);
+        ctx.quadraticCurveTo(
+            ax + seite * (14 + idx * 6), y + 44,
+            ax + seite * (20 + idx * 9) + schwung * seite, y + 58 - Math.abs(schwung) * 0.4
+        );
+        ctx.stroke();
+        // dünne dunkle Kontur je Arm
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(43,43,58,0.45)';
+        ctx.stroke();
+    }
+
+    // Kopf-Kuppel
+    ctx.beginPath();
+    ctx.ellipse(x, y, 52, 46, 0, Math.PI, Math.PI * 2);
+    ctx.quadraticCurveTo(x + 52, y + 26, x + 40, y + 26);
+    ctx.lineTo(x - 40, y + 26);
+    ctx.quadraticCurveTo(x - 52, y + 26, x - 52, y);
+    ctx.closePath();
+    ctx.fillStyle = koerper;
+    ctx.fill();
+    ctx.strokeStyle = outline;
+    ctx.lineWidth = 3.5;
+    ctx.stroke();
+
+    // heller Lichtfleck
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.arc(x - 18, y - 22, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ---------- Gesicht ----------
+    const fx = x, fy = y + 2;
+    ctx.fillStyle = outline;
+    ctx.beginPath();
+    ctx.arc(fx - 16, fy - 4, 4, 0, Math.PI * 2);
+    ctx.arc(fx + 16, fy - 4, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = outline;
+    ctx.lineWidth = 3;
+    if (boss.besiegt) {
+        ctx.beginPath();
+        ctx.arc(fx, fy + 4, 11, Math.PI * 0.12, Math.PI * 0.88);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,150,200,0.7)';
+        ctx.beginPath();
+        ctx.arc(fx - 27, fy + 4, 6, 0, Math.PI * 2);
+        ctx.arc(fx + 27, fy + 4, 6, 0, Math.PI * 2);
+        ctx.fill();
+    } else {
+        // grummelige Brauen + Schmollmund
+        ctx.beginPath();
+        ctx.moveTo(fx - 24, fy - 16); ctx.lineTo(fx - 9, fy - 11);
+        ctx.moveTo(fx + 24, fy - 16); ctx.lineTo(fx + 9, fy - 11);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(fx, fy + 18, 9, Math.PI * 1.15, Math.PI * 1.85);
+        ctx.stroke();
+    }
+
+    ctx.restore();
 }
 
 // Bonus-Sonne, die ab und zu hinter dem Boss hervorkommt (bringt ein Herz).

@@ -78,6 +78,16 @@ const Sound = {
         this.ton(300, 0.12, 'triangle', 0.08, 0, 520);
     },
 
+    // Funkelnde Aufwärts-Melodie, wenn ein Freund aus der
+    // Zauberblase befreit wird (mit "Plopp" der Blase davor)
+    rettung() {
+        this.ton(520, 0.06, 'triangle', 0.14, 0, 300); // die Blase ploppt
+        this.ton(784, 0.09, 'sine', 0.16, 0.06);
+        this.ton(988, 0.09, 'sine', 0.16, 0.14);
+        this.ton(1175, 0.09, 'sine', 0.16, 0.22);
+        this.ton(1568, 0.24, 'sine', 0.18, 0.30);
+    },
+
     // Warmes Glöckchen beim Extraherz
     extraherz() {
         this.ton(660, 0.1, 'sine', 0.16);
@@ -108,11 +118,13 @@ const Sound = {
         this.ton(220, 0.1, 'triangle', 0.06, 0, 150);
     },
 
-    // Sanftes, tiefes Donnergrollen – absichtlich weich, nicht erschreckend
+    // Tiefes Donnergrollen – kräftig genug zum Hören,
+    // aber absichtlich weich, nicht erschreckend
     donner() {
-        this.ton(140, 0.5, 'triangle', 0.10, 0.0, 70);
-        this.ton(90, 0.75, 'sine', 0.08, 0.05, 50);
-        this.ton(190, 0.35, 'triangle', 0.06, 0.0, 110);
+        this.ton(140, 0.6, 'triangle', 0.16, 0.0, 70);
+        this.ton(90, 1.0, 'sine', 0.14, 0.05, 45);
+        this.ton(190, 0.4, 'triangle', 0.09, 0.0, 110);
+        this.ton(60, 0.9, 'sine', 0.10, 0.25, 40); // langes Nachgrollen
     },
 
     // Kleine Sieges-Melodie am Regenbogen

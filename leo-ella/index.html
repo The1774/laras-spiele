@@ -3,81 +3,683 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Leo Ella – kommt bald</title>
+    <title>Leo Ella</title>
+
+    <!-- iPad/iPhone: Vollbild, wenn direkt vom Home-Bildschirm gestartet -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f3efe9">
+
+    <!-- Verspielte Schrift "Fredoka" (optional, Fallback: Comic Sans MS) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Gemeinsame Basis (Farben, Haus-Knopf) -->
-    <link rel="stylesheet" href="../gemeinsam/basis.css">
-    <style>
-        /* Platzhalter-Seite: Leo sitzt in seinem Zimmer und wartet.
-           Wird ersetzt, sobald das Spiel „Leo Ella" gebaut wird. */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; overflow: hidden; }
-        body {
-            background: linear-gradient(#f3efe9 0%, #f3efe9 60%, #d9d3cb 60%, #d9d3cb 100%);
-            font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            -webkit-user-select: none;
-            user-select: none;
-            touch-action: manipulation;
-        }
-        h1 { font-size: 40px; color: #6d3fb8; }
-        p  { font-size: 22px; color: #4a4a5a; }
-        svg.leo { width: 320px; height: 300px; }
 
-    </style>
+    <!-- Gemeinsame Basis (Farben, Haus-Knopf) vor dem eigenen Stil -->
+    <link rel="stylesheet" href="../gemeinsam/basis.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<a class="haus-knopf" href="../index.html" title="Zurück zum Startbildschirm" aria-label="Zurück zum Startbildschirm">
-    <svg viewBox="0 0 40 40" width="36" height="36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M6 20 L20 7 L34 20" fill="none" stroke="#2b2b3a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M10 18 V33 H30 V18" fill="none" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
-        <rect x="17" y="24" width="6" height="9" rx="1" fill="#ff8fcf"/>
-    </svg>
-</a>
+<!-- Rahmen hält die Bühne mittig; die Bühne (1024 × 768) wird skaliert -->
+<div id="skalier-rahmen">
+    <div id="buehne">
 
-<!-- Leo Ella, der kleine Leopard (Vorderansicht) -->
-<svg class="leo" viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <ellipse cx="160" cy="284" rx="86" ry="10" fill="#b89aa0" opacity="0.5"/>
-    <path d="M232 250 Q290 250 282 200 Q276 172 250 184" stroke="#2b2b3a" stroke-width="18" fill="none" stroke-linecap="round"/>
-    <path d="M232 250 Q290 250 282 200 Q276 172 250 184" stroke="#ffd98a" stroke-width="10" fill="none" stroke-linecap="round"/>
-    <circle cx="270" cy="236" r="5" fill="#5a3a22"/><circle cx="283" cy="210" r="5" fill="#5a3a22"/>
-    <ellipse cx="160" cy="240" rx="72" ry="46" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"/>
-    <ellipse cx="160" cy="250" rx="38" ry="26" fill="#fff6e6"/>
-    <circle cx="104" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
-    <circle cx="216" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
-    <ellipse cx="126" cy="274" rx="20" ry="12" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"/>
-    <ellipse cx="194" cy="274" rx="20" ry="12" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"/>
-    <circle cx="100" cy="86" r="30" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"/><circle cx="100" cy="86" r="16" fill="#ff9ec2"/>
-    <circle cx="220" cy="86" r="30" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"/><circle cx="220" cy="86" r="16" fill="#ff9ec2"/>
-    <circle cx="160" cy="150" r="84" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"/>
-    <circle cx="98" cy="128" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/><circle cx="90" cy="158" r="5" fill="#5a3a22"/>
-    <circle cx="222" cy="128" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/><circle cx="230" cy="158" r="5" fill="#5a3a22"/>
-    <circle cx="132" cy="86" r="6" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/><circle cx="160" cy="74" r="5" fill="#5a3a22"/>
-    <circle cx="188" cy="86" r="6" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
-    <ellipse cx="212" cy="46" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(-30 212 46)"/>
-    <ellipse cx="240" cy="58" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(30 240 58)"/>
-    <circle cx="226" cy="54" r="7" fill="#ffd24a" stroke="#2b2b3a" stroke-width="3"/>
-    <ellipse cx="160" cy="186" rx="34" ry="24" fill="#fff6e6"/>
-    <ellipse cx="132" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-    <circle cx="134" cy="149" r="14" fill="#2b2b3a"/><circle cx="129" cy="142" r="5" fill="#ffffff"/><circle cx="138" cy="153" r="2.5" fill="#ffffff"/>
-    <ellipse cx="188" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-    <circle cx="190" cy="149" r="14" fill="#2b2b3a"/><circle cx="185" cy="142" r="5" fill="#ffffff"/><circle cx="194" cy="153" r="2.5" fill="#ffffff"/>
-    <circle cx="102" cy="182" r="12" fill="#ff9ec2" opacity="0.7"/><circle cx="218" cy="182" r="12" fill="#ff9ec2" opacity="0.7"/>
-    <path d="M152 178 L168 178 L160 188 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M146 194 Q153 204 160 194 Q167 204 174 194" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
-    <path d="M60 176 L100 186 M60 196 L100 196" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"/>
-    <path d="M260 176 L220 186 M260 196 L220 196" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"/>
-</svg>
+        <!-- ===== Zimmer (Quelle: design/zimmer/zimmer-tag.svg + Nacht-Teile aus zimmer-nacht.svg) ===== -->
+        <svg id="zimmer" viewBox="0 0 856 768" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="tapete" width="26" height="26" patternUnits="userSpaceOnUse">
+                <circle cx="6" cy="6" r="1.6" fill="#ffffff"></circle>
+                <circle cx="19" cy="19" r="1.6" fill="#ffffff"></circle>
+              </pattern>
+              <pattern id="dielen" width="160" height="44" patternUnits="userSpaceOnUse">
+                <rect width="160" height="44" fill="#d9d3cb"></rect>
+                <path d="M0 43.5 H160 M80 0 V22 M0 22 H160" stroke="#cbc4bb" stroke-width="1.5"></path>
+                <path d="M10 8 h50 M100 32 h40" stroke="#e3ded7" stroke-width="2" stroke-linecap="round"></path>
+              </pattern>
+            </defs>
+            <rect x="0" y="0" width="856" height="440" fill="#f3efe9"></rect>
+            <rect x="0" y="0" width="856" height="440" fill="url(#tapete)"></rect>
+            <rect x="648" y="0" width="208" height="440" fill="#dad1c6"></rect>
+            <rect x="0" y="440" width="856" height="328" fill="url(#dielen)"></rect>
+            <rect x="0" y="430" width="856" height="14" fill="#ffffff"></rect>
+        
+            <rect x="200" y="36" width="200" height="196" rx="6" fill="#ffffff"></rect>
+            <!-- Fenster bei Tag -->
+            <g class="nur-tag">
+            <rect x="212" y="48" width="176" height="160" fill="#d3e4ee"></rect>
+            <ellipse cx="250" cy="80" rx="40" ry="14" fill="#ffffff" opacity="0.9"></ellipse>
+            <ellipse cx="340" cy="66" rx="30" ry="10" fill="#ffffff" opacity="0.8"></ellipse>
+            <path d="M212 150 Q240 118 268 148 Q290 112 322 146 Q346 122 388 150 L388 208 L212 208 Z" fill="#7fa86e"></path>
+            <path d="M212 170 Q250 150 300 172 Q340 154 388 176 L388 208 L212 208 Z" fill="#5f8c55"></path>
+            <path d="M212 190 Q300 180 388 194 L388 208 L212 208 Z" fill="#a8c58a"></path>
+            </g>
+            <!-- Fenster bei Nacht: Mond, Sterne, dunkle Hügel -->
+            <g class="nur-nacht">
+            <rect x="212" y="48" width="176" height="160" fill="#2a2a5e"></rect>
+            <path d="M356 76 A22 22 0 1 0 376 106 A17 17 0 0 1 356 76 Z" fill="#fff1b8"></path>
+            <circle cx="236" cy="70" r="2.5" fill="#ffffff"></circle><circle cx="268" cy="58" r="2" fill="#ffffff"></circle>
+            <circle cx="300" cy="90" r="2" fill="#ffffff"></circle><circle cx="326" cy="60" r="2.5" fill="#ffffff"></circle>
+            <circle cx="250" cy="110" r="2" fill="#ffffff"></circle><circle cx="380" cy="66" r="1.5" fill="#ffffff"></circle>
+                    <path d="M212 150 Q240 118 268 148 Q290 112 322 146 Q346 122 388 150 L388 208 L212 208 Z" fill="#2f4634"></path>
+            <path d="M212 170 Q250 150 300 172 Q340 154 388 176 L388 208 L212 208 Z" fill="#22351f"></path>
+            <path d="M212 190 Q300 180 388 194 L388 208 L212 208 Z" fill="#3d5a3a"></path>
+            </g>
+            <rect x="298" y="48" width="4" height="160" fill="#ffffff"></rect>
+            <rect x="212" y="126" width="176" height="4" fill="#ffffff"></rect>
+            <rect x="196" y="230" width="208" height="10" rx="3" fill="#ffffff"></rect>
+            <path d="M200 30 q-24 90 -10 206 h22 V30 Z" fill="#f4f1ec" opacity="0.9"></path>
+            <path d="M400 30 q24 90 10 206 h-22 V30 Z" fill="#f4f1ec" opacity="0.9"></path>
+            <path d="M300 228 q-22 -14 -18 -30 q10 -14 22 -2 q12 -12 22 2 q4 16 -18 30 Z" fill="#ffffff"></path>
+            <path d="M286 228 h28 v4 h-28 Z" fill="#e8e2da"></path>
+        
+            <path d="M180 36 v30 M178 66 q-14 30 -6 60 M182 66 q16 30 8 64" stroke="#8fa88c" stroke-width="3" fill="none" stroke-linecap="round"></path>
+            <ellipse cx="170" cy="86" rx="8" ry="5" fill="#a9bfa3" transform="rotate(-30 170 86)"></ellipse>
+            <ellipse cx="192" cy="96" rx="8" ry="5" fill="#a9bfa3" transform="rotate(30 192 96)"></ellipse>
+            <ellipse cx="166" cy="108" rx="8" ry="5" fill="#9db59a" transform="rotate(-20 166 108)"></ellipse>
+            <ellipse cx="194" cy="118" rx="8" ry="5" fill="#9db59a" transform="rotate(20 194 118)"></ellipse>
+            <ellipse cx="172" cy="126" rx="7" ry="4.5" fill="#a9bfa3" transform="rotate(-30 172 126)"></ellipse>
+            <rect x="164" y="30" width="34" height="8" rx="3" fill="#ffffff"></rect>
+        
+            <rect x="428" y="84" width="100" height="120" fill="#ffffff"></rect>
+            <rect x="436" y="92" width="84" height="104" fill="#fbf7f2"></rect>
+            <g transform="translate(478 144)">
+              <path d="M0 -44 L4 -12 L-4 -12 Z M31 -31 L14 -6 L8 -12 Z M44 0 L12 4 L12 -4 Z M31 31 L6 14 L12 8 Z M0 44 L-4 12 L4 12 Z M-31 31 L-14 6 L-8 12 Z M-44 0 L-12 -4 L-12 4 Z M-31 -31 L-6 -14 L-12 -8 Z" fill="#e3b7b2"></path>
+              <path d="M17 -41 L8 -12 L2 -14 Z M41 -17 L14 -2 L12 -8 Z M41 17 L12 8 L14 2 Z M17 41 L2 14 L8 12 Z M-17 41 L-8 12 L-2 14 Z M-41 17 L-14 2 L-12 8 Z M-41 -17 L-12 -8 L-14 -2 Z M-17 -41 L-2 -14 L-8 -12 Z" fill="#c9b7d1"></path>
+              <circle cx="0" cy="0" r="18" fill="#f4d7b8"></circle>
+            </g>
+            <rect x="546" y="84" width="100" height="120" fill="#ffffff"></rect>
+            <rect x="554" y="92" width="84" height="104" fill="#f5ece8"></rect>
+            <path d="M566 176 A30 30 0 0 1 626 176" stroke="#e3b7b2" stroke-width="8" fill="none"></path>
+            <path d="M576 176 A20 20 0 0 1 616 176" stroke="#d9c2b6" stroke-width="8" fill="none"></path>
+            <path d="M586 176 A10 10 0 0 1 606 176" stroke="#c9b3c9" stroke-width="8" fill="none"></path>
+        
+            <g fill="#ffffff">
+              <circle cx="560" cy="6" r="52"></circle>
+              <circle cx="522" cy="22" r="34"></circle>
+              <circle cx="600" cy="24" r="36"></circle>
+              <circle cx="546" cy="46" r="30"></circle>
+              <circle cx="580" cy="48" r="28"></circle>
+            </g>
+            <circle cx="536" cy="34" r="12" fill="#f1ede7"></circle>
+            <circle cx="588" cy="14" r="10" fill="#f1ede7"></circle>
+        
+            <path d="M644 250 L748 150 L852 250 Z" fill="#d6b9b2"></path>
+            <path d="M644 250 L748 150 L852 250" stroke="#ffffff" stroke-width="12" fill="none" stroke-linejoin="round" stroke-linecap="round"></path>
+            <rect x="642" y="244" width="12" height="230" fill="#ffffff"></rect>
+            <rect x="842" y="244" width="14" height="230" fill="#ffffff"></rect>
+            <rect x="654" y="250" width="188" height="130" fill="#d6b9b2"></rect>
+            <rect x="654" y="380" width="188" height="60" fill="#efe6dc"></rect>
+            <rect x="662" y="352" width="70" height="40" rx="12" fill="#f6efe6"></rect>
+            <path d="M734 372 Q790 356 842 372 L842 440 L734 440 Z" fill="#e8dcd0"></path>
+            <circle cx="770" cy="400" r="3" fill="#ffffff"></circle>
+            <circle cx="810" cy="412" r="3" fill="#ffffff"></circle>
+            <circle cx="790" cy="426" r="3" fill="#ffffff"></circle>
+            <rect x="642" y="436" width="214" height="16" fill="#ffffff"></rect>
+            <rect x="642" y="452" width="214" height="22" fill="#f4f1ec"></rect>
+            <path d="M672 440 v36 M700 440 v36 M728 440 v36 M756 440 v36 M784 440 v36 M812 440 v36" stroke="#ffffff" stroke-width="8"></path>
+            <rect x="642" y="474" width="214" height="8" fill="#e8e2da"></rect>
+        
+            <ellipse cx="470" cy="640" rx="300" ry="82" fill="#e3c4c9"></ellipse>
+            <ellipse cx="470" cy="640" rx="300" ry="82" fill="none" stroke="#d8b5bb" stroke-width="6"></ellipse>
+        
+            <g transform="translate(996 0) scale(-1 1)">
+            <rect x="786" y="612" width="24" height="70" rx="10" fill="#a9a39e"></rect>
+            <rect x="740" y="612" width="24" height="70" rx="10" fill="#a9a39e"></rect>
+            <rect x="712" y="620" width="26" height="66" rx="11" fill="#b9b3ae"></rect>
+            <rect x="812" y="620" width="26" height="66" rx="11" fill="#b9b3ae"></rect>
+            <path d="M836 560 q22 6 18 30" stroke="#a9a39e" stroke-width="6" fill="none" stroke-linecap="round"></path>
+            <rect x="706" y="540" width="134" height="104" rx="44" fill="#b9b3ae"></rect>
+            <path d="M736 548 Q736 480 754 424" stroke="#b9b3ae" stroke-width="40" fill="none" stroke-linecap="round"></path>
+            <rect x="746" y="372" width="8" height="26" rx="4" fill="#a9a39e"></rect>
+            <rect x="762" y="370" width="8" height="26" rx="4" fill="#a9a39e"></rect>
+            <circle cx="750" cy="370" r="6" fill="#b9b3ae"></circle>
+            <circle cx="766" cy="368" r="6" fill="#b9b3ae"></circle>
+            <ellipse cx="778" cy="400" rx="16" ry="8" fill="#a9a39e" transform="rotate(25 778 400)"></ellipse>
+            <ellipse cx="748" cy="410" rx="34" ry="21" fill="#b9b3ae" transform="rotate(-12 748 410)"></ellipse>
+            <ellipse cx="716" cy="420" rx="17" ry="13" fill="#c6c0bb" transform="rotate(-12 716 420)"></ellipse>
+            <circle cx="742" cy="404" r="4" fill="#2b2b3a"></circle>
+            <g fill="#cfc9c4" opacity="0.7">
+              <circle cx="740" cy="580" r="3"></circle>
+              <circle cx="790" cy="566" r="3"></circle>
+              <circle cx="770" cy="606" r="3"></circle>
+              <circle cx="816" cy="600" r="3"></circle>
+              <circle cx="746" cy="490" r="2.5"></circle>
+              <circle cx="754" cy="456" r="2.5"></circle>
+            </g>
+            </g>
+          
+            <!-- ===== Nur nachts sichtbar (zimmer.js schaltet um) ===== -->
+            <g class="nur-nacht" id="nacht">
+              <!-- Dunkles Overlay über dem ganzen Zimmer -->
+              <rect x="0" y="0" width="856" height="768" fill="#2b2452" opacity="0.5"></rect>
+              <!-- Rosa Nachtlicht -->
+              <g id="nachtlicht">
+              <circle cx="352" cy="200" r="70" fill="#ff8fcf" opacity="0.18"></circle>
+            <circle cx="352" cy="200" r="40" fill="#ff8fcf" opacity="0.22"></circle>
+            <path d="M336 232 h32 v-6 a6 6 0 0 0 -6 -6 h-20 a6 6 0 0 0 -6 6 Z" fill="#e6a4c4"></path>
+            <rect x="342" y="160" width="20" height="62" rx="6" fill="#ffd6ec" opacity="0.85"></rect>
+            <rect x="344" y="162" width="16" height="58" rx="5" fill="#ff9ecf" opacity="0.5"></rect>
+            <g fill="#fff3fa">
+              <circle cx="348" cy="172" r="1.8"></circle><circle cx="356" cy="180" r="1.6"></circle><circle cx="350" cy="192" r="2"></circle>
+              <circle cx="357" cy="202" r="1.6"></circle><circle cx="347" cy="210" r="1.8"></circle><circle cx="354" cy="216" r="1.4"></circle>
+            </g>
+            <rect x="340" y="154" width="24" height="8" rx="3" fill="#e6a4c4"></rect>
+              </g>
+              <!-- Gedimmte Deckenlampe -->
+              <circle cx="300" cy="214" r="18" fill="#ffffff" opacity="0.18"></circle>
+              <!-- Lichterkette am Hausbett -->
+              <g id="lichterkette">
+              <path d="M640 262 L748 162 L856 262" stroke="#8a7a6a" stroke-width="1.5" fill="none"></path>
+            <g fill="#ffe9a8">
+              <circle cx="652" cy="251" r="4"></circle><circle cx="676" cy="229" r="4"></circle><circle cx="700" cy="207" r="4"></circle>
+              <circle cx="724" cy="185" r="4"></circle><circle cx="748" cy="163" r="4"></circle><circle cx="772" cy="185" r="4"></circle>
+              <circle cx="796" cy="207" r="4"></circle><circle cx="820" cy="229" r="4"></circle><circle cx="844" cy="251" r="4"></circle>
+            </g>
+            <g fill="#ffe9a8" opacity="0.28">
+              <circle cx="652" cy="251" r="11"></circle><circle cx="676" cy="229" r="11"></circle><circle cx="700" cy="207" r="11"></circle>
+              <circle cx="724" cy="185" r="11"></circle><circle cx="748" cy="163" r="11"></circle><circle cx="772" cy="185" r="11"></circle>
+              <circle cx="796" cy="207" r="11"></circle><circle cx="820" cy="229" r="11"></circle><circle cx="844" cy="251" r="11"></circle>
+            </g>
+            <path d="M652 251 L748 163 L844 251 Z" fill="#ffe9a8" opacity="0.08"></path>
+              </g>
+              <!-- Leo schläft im Bett (kleine Version) – die Zzz kommen aus partikel.js -->
+              <g id="leo-im-bett">
+              <circle cx="706" cy="326" r="26" fill="#ffd98a" stroke="#2b2b3a" stroke-width="3"></circle>
+              <circle cx="706" cy="326" r="13" fill="#ff9ec2"></circle>
+              <circle cx="774" cy="318" r="26" fill="#ffd98a" stroke="#2b2b3a" stroke-width="3"></circle>
+              <circle cx="774" cy="318" r="13" fill="#ff9ec2"></circle>
+              <circle cx="742" cy="368" r="62" fill="#ffd98a" stroke="#2b2b3a" stroke-width="3"></circle>
+              <circle cx="700" cy="352" r="5" fill="#c98a4a" stroke="#5a3a22" stroke-width="2.5"></circle>
+              <circle cx="694" cy="374" r="3.5" fill="#5a3a22"></circle>
+              <circle cx="784" cy="352" r="5" fill="#c98a4a" stroke="#5a3a22" stroke-width="2.5"></circle>
+              <circle cx="790" cy="374" r="3.5" fill="#5a3a22"></circle>
+              <circle cx="722" cy="322" r="4.5" fill="#c98a4a" stroke="#5a3a22" stroke-width="2.5"></circle>
+              <circle cx="742" cy="312" r="3.5" fill="#5a3a22"></circle>
+              <circle cx="762" cy="322" r="4.5" fill="#c98a4a" stroke="#5a3a22" stroke-width="2.5"></circle>
+              <ellipse cx="792" cy="300" rx="11" ry="7.5" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3" transform="rotate(-30 792 300)"></ellipse>
+              <ellipse cx="812" cy="308" rx="11" ry="7.5" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3" transform="rotate(30 812 308)"></ellipse>
+              <circle cx="802" cy="305" r="5" fill="#ffd24a" stroke="#2b2b3a" stroke-width="2"></circle>
+              <ellipse cx="742" cy="394" rx="24" ry="17" fill="#fff6e6"></ellipse>
+              <path d="M708 366 Q722 376 736 366" stroke="#2b2b3a" stroke-width="3.5" fill="none" stroke-linecap="round"></path>
+              <path d="M748 366 Q762 376 776 366" stroke="#2b2b3a" stroke-width="3.5" fill="none" stroke-linecap="round"></path>
+              <circle cx="700" cy="392" r="8" fill="#ff9ec2" opacity="0.7"></circle>
+              <circle cx="784" cy="392" r="8" fill="#ff9ec2" opacity="0.7"></circle>
+              <path d="M736 388 L748 388 L742 396 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"></path>
+              <path d="M737 402 Q742 406 747 402" stroke="#2b2b3a" stroke-width="3" fill="none" stroke-linecap="round"></path>
+              <path d="M660 424 Q742 404 842 424 L842 440 L660 440 Z" fill="#ebdcd0" stroke="#e0cdbf" stroke-width="2"></path>
+              <circle cx="700" cy="430" r="2.5" fill="#ffffff"></circle><circle cx="760" cy="428" r="2.5" fill="#ffffff"></circle><circle cx="816" cy="432" r="2.5" fill="#ffffff"></circle>
+              </g>
+            </g>
+          </svg>
 
-<h1>Leo Ella kommt bald</h1>
-<p>Leo richtet noch sein Zimmer ein. 🎀</p>
+        <!-- ===== Leo (Quelle: design/leo-ella-standard.svg, Varianten aus design/zustaende und design/reaktionen) =====
+             Jede Gruppe mit data-teil/data-variante wird von js/leo.js ein- oder ausgeblendet. -->
+        <svg id="leo" viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+             style="font-family: Fredoka, 'Comic Sans MS', sans-serif;">
+        <g id="leo-figur">
+
+            <!-- Schatten -->
+            <ellipse data-teil="schatten" data-variante="tag"    cx="160" cy="284" rx="86" ry="10" fill="#f0d9b0"/>
+            <ellipse data-teil="schatten" data-variante="klein"  cx="160" cy="286" rx="60" ry="8"  fill="#f0d9b0"/>
+            <ellipse data-teil="schatten" data-variante="frisch" cx="160" cy="284" rx="86" ry="10" fill="#c9dcef"/>
+            <ellipse data-teil="schatten" data-variante="nacht"  cx="160" cy="284" rx="86" ry="10" fill="#4e4080"/>
+
+            <!-- Schwanz -->
+            <g data-teil="schwanz" data-variante="normal" class="schwanz-wedeln">
+                <path d="M232 250 Q290 250 282 200 Q276 172 250 184" stroke="#2b2b3a" stroke-width="18" fill="none" stroke-linecap="round"/>
+                <path d="M232 250 Q290 250 282 200 Q276 172 250 184" stroke="var(--leo-fell)" stroke-width="10" fill="none" stroke-linecap="round"/>
+                <circle cx="270" cy="236" r="5" fill="#5a3a22"/>
+                <circle cx="283" cy="210" r="5" fill="#5a3a22"/>
+            </g>
+            <g data-teil="schwanz" data-variante="traurig">
+                <path d="M232 250 Q276 262 286 236" stroke="#2b2b3a" stroke-width="18" fill="none" stroke-linecap="round"/>
+                <path d="M232 250 Q276 262 286 236" stroke="var(--leo-fell)" stroke-width="10" fill="none" stroke-linecap="round"/>
+                <circle cx="268" cy="254" r="5" fill="#5a3a22"/>
+            </g>
+            <g data-teil="schwanz" data-variante="herz">
+                <path d="M236 244 c -10 -16 -34 -6 -24 12 c 6 10 24 20 24 20 c 0 0 18 -10 24 -20 c 10 -18 -14 -28 -24 -12 Z" fill="none" stroke="#2b2b3a" stroke-width="18" stroke-linejoin="round"/>
+                <path d="M236 244 c -10 -16 -34 -6 -24 12 c 6 10 24 20 24 20 c 0 0 18 -10 24 -20 c 10 -18 -14 -28 -24 -12 Z" fill="none" stroke="var(--leo-fell)" stroke-width="10" stroke-linejoin="round"/>
+                <circle cx="216" cy="240" r="5" fill="#5a3a22"/>
+                <circle cx="258" cy="240" r="5" fill="#5a3a22"/>
+            </g>
+            <g data-teil="schwanz" data-variante="freude">
+                <path d="M232 250 Q276 236 288 192" stroke="#2b2b3a" stroke-width="18" fill="none" stroke-linecap="round"/>
+                <path d="M232 250 Q276 236 288 192" stroke="var(--leo-fell)" stroke-width="10" fill="none" stroke-linecap="round"/>
+                <circle cx="266" cy="228" r="5" fill="#5a3a22"/>
+            </g>
+
+            <!-- Körper mit hellem Bauch und Rosetten -->
+            <g data-teil="koerper" data-variante="normal">
+                <ellipse cx="160" cy="240" rx="72" ry="46" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/>
+                <ellipse cx="160" cy="250" rx="38" ry="26" fill="#fff6e6"/>
+                <circle cx="104" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
+                <circle cx="216" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
+                <circle cx="120" cy="256" r="5" fill="#5a3a22"/>
+                <circle cx="200" cy="256" r="5" fill="#5a3a22"/>
+            </g>
+            <g data-teil="koerper" data-variante="plustern">
+                <ellipse cx="160" cy="240" rx="76" ry="48" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/>
+                <ellipse cx="160" cy="250" rx="40" ry="27" fill="#fff6e6"/>
+                <circle cx="104" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
+                <circle cx="216" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
+            </g>
+
+            <!-- Bauchgrummeln (hungrig) -->
+            <g data-teil="grummel" data-variante="an">
+                <path d="M142 246 q5 -7 10 0 t10 0" stroke="#8f5fd6" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M148 258 q5 -7 10 0 t10 0" stroke="#8f5fd6" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </g>
+
+            <!-- Pfoten -->
+            <g data-teil="pfoten" data-variante="normal">
+                <ellipse cx="126" cy="274" rx="20" ry="12" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/>
+                <ellipse cx="194" cy="274" rx="20" ry="12" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/>
+            </g>
+
+            <!-- Winkende Pfote (Wiedersehensfreude) -->
+            <g data-teil="winkpfote" data-variante="an">
+                <ellipse id="winkpfote" cx="258" cy="150" rx="13" ry="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4" transform="rotate(30 258 150)"/>
+            </g>
+
+            <!-- ===== Kopf ===== -->
+            <g id="kopf">
+
+                <!-- Ohren (mit der Schleife als Kind – sie wandert mit) -->
+                <g data-teil="ohren" data-variante="oben">
+                    <circle cx="100" cy="86" r="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/><circle cx="100" cy="86" r="16" fill="#ff9ec2"/>
+                    <circle cx="220" cy="86" r="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/><circle cx="220" cy="86" r="16" fill="#ff9ec2"/>
+                    <g class="schleife">
+                        <ellipse cx="212" cy="46" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(-30 212 46)"/>
+                        <ellipse cx="240" cy="58" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(30 240 58)"/>
+                        <circle cx="226" cy="54" r="7" fill="#ffd24a" stroke="#2b2b3a" stroke-width="3"/>
+                    </g>
+                </g>
+                <g data-teil="ohren" data-variante="unten">
+                    <circle cx="90" cy="108" r="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/><circle cx="90" cy="108" r="16" fill="#ff9ec2"/>
+                    <circle cx="230" cy="108" r="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/><circle cx="230" cy="108" r="16" fill="#ff9ec2"/>
+                    <g class="schleife" transform="translate(10 24)">
+                        <ellipse cx="212" cy="46" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(-30 212 46)"/>
+                        <ellipse cx="240" cy="58" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(30 240 58)"/>
+                        <circle cx="226" cy="54" r="7" fill="#ffd24a" stroke="#2b2b3a" stroke-width="3"/>
+                    </g>
+                </g>
+                <g data-teil="ohren" data-variante="hoch">
+                    <circle cx="100" cy="82" r="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/><circle cx="100" cy="82" r="16" fill="#ff9ec2"/>
+                    <circle cx="220" cy="82" r="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/><circle cx="220" cy="82" r="16" fill="#ff9ec2"/>
+                    <g class="schleife" transform="translate(0 -4)">
+                        <ellipse cx="212" cy="46" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(-30 212 46)"/>
+                        <ellipse cx="240" cy="58" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(30 240 58)"/>
+                        <circle cx="226" cy="54" r="7" fill="#ffd24a" stroke="#2b2b3a" stroke-width="3"/>
+                    </g>
+                </g>
+                <g data-teil="ohren" data-variante="nacht">
+                    <circle cx="94" cy="100" r="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/><circle cx="94" cy="100" r="16" fill="#ff9ec2"/>
+                    <circle cx="226" cy="100" r="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/><circle cx="226" cy="100" r="16" fill="#ff9ec2"/>
+                    <g class="schleife" transform="translate(6 14)">
+                        <ellipse cx="212" cy="46" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(-30 212 46)"/>
+                        <ellipse cx="240" cy="58" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(30 240 58)"/>
+                        <circle cx="226" cy="54" r="7" fill="#ffd24a" stroke="#2b2b3a" stroke-width="3"/>
+                    </g>
+                </g>
+
+                <!-- Kopf mit Rosetten-Flecken -->
+                <circle cx="160" cy="150" r="84" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/>
+                <circle cx="98" cy="128" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
+                <circle cx="90" cy="158" r="5" fill="#5a3a22"/>
+                <circle cx="222" cy="128" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
+                <circle cx="230" cy="158" r="5" fill="#5a3a22"/>
+                <circle cx="132" cy="86" r="6" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
+                <circle cx="160" cy="74" r="5" fill="#5a3a22"/>
+                <circle cx="188" cy="86" r="6" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"/>
+                <circle cx="112" cy="104" r="4" fill="#5a3a22"/>
+                <circle cx="208" cy="104" r="4" fill="#5a3a22"/>
+
+                <!-- Brauen (traurig) -->
+                <g data-teil="brauen" data-variante="traurig">
+                    <path d="M108 126 Q126 120 148 110" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <path d="M212 126 Q194 120 172 110" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                </g>
+
+                <!-- Schnauze -->
+                <ellipse cx="160" cy="186" rx="34" ry="24" fill="#fff6e6"/>
+
+                <!-- Augen -->
+                <g data-teil="augen" data-variante="offen">
+                    <ellipse cx="132" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="134" cy="149" r="14" fill="#2b2b3a"/><circle cx="129" cy="142" r="5" fill="#ffffff"/><circle cx="138" cy="153" r="2.5" fill="#ffffff"/>
+                    <ellipse cx="188" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="190" cy="149" r="14" fill="#2b2b3a"/><circle cx="185" cy="142" r="5" fill="#ffffff"/><circle cx="194" cy="153" r="2.5" fill="#ffffff"/>
+                </g>
+                <g data-teil="augen" data-variante="gross">
+                    <ellipse cx="132" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="130" cy="152" r="16" fill="#2b2b3a"/><circle cx="125" cy="145" r="5" fill="#ffffff"/>
+                    <ellipse cx="188" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="186" cy="152" r="16" fill="#2b2b3a"/><circle cx="181" cy="145" r="5" fill="#ffffff"/>
+                </g>
+                <g data-teil="augen" data-variante="muede">
+                    <ellipse cx="132" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="134" cy="152" r="13" fill="#2b2b3a"/><circle cx="129" cy="146" r="4" fill="#ffffff"/>
+                    <ellipse cx="132" cy="132" rx="23" ry="24" fill="var(--leo-fell)"/>
+                    <path d="M111 150 Q132 158 153 150" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <ellipse cx="188" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="190" cy="152" r="13" fill="#2b2b3a"/><circle cx="185" cy="146" r="4" fill="#ffffff"/>
+                    <ellipse cx="188" cy="132" rx="23" ry="24" fill="var(--leo-fell)"/>
+                    <path d="M167 150 Q188 158 209 150" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                </g>
+                <g data-teil="augen" data-variante="seitlich">
+                    <ellipse cx="132" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="126" cy="150" r="14" fill="#2b2b3a"/><circle cx="121" cy="143" r="5" fill="#ffffff"/><circle cx="130" cy="154" r="2.5" fill="#ffffff"/>
+                    <ellipse cx="188" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="182" cy="150" r="14" fill="#2b2b3a"/><circle cx="177" cy="143" r="5" fill="#ffffff"/><circle cx="186" cy="154" r="2.5" fill="#ffffff"/>
+                </g>
+                <g data-teil="augen" data-variante="traurig">
+                    <ellipse cx="132" cy="150" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="132" cy="156" r="14" fill="#2b2b3a"/><circle cx="127" cy="150" r="5" fill="#ffffff"/>
+                    <ellipse cx="188" cy="150" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="188" cy="156" r="14" fill="#2b2b3a"/><circle cx="183" cy="150" r="5" fill="#ffffff"/>
+                </g>
+                <g data-teil="augen" data-variante="freude">
+                    <ellipse cx="132" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="134" cy="149" r="15" fill="#2b2b3a"/><circle cx="128" cy="141" r="6" fill="#ffffff"/><circle cx="139" cy="154" r="3" fill="#ffffff"/>
+                    <ellipse cx="188" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
+                    <circle cx="190" cy="149" r="15" fill="#2b2b3a"/><circle cx="184" cy="141" r="6" fill="#ffffff"/><circle cx="195" cy="154" r="3" fill="#ffffff"/>
+                </g>
+                <g data-teil="augen" data-variante="lachen">
+                    <path d="M110 150 Q132 128 154 150" stroke="#2b2b3a" stroke-width="5" fill="none" stroke-linecap="round"/>
+                    <path d="M166 150 Q188 128 210 150" stroke="#2b2b3a" stroke-width="5" fill="none" stroke-linecap="round"/>
+                </g>
+                <g data-teil="augen" data-variante="zu">
+                    <path d="M112 148 Q132 162 152 148" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <path d="M168 148 Q188 162 208 148" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                </g>
+                <g data-teil="augen" data-variante="zugekniffen">
+                    <path d="M112 142 Q132 156 152 142" stroke="#2b2b3a" stroke-width="5" fill="none" stroke-linecap="round"/>
+                    <path d="M168 142 Q188 156 208 142" stroke="#2b2b3a" stroke-width="5" fill="none" stroke-linecap="round"/>
+                </g>
+
+                <!-- Wangen -->
+                <g data-teil="wangen" data-variante="normal">
+                    <circle cx="102" cy="182" r="12" fill="#ff9ec2" opacity="0.7"/>
+                    <circle cx="218" cy="182" r="12" fill="#ff9ec2" opacity="0.7"/>
+                </g>
+                <g data-teil="wangen" data-variante="gross">
+                    <circle cx="102" cy="180" r="14" fill="#ff9ec2" opacity="0.85"/>
+                    <circle cx="218" cy="180" r="14" fill="#ff9ec2" opacity="0.85"/>
+                </g>
+
+                <!-- Träne -->
+                <path data-teil="traene" data-variante="gross" d="M204 176 C 204 176 214 190 214 197 A 10 10 0 0 1 194 197 C 194 190 204 176 204 176 Z" fill="#6ec6f0" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <path data-teil="traene" data-variante="klein" d="M214 158 C 214 158 220 167 220 171 A 6 6 0 0 1 208 171 C 208 167 214 158 214 158 Z" fill="#6ec6f0" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/>
+
+                <!-- Nase -->
+                <path d="M152 178 L168 178 L160 188 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+
+                <!-- Mund -->
+                <path data-teil="mund" data-variante="laecheln" d="M146 194 Q153 204 160 194 Q167 204 174 194" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path data-teil="mund" data-variante="zick"     d="M144 198 Q152 190 160 198 Q168 206 176 198" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path data-teil="mund" data-variante="gerade"   d="M148 198 L172 198" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path data-teil="mund" data-variante="traurig"  d="M150 206 Q155 200 160 204 Q165 200 170 206" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path data-teil="mund" data-variante="lachen"   d="M138 196 Q149 210 160 196 Q171 210 182 196" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path data-teil="mund" data-variante="klein"    d="M154 196 Q160 201 166 196" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <g data-teil="mund" data-variante="gaehnen">
+                    <ellipse cx="160" cy="204" rx="12" ry="13" fill="#2b2b3a"/>
+                    <ellipse cx="160" cy="211" rx="7" ry="5" fill="#ff8fcf"/>
+                </g>
+                <g data-teil="mund" data-variante="gaehnen-gross">
+                    <ellipse cx="160" cy="206" rx="13" ry="15" fill="#2b2b3a"/>
+                    <ellipse cx="160" cy="214" rx="8" ry="5" fill="#ff8fcf"/>
+                </g>
+
+                <!-- Schnurrhaare -->
+                <path d="M60 176 L100 186 M60 196 L100 196" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"/>
+                <path d="M260 176 L220 186 M260 196 L220 196" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"/>
+            </g>
+
+            <!-- Matsch, Stinke-Linien und Fliegen (schmutzig) – Flecken werden einzeln weggewischt -->
+            <g data-teil="matsch" data-variante="an">
+                <g class="flecken">
+                    <path class="fleck" data-x="118" data-y="104" d="M96 100 q10 -14 24 -6 q14 -6 20 8 q12 4 4 16 q-6 12 -20 6 q-14 8 -24 -2 q-12 -4 -4 -22 Z" fill="#7a5230" stroke="#4a2f18" stroke-width="3" stroke-linejoin="round"/>
+                    <path class="fleck" data-x="210" data-y="166" d="M196 160 q10 -10 20 -2 q12 2 8 14 q-4 12 -16 8 q-14 4 -16 -8 q-4 -8 4 -12 Z" fill="#7a5230" stroke="#4a2f18" stroke-width="3" stroke-linejoin="round"/>
+                    <path class="fleck" data-x="186" data-y="230" d="M168 222 q14 -12 30 -4 q16 4 12 18 q-6 14 -22 10 q-16 6 -26 -6 q-8 -10 6 -18 Z" fill="#7a5230" stroke="#4a2f18" stroke-width="3" stroke-linejoin="round"/>
+                    <path class="fleck" data-x="116" data-y="242" d="M104 236 q10 -10 22 -2 q8 6 2 14 q-8 8 -18 4 q-10 -2 -6 -16 Z" fill="#7a5230" stroke="#4a2f18" stroke-width="3" stroke-linejoin="round"/>
+                    <ellipse class="fleck" data-x="132" data-y="196" cx="132" cy="196" rx="10" ry="6" fill="#7a5230" stroke="#4a2f18" stroke-width="2.5"/>
+                </g>
+                <g class="stink">
+                    <path d="M118 40 q8 -10 0 -20 q-8 -10 0 -20" stroke="#8f8f9a" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path d="M144 32 q8 -10 0 -20 q-8 -10 0 -20" stroke="#8f8f9a" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path d="M170 40 q8 -10 0 -20 q-8 -10 0 -20" stroke="#8f8f9a" stroke-width="3" fill="none" stroke-linecap="round"/>
+                </g>
+                <g class="fliegen">
+                    <g class="fliege">
+                        <path d="M40 120 q14 -30 40 -12" stroke="#2b2b3a" stroke-width="2" fill="none" stroke-dasharray="3 4"/>
+                        <ellipse cx="84" cy="110" rx="8" ry="6" fill="#2b2b3a"/>
+                        <ellipse cx="78" cy="102" rx="6" ry="3" fill="#dfe6ff" stroke="#2b2b3a" stroke-width="1.5" transform="rotate(-30 78 102)"/>
+                        <ellipse cx="90" cy="102" rx="6" ry="3" fill="#dfe6ff" stroke="#2b2b3a" stroke-width="1.5" transform="rotate(30 90 102)"/>
+                    </g>
+                    <g class="fliege">
+                        <path d="M290 40 q-6 30 -30 20" stroke="#2b2b3a" stroke-width="2" fill="none" stroke-dasharray="3 4"/>
+                        <ellipse cx="256" cy="62" rx="8" ry="6" fill="#2b2b3a"/>
+                        <ellipse cx="250" cy="54" rx="6" ry="3" fill="#dfe6ff" stroke="#2b2b3a" stroke-width="1.5" transform="rotate(-30 250 54)"/>
+                        <ellipse cx="262" cy="54" rx="6" ry="3" fill="#dfe6ff" stroke="#2b2b3a" stroke-width="1.5" transform="rotate(30 262 54)"/>
+                    </g>
+                </g>
+            </g>
+
+            <!-- Kuscheldecke -->
+            <g data-teil="decke" data-variante="an">
+                <path d="M74 232 Q160 210 250 232 L256 290 L66 290 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"/>
+                <circle cx="110" cy="256" r="6" fill="#ffd6ec"/><circle cx="160" cy="268" r="6" fill="#ffd6ec"/><circle cx="212" cy="256" r="6" fill="#ffd6ec"/>
+            </g>
+            <g data-teil="decke" data-variante="hoch">
+                <path d="M78 252 Q160 236 246 252 L252 290 L70 290 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"/>
+                <circle cx="118" cy="272" r="6" fill="#ffd6ec"/><circle cx="204" cy="272" r="6" fill="#ffd6ec"/>
+            </g>
+
+            <!-- ===== Props ===== -->
+            <g data-teil="props" data-variante="schuessel-leer">
+                <ellipse cx="52" cy="272" rx="30" ry="12" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4"/>
+                <ellipse cx="52" cy="268" rx="22" ry="6" fill="#ffd6ec"/>
+            </g>
+            <g data-teil="props" data-variante="schuessel-voll">
+                <ellipse cx="52" cy="272" rx="30" ry="12" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4"/>
+                <circle cx="44" cy="266" r="4" fill="#ffd24a"/><circle cx="58" cy="264" r="4" fill="#ffd24a"/><circle cx="52" cy="272" r="3.5" fill="#ffd24a"/>
+            </g>
+            <g data-teil="props" data-variante="glas" transform="translate(28 232) scale(0.65)">
+                <path d="M30 10 h20 v10 l6 8 v40 a6 6 0 0 1 -6 6 h-20 a6 6 0 0 1 -6 -6 v-40 l6 -8 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M24 40 h32 v28 a6 6 0 0 1 -6 6 h-20 a6 6 0 0 1 -6 -6 Z" fill="#6ec6f0"/>
+                <rect x="30" y="6" width="20" height="8" rx="3" fill="#b388eb" stroke="#2b2b3a" stroke-width="3"/>
+            </g>
+            <g data-teil="props" data-variante="herzen">
+                <path d="M262 150 c -6 -10 -20 -4 -14 8 c 4 8 14 12 14 12 c 0 0 10 -4 14 -12 c 6 -12 -8 -18 -14 -8 Z" fill="#ff5fa2" stroke="#2b2b3a" stroke-width="3"/>
+                <path d="M282 108 c -4 -7 -14 -3 -10 6 c 3 5 10 8 10 8 c 0 0 7 -3 10 -8 c 4 -9 -6 -13 -10 -6 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="2.5"/>
+                <path d="M252 80 c -3 -5 -10 -2 -7 4 c 2 4 7 6 7 6 c 0 0 5 -2 7 -6 c 3 -6 -4 -9 -7 -4 Z" fill="#ffb3d9" stroke="#2b2b3a" stroke-width="2"/>
+            </g>
+            <g data-teil="props" data-variante="vibration">
+                <circle cx="76" cy="60" r="12" fill="#b388eb" opacity="0.6"/>
+                <circle cx="76" cy="60" r="22" fill="none" stroke="#b388eb" stroke-width="3" opacity="0.5"/>
+                <circle cx="76" cy="60" r="32" fill="none" stroke="#b388eb" stroke-width="2" opacity="0.3"/>
+                <path d="M30 210 q6 -6 12 0 t12 0 t12 0" stroke="#b388eb" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M30 226 q6 -6 12 0 t12 0 t12 0" stroke="#b388eb" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </g>
+            <g data-teil="props" data-variante="funkeln">
+                <path d="M40 40 L46 56 L62 62 L46 68 L40 84 L34 68 L18 62 L34 56 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M284 130 L288 140 L298 144 L288 148 L284 158 L280 148 L270 144 L280 140 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M56 232 L59 240 L67 243 L59 246 L56 254 L53 246 L45 243 L53 240 Z" fill="#ffd24a" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M262 26 L265 34 L273 37 L265 40 L262 48 L259 40 L251 37 L259 34 Z" fill="#ffd24a" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M44 120 C 44 120 52 132 52 137 A 8 8 0 0 1 36 137 C 36 132 44 120 44 120 Z" fill="#6ec6f0" stroke="#2b2b3a" stroke-width="2.5" stroke-linejoin="round"/>
+                <path d="M270 210 C 270 210 278 222 278 227 A 8 8 0 0 1 262 227 C 262 222 270 210 270 210 Z" fill="#6ec6f0" stroke="#2b2b3a" stroke-width="2.5" stroke-linejoin="round"/>
+                <circle cx="20" cy="184" r="9" fill="#ffffff" stroke="#6ec6f0" stroke-width="2.5"/>
+                <circle cx="300" cy="72" r="7" fill="#ffffff" stroke="#6ec6f0" stroke-width="2.5"/>
+                <circle cx="290" cy="264" r="10" fill="#ffffff" stroke="#6ec6f0" stroke-width="2.5"/>
+            </g>
+            <g data-teil="props" data-variante="grossesherz" transform="translate(0 -34)">
+                <path d="M160 54 c -12 -20 -40 -8 -28 16 c 8 16 28 24 28 24 c 0 0 20 -8 28 -24 c 12 -24 -16 -36 -28 -16 Z" fill="#ff5fa2" stroke="#2b2b3a" stroke-width="3.5"/>
+            </g>
+            <g data-teil="props" data-variante="kitzellinien">
+                <path d="M34 150 q-10 10 0 20 M26 180 q-10 10 0 20" stroke="#2b2b3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M290 140 q10 10 0 20 M298 170 q10 10 0 20" stroke="#2b2b3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </g>
+            <g data-teil="props" data-variante="herz-klein">
+                <path d="M264 60 c -5 -8 -16 -3 -11 7 c 3 6 11 9 11 9 c 0 0 8 -3 11 -9 c 5 -10 -6 -15 -11 -7 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="2.5"/>
+            </g>
+            <g data-teil="props" data-variante="mond">
+                <circle cx="40" cy="40" r="3" fill="#ffffff" opacity="0.8"/>
+                <circle cx="290" cy="150" r="2.5" fill="#ffffff" opacity="0.8"/>
+                <circle cx="30" cy="130" r="2" fill="#ffffff" opacity="0.8"/>
+                <path d="M40 90 A 18 18 0 1 0 58 68 A 13 13 0 1 1 40 90 Z" fill="#ffe066"/>
+            </g>
+
+            <!-- Sprechblasen -->
+            <g data-teil="blase" data-variante="danke">
+                <rect x="14" y="16" width="112" height="44" rx="14" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/>
+                <path d="M60 60 L54 74 L74 60 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M60 60 L74 60" stroke="#ffffff" stroke-width="4"/>
+                <text x="70" y="45" font-size="19" font-weight="700" fill="#2b2b3a" text-anchor="middle">Mmh, danke!</text>
+            </g>
+            <g data-teil="blase" data-variante="lara">
+                <rect x="14" y="40" width="80" height="42" rx="14" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/>
+                <path d="M72 82 L84 96 L88 82 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M72 82 L88 82" stroke="#ffffff" stroke-width="4"/>
+                <text x="54" y="68" font-size="21" font-weight="700" fill="#2b2b3a" text-anchor="middle">Lara!</text>
+            </g>
+            <g data-teil="blase" data-variante="hihi">
+                <rect x="200" y="14" width="96" height="42" rx="14" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/>
+                <path d="M232 56 L226 70 L246 56 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M232 56 L246 56" stroke="#ffffff" stroke-width="4"/>
+                <text x="248" y="42" font-size="20" font-weight="700" fill="#2b2b3a" text-anchor="middle">Hihihi!</text>
+            </g>
+        </g>
+        </svg>
+
+        <!-- ===== Status-Ringe links (Quelle: design/ui/ring-*.svg) – Füllstand über stroke-dashoffset, Umfang 289 ===== -->
+        <div id="ringe">
+            <svg id="ring-satt" class="ring" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" aria-label="Satt">
+                <circle cx="55" cy="55" r="46" fill="#ffffff" stroke="#ffd6ec" stroke-width="12"/>
+                <circle class="fuellung" cx="55" cy="55" r="46" fill="none" stroke="#ff5fa2" stroke-width="12" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="0" transform="rotate(-90 55 55)"/>
+                <path d="M30 52 h50 a25 25 0 0 1 -50 0 Z" fill="none" stroke="#2b2b3a" stroke-width="5" stroke-linejoin="round"/>
+                <path d="M40 40 q6 -8 12 0 q6 -8 12 0" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+            <svg id="ring-sauber" class="ring" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" aria-label="Sauber">
+                <circle cx="55" cy="55" r="46" fill="#ffffff" stroke="#d6f0ff" stroke-width="12"/>
+                <circle class="fuellung" cx="55" cy="55" r="46" fill="none" stroke="#6ec6f0" stroke-width="12" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="0" transform="rotate(-90 55 55)"/>
+                <circle cx="48" cy="58" r="16" fill="none" stroke="#2b2b3a" stroke-width="5"/>
+                <circle cx="70" cy="42" r="9" fill="none" stroke="#2b2b3a" stroke-width="5"/>
+                <circle cx="72" cy="68" r="5" fill="none" stroke="#2b2b3a" stroke-width="4"/>
+            </svg>
+            <svg id="ring-ausgeschlafen" class="ring" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" aria-label="Ausgeschlafen">
+                <circle cx="55" cy="55" r="46" fill="#ffffff" stroke="#e2d1ff" stroke-width="12"/>
+                <circle class="fuellung" cx="55" cy="55" r="46" fill="none" stroke="#b388eb" stroke-width="12" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="0" transform="rotate(-90 55 55)"/>
+                <path d="M62 30 A26 26 0 1 0 80 70 A20 20 0 0 1 62 30 Z" fill="none" stroke="#2b2b3a" stroke-width="5" stroke-linejoin="round"/>
+            </svg>
+        </div>
+
+        <!-- ===== Haus-Knopf (zurück zum Startbildschirm) – dort, wo im Design der Ton-Knopf war ===== -->
+        <a class="haus-knopf" href="../index.html" title="Zurück zu Laras Spielen" aria-label="Zurück zu Laras Spielen">
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M6 20 L20 7 L34 20" fill="none" stroke="#2b2b3a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 18 V33 H30 V18" fill="none" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                <rect x="17" y="24" width="6" height="9" rx="1" fill="#ff8fcf"/>
+            </svg>
+        </a>
+
+        <!-- Ton-Knopf daneben (Quelle: design/ui/knopf-ton.svg) -->
+        <button id="ton-knopf" class="rund-knopf" title="Ton an/aus" aria-label="Ton an/aus">
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M8 16 h7 l8 -7 v22 l-8 -7 h-7 Z" fill="none" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                <g class="ton-wellen"><path d="M28 14 q6 6 0 12 M31 9 q10 11 0 22" fill="none" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"/></g>
+                <path class="ton-strich" d="M8 32 L34 6" stroke="#e0507a" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+        </button>
+
+        <!-- Sticker-Album: kommt später (Quelle: design/ui/knopf-sticker.svg) -->
+        <button id="sticker-knopf" class="rund-knopf" title="Sticker-Album – kommt später" aria-label="Sticker-Album – kommt später" disabled>
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M20 5 L24.5 15 L35 16 L27 23 L29.5 34 L20 28.5 L10.5 34 L13 23 L5 16 L15.5 15 Z" fill="none" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <!-- ===== Kachel-Leiste rechts (Quelle: design/ui/kachel-*.svg) ===== -->
+        <div id="leiste">
+            <button id="kachel-futter" class="kachel" aria-label="Futter">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <ellipse cx="40" cy="44" rx="30" ry="10" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3"/>
+                    <path d="M10 44 a30 10 0 0 0 60 0 v10 a30 10 0 0 1 -60 0 Z" fill="#ff5fa2" stroke="#2b2b3a" stroke-width="3"/>
+                    <circle cx="30" cy="40" r="5" fill="#ffd24a" stroke="#2b2b3a" stroke-width="2"/>
+                    <circle cx="44" cy="37" r="5" fill="#ffd24a" stroke="#2b2b3a" stroke-width="2"/>
+                    <circle cx="52" cy="42" r="4" fill="#ffd24a" stroke="#2b2b3a" stroke-width="2"/>
+                </svg>
+            </button>
+            <button id="kachel-wasser" class="kachel" aria-label="Wasser">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M30 10 h20 v10 l6 8 v40 a6 6 0 0 1 -6 6 h-20 a6 6 0 0 1 -6 -6 v-40 l6 -8 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                    <path d="M24 40 h32 v28 a6 6 0 0 1 -6 6 h-20 a6 6 0 0 1 -6 -6 Z" fill="#6ec6f0"/>
+                    <rect x="30" y="6" width="20" height="8" rx="3" fill="#b388eb" stroke="#2b2b3a" stroke-width="3"/>
+                </svg>
+            </button>
+            <button id="kachel-schwamm" class="kachel" aria-label="Schwamm">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="14" y="30" width="52" height="34" rx="10" fill="#ffe066" stroke="#2b2b3a" stroke-width="3"/>
+                    <circle cx="28" cy="44" r="3" fill="#e0b800"/><circle cx="44" cy="52" r="3" fill="#e0b800"/><circle cx="52" cy="40" r="3" fill="#e0b800"/>
+                    <circle cx="22" cy="24" r="6" fill="#ffffff" stroke="#6ec6f0" stroke-width="2"/>
+                    <circle cx="40" cy="16" r="8" fill="#ffffff" stroke="#6ec6f0" stroke-width="2"/>
+                    <circle cx="58" cy="22" r="5" fill="#ffffff" stroke="#6ec6f0" stroke-width="2"/>
+                </svg>
+            </button>
+            <button id="kachel-streicheln" class="kachel" aria-label="Streicheln">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M40 66 c -10 -10 -26 -18 -26 -34 c 0 -10 8 -16 15 -16 c 6 0 9 4 11 8 c 2 -4 5 -8 11 -8 c 7 0 15 6 15 16 c 0 16 -16 24 -26 34 Z" fill="#ff5fa2" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <button id="kachel-ball" class="kachel" aria-label="Ball – kommt später" disabled>
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="40" cy="42" r="26" fill="#ffffff" stroke="#8f8f9a" stroke-width="3"/>
+                    <path d="M18 34 q22 -10 44 0 M18 50 q22 10 44 0" fill="none" stroke="#8f8f9a" stroke-width="3"/>
+                </svg>
+            </button>
+            <button id="kachel-decke" class="kachel" aria-label="Decke – Schlafen gehen">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M14 36 Q40 26 66 36 L68 62 L12 62 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                    <circle cx="30" cy="50" r="3" fill="#ffd6ec"/><circle cx="50" cy="50" r="3" fill="#ffd6ec"/>
+                    <path d="M60 12 A12 12 0 1 0 70 28 A9 9 0 0 1 60 12 Z" fill="#ffe066" stroke="#2b2b3a" stroke-width="3"/>
+                </svg>
+            </button>
+            <!-- Nachts statt der Decke: Sonne = Aufwachen (Quelle: design/ui/knopf-sonne.svg) -->
+            <button id="kachel-sonne" class="kachel" aria-label="Sonne – Aufwachen">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="40" cy="40" r="16" fill="#ffb347" stroke="#2b2b3a" stroke-width="3"/>
+                    <path d="M40 8 v12 M40 60 v12 M8 40 h12 M60 40 h12 M17 17 l8 8 M55 55 l8 8 M63 17 l-8 8 M25 55 l-8 8" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Schwamm, der am Finger klebt, solange geputzt wird -->
+        <svg id="schwamm-cursor" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="14" y="30" width="52" height="34" rx="10" fill="#ffe066" stroke="#2b2b3a" stroke-width="3"/>
+            <circle cx="28" cy="44" r="3" fill="#e0b800"/><circle cx="44" cy="52" r="3" fill="#e0b800"/><circle cx="52" cy="40" r="3" fill="#e0b800"/>
+            <circle cx="22" cy="24" r="6" fill="#ffffff" stroke="#6ec6f0" stroke-width="2"/>
+            <circle cx="40" cy="16" r="8" fill="#ffffff" stroke="#6ec6f0" stroke-width="2"/>
+            <circle cx="58" cy="22" r="5" fill="#ffffff" stroke="#6ec6f0" stroke-width="2"/>
+        </svg>
+
+        <!-- Partikel (Herzen, Funkeln, Tropfen, Zzz) über allem -->
+        <canvas id="partikel" width="1024" height="768"></canvas>
+
+    </div>
+</div>
+
+<!-- Klassische Script-Tags in fester Reihenfolge – KEINE ES-Module,
+     damit das Spiel per Doppelklick (file://) ohne Server startet. -->
+<script src="../gemeinsam/speicher.js"></script>
+<script src="../gemeinsam/audio.js"></script>
+<script src="../gemeinsam/skalierung.js"></script>
+<script src="../gemeinsam/eingabe.js"></script>
+<script src="../gemeinsam/partikel.js"></script>
+<script src="js/config.js"></script>
+<script src="js/leo.js"></script>
+<script src="js/zimmer.js"></script>
+<script src="js/game.js"></script>
 
 </body>
 </html>

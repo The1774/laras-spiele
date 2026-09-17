@@ -150,6 +150,65 @@ const Sound = {
         this.ton(600, 0.06, 'sine', 0.1);
     },
 
+    // ---------- Sounds für Leo Ella (und künftige Kuschel-Spiele) ----------
+
+    // Leises, brummendes Schnurren – viele kurze, tiefe Pulse
+    schnurren(dauer) {
+        const n = Math.max(3, Math.round((dauer || 0.8) / 0.09));
+        for (let i = 0; i < n; i++) {
+            this.ton(96, 0.07, 'triangle', 0.09, i * 0.09, 84);
+        }
+    },
+
+    // Kicherndes Auf und Ab beim Kitzeln
+    kichern() {
+        const toene = [880, 1108, 932, 1175, 988, 1318];
+        toene.forEach((f, i) => this.ton(f, 0.06, 'sine', 0.11, i * 0.075));
+    },
+
+    // Herzhaftes Gähnen: langsamer Gleitton nach unten
+    gaehnen() {
+        this.ton(420, 0.7, 'sine', 0.11, 0, 210);
+        this.ton(630, 0.5, 'triangle', 0.04, 0.05, 320);
+    },
+
+    // Schmatzen beim Essen – drei weiche, tiefe Plopps
+    schmatzen() {
+        for (let i = 0; i < 3; i++) {
+            this.ton(190, 0.07, 'triangle', 0.12, i * 0.17, 120);
+        }
+    },
+
+    // Blubbern beim Trinken
+    blubbern() {
+        for (let i = 0; i < 4; i++) {
+            this.ton(300 + i * 60, 0.09, 'sine', 0.09, i * 0.12, 600 + i * 60);
+        }
+    },
+
+    // Weicher Platscher (Wasser, Schwamm)
+    platsch() {
+        this.ton(520, 0.12, 'triangle', 0.10, 0, 160);
+        this.ton(900, 0.06, 'sine', 0.06, 0.03, 300);
+    },
+
+    // Kleines Schlaflied-Motiv beim Zudecken
+    schlaflied() {
+        const melodie = [523, 494, 440, 392];
+        melodie.forEach((f, i) => this.ton(f, 0.35, 'sine', 0.12, i * 0.32));
+    },
+
+    // Fröhliches Aufwach-Motiv am Morgen
+    morgen() {
+        const melodie = [523, 659, 784, 1046];
+        melodie.forEach((f, i) => this.ton(f, 0.16, 'sine', 0.14, i * 0.13));
+    },
+
+    // Kurzes, fragendes „Mrrp?" – wenn Leo angetippt wird
+    mrrp() {
+        this.ton(520, 0.14, 'triangle', 0.09, 0, 780);
+    },
+
     // ---------- Stumm-Zustand (gemeinsam für alle Spiele) ----------
 
     // Ton an/aus – gibt den neuen Zustand zurück und merkt ihn sich

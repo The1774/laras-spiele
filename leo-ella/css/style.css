@@ -1,0 +1,400 @@
+/* =====================================================
+   Leo Ella – Styling
+   Feste Bühne 1024 × 768 (gemeinsam/skalierung.js), links das
+   Zimmer (856 breit), rechts die Kachel-Leiste (168 breit).
+   Farben und Haus-Knopf kommen aus ../gemeinsam/basis.css.
+   ===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: #f3efe9;
+    font-family: var(--schrift);
+    touch-action: none;                /* die Bühne übernimmt alle Gesten selbst */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
+}
+
+/* Hält die Bühne mittig; die Bühne wird per JS skaliert */
+#skalier-rahmen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#buehne {
+    position: relative;
+    width: 1024px;
+    height: 768px;
+    flex: none;
+    background: #f3efe9;
+    overflow: hidden;
+}
+
+/* ---------- Zimmer ---------- */
+
+#zimmer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 856px;
+    height: 768px;
+    display: block;
+}
+
+/* Tag/Nacht: Gruppen weich ein- und ausblenden */
+#zimmer .nur-tag,
+#zimmer .nur-nacht {
+    transition: opacity 1.4s ease-in-out;
+}
+#zimmer .nur-nacht { opacity: 0; pointer-events: none; }
+#buehne.nacht #zimmer .nur-nacht,
+#buehne.daemmern #zimmer .nur-nacht { opacity: 1; }
+#buehne.nacht #zimmer .nur-tag,
+#buehne.daemmern #zimmer .nur-tag { opacity: 0; }
+/* Beim Dämmern bleibt das Bett noch leer – Leo sitzt ja noch mitten im Zimmer */
+#buehne.daemmern #leo-im-bett { opacity: 0; }
+
+/* Lichterkette und Nachtlicht glimmen ganz sanft */
+#buehne.nacht #lichterkette,
+#buehne.nacht #nachtlicht {
+    animation: glimmen 3s ease-in-out infinite;
+}
+@keyframes glimmen {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.78; }
+}
+
+/* ---------- Leo ---------- */
+
+#leo {
+    position: absolute;
+    left: 220px;
+    top: 218px;
+    width: 480px;
+    height: 450px;
+    display: block;
+    transition: opacity 1.2s ease-in-out;
+}
+#buehne.nacht #leo {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Alle Bewegungen drehen/skalieren um Leos Fußpunkt */
+#leo-figur,
+#kopf {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+}
+#kopf {
+    transform-origin: 50% 85%;
+}
+
+/* Ruhig atmen – immer */
+#leo-figur {
+    animation: atmen 3.2s ease-in-out infinite;
+}
+@keyframes atmen {
+    0%, 100% { transform: scale(1, 1); }
+    50%      { transform: scale(1.012, 1.02); }
+}
+
+/* Schwanz wedelt gemütlich (um seinen Ansatz am Körper) */
+.schwanz-wedeln {
+    transform-box: fill-box;
+    transform-origin: 0% 100%;
+    animation: wedeln 2.6s ease-in-out infinite;
+}
+@keyframes wedeln {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(-7deg); }
+}
+
+/* Fliegen (schmutzig) kreisen um Leo */
+.fliege {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: fliegen 1.1s ease-in-out infinite alternate;
+}
+.fliege:nth-child(2) { animation-delay: 0.5s; animation-duration: 0.9s; }
+@keyframes fliegen {
+    from { transform: translate(-6px, -4px); }
+    to   { transform: translate(6px, 4px); }
+}
+
+/* ---------- Reaktions-Bewegungen ---------- */
+
+/* Kopfnicken (Danke fürs Essen) */
+#kopf.nicken {
+    animation: nicken 0.55s ease-in-out 4;
+}
+@keyframes nicken {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(6deg) translateY(4px); }
+}
+
+/* Kopf lehnt sich in den Finger (Schnurren) */
+#kopf.lehnen {
+    animation: lehnen 0.6s ease-out forwards;
+}
+@keyframes lehnen {
+    to { transform: rotate(-14deg); }
+}
+
+/* Vibrieren (Schnurren) – winzig, nur ein Kribbeln */
+#leo-figur.vibrieren {
+    animation: vibrieren 0.12s linear infinite;
+}
+@keyframes vibrieren {
+    0%, 100% { transform: translate(0, 0); }
+    25%      { transform: translate(1.2px, -0.6px); }
+    75%      { transform: translate(-1.2px, 0.6px); }
+}
+
+/* Freudenhüpfer (Wiedersehen) */
+#leo-figur.huepfen {
+    animation: huepfen 0.7s ease-in-out 3;
+}
+@keyframes huepfen {
+    0%, 100% { transform: translateY(0) scale(1, 1); }
+    30%      { transform: translateY(-26px) scale(0.98, 1.04); }
+    60%      { transform: translateY(0) scale(1.03, 0.97); }
+}
+
+/* Wackeln links-rechts (Kitzeln) */
+#leo-figur.wackeln {
+    animation: wackeln 0.28s ease-in-out 5;
+}
+@keyframes wackeln {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-8deg); }
+    75%      { transform: rotate(6deg); }
+}
+
+/* Schütteln wie ein nasser Hund (Frisch geputzt, Teil 1) */
+#leo-figur.schuetteln {
+    animation: schuetteln 0.09s linear 8;
+}
+@keyframes schuetteln {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    50%      { transform: translateX(6px) rotate(3deg); }
+}
+
+/* Aufplustern und glänzen (Frisch geputzt, Teil 2) */
+#leo-figur.plustern {
+    animation: plustern 0.9s ease-out;
+}
+@keyframes plustern {
+    0%   { transform: scale(1, 1); }
+    40%  { transform: scale(1.08, 1.08); }
+    100% { transform: scale(1.03, 1.03); }
+}
+
+/* Winkende Pfote (Wiedersehen) */
+#winkpfote {
+    transform-box: fill-box;
+    transform-origin: 30% 90%;
+    animation: winken 0.4s ease-in-out infinite alternate;
+}
+@keyframes winken {
+    from { transform: rotate(-12deg); }
+    to   { transform: rotate(14deg); }
+}
+
+/* Sprechblasen und Herzen ploppen auf */
+[data-teil="blase"],
+[data-teil="props"] {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ploppen 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes ploppen {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+}
+
+/* ---------- Status-Ringe links ---------- */
+
+#ringe {
+    position: absolute;
+    left: 28px;
+    top: 120px;
+    width: 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    pointer-events: none;
+}
+
+.ring {
+    width: 110px;
+    height: 110px;
+    display: block;
+}
+
+/* Der Füllstand läuft weich nach */
+.ring .fuellung {
+    transition: stroke-dashoffset 0.8s ease-out;
+}
+
+/* Wenn ein Bedürfnis niedrig ist, pocht der Ring sanft */
+.ring.niedrig {
+    animation: pochen 1.6s ease-in-out infinite;
+}
+@keyframes pochen {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
+}
+
+/* ---------- Knöpfe oben/unten links ---------- */
+
+/* Haus-Knopf (aus basis.css) sitzt an der Stelle des früheren Ton-Knopfs,
+   der Ton-Knopf rückt daneben. Beide 72 px wie im Design. */
+#buehne .haus-knopf {
+    left: 24px;
+    top: 24px;
+    width: 72px;
+    height: 72px;
+}
+
+.rund-knopf {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 4px solid var(--outline);
+    background: var(--weiss);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.25);
+    -webkit-tap-highlight-color: transparent;
+    z-index: 11;
+}
+.rund-knopf:active { transform: scale(0.92); }
+.rund-knopf svg { width: 40px; height: 40px; display: block; }
+
+#ton-knopf { left: 108px; top: 24px; }
+#ton-knopf .ton-strich { display: none; }
+#ton-knopf.stumm .ton-strich { display: block; }
+#ton-knopf.stumm .ton-wellen { display: none; }
+
+/* Sticker-Album: kommt später – deshalb gestrichelt und blass */
+#sticker-knopf {
+    left: 24px;
+    bottom: 24px;
+    background: #ffe066;
+    border-style: dashed;
+    border-color: #b9b9c6;
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* ---------- Kachel-Leiste rechts ---------- */
+
+#leiste {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 168px;
+    height: 768px;
+    background: var(--weiss);
+    border-left: 6px solid #e7c9f5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.kachel {
+    width: 104px;
+    height: 104px;
+    border-radius: 24px;
+    border: 4px solid var(--outline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.08s ease-out;
+}
+.kachel:active,
+.kachel.aktiv {
+    transform: scale(0.92);
+}
+.kachel.aktiv {
+    box-shadow: 0 0 0 5px #ffd24a;
+}
+.kachel svg { width: 68px; height: 68px; display: block; }
+
+#kachel-futter     { background: #ffd6ec; }
+#kachel-wasser     { background: #d6f0ff; }
+#kachel-schwamm    { background: #fff3c4; }
+#kachel-streicheln { background: #ffe9f4; }
+#kachel-decke      { background: #e2d1ff; }
+#kachel-sonne      { background: #fff3c4; display: none; }
+
+/* Ball: kommt später */
+#kachel-ball {
+    border: 4px dashed #b9b9c6;
+    background: #f4f4f7;
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* Nachts: Decke weg, Sonne da; alles andere schläft mit */
+#buehne.nacht #kachel-decke { display: none; }
+#buehne.nacht #kachel-sonne { display: flex; }
+#buehne.nacht #kachel-futter,
+#buehne.nacht #kachel-wasser,
+#buehne.nacht #kachel-schwamm,
+#buehne.nacht #kachel-streicheln {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+/* ---------- Schwamm am Finger ---------- */
+
+#schwamm-cursor {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    margin-left: -45px;
+    margin-top: -45px;
+    display: none;
+    pointer-events: none;
+    z-index: 9;
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.15));
+}
+#buehne.schwamm-modus #schwamm-cursor { display: block; }
+
+/* ---------- Partikel-Canvas über allem ---------- */
+
+#partikel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1024px;
+    height: 768px;
+    pointer-events: none;
+    z-index: 8;
+}

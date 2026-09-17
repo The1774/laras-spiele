@@ -11,14 +11,15 @@ const ctx = canvas.getContext('2d');
 
 // ---------- Gespeicherter Fortschritt ----------
 
+// Ablage mit Präfix "zauberwiese." (gemeinsam/speicher.js). Alte
+// Speicherstände aus der Zeit vor der Spielesammlung werden einmalig
+// umgezogen, damit Laras Fortschritt erhalten bleibt.
+const Ablage = Speicher.fuer('zauberwiese');
+Ablage.migriere(KONFIG.SPEICHER_SCHLUESSEL_ALT, KONFIG.SPEICHER_SCHLUESSEL);
+
 function ladeFortschritt() {
-    let fortschritt = null;
-    try {
-        const roh = localStorage.getItem(KONFIG.SPEICHER_SCHLUESSEL);
-        if (roh) fortschritt = JSON.parse(roh);
-    } catch (e) {
-        // localStorage blockiert? Dann einfach ohne Speichern spielen.
-    }
+    // localStorage blockiert oder leer? Dann einfach ohne Speicherstand starten.
+    let fortschritt = Ablage.get(KONFIG.SPEICHER_SCHLUESSEL, null);
     if (!fortschritt) {
         fortschritt = { freigeschaltet: 1, highscore: 0, schwierigkeit: KONFIG.SCHWIERIGKEIT_STANDARD };
     }
@@ -34,9 +35,7 @@ function aktiveSchwierigkeit() {
 }
 
 function speichereFortschritt() {
-    try {
-        localStorage.setItem(KONFIG.SPEICHER_SCHLUESSEL, JSON.stringify(spiel.fortschritt));
-    } catch (e) { /* siehe oben */ }
+    Ablage.set(KONFIG.SPEICHER_SCHLUESSEL, spiel.fortschritt);
 }
 
 // ---------- Zentraler Spielzustand ----------
@@ -1370,6 +1369,9 @@ function init() {
     // Gespeicherte Stimmen-Einstellung wiederherstellen
     Stimme.aus = !!spiel.fortschritt.stimmeAus;
     UI.setzeStimmeKnopf(Stimme.aus);
+
+    // Gemeinsamer Stumm-Zustand aller Spiele (hub.stumm) – Symbol angleichen
+    UI.setzeStummKnopf(Sound.stumm);
 
     // Menü-Knöpfe verdrahten
     function knopf(id, aktion) {

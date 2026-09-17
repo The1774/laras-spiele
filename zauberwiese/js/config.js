@@ -185,6 +185,11 @@ const KONFIG = {
 
     SCHRIFT: "'Fredoka', 'Comic Sans MS', sans-serif",
 
-    // Schlüssel für den gespeicherten Fortschritt (localStorage)
-    SPEICHER_SCHLUESSEL: 'bella-zauberwiese-fortschritt'
+    // Schlüssel für den gespeicherten Fortschritt (localStorage über
+    // gemeinsam/speicher.js, das Präfix "zauberwiese." kommt automatisch davor)
+    SPEICHER_SCHLUESSEL: 'fortschritt',
+
+    // Alter Schlüssel aus der Zeit vor der Spielesammlung – wird beim
+    // Start einmalig auf den neuen umgezogen (game.js)
+    SPEICHER_SCHLUESSEL_ALT: 'bella-zauberwiese-fortschritt'
 };

@@ -2,9 +2,11 @@
 // Startbildschirm (Hub) von „Laras Spiele"
 //
 // - skaliert die feste Bühne (1024 × 768) auf den Bildschirm
-// - Ton-Knopf: Stumm-Zustand unter "hub.stumm" – gilt für alle Spiele
+// - Ton-Knopf: Stumm-Zustand über gemeinsam/audio.js (hub.stumm),
+//   gilt damit für alle Spiele
 // - Kachel tippen: eindrücken, kurzer Pling, dann Wechsel zum Spiel
 //
+// Braucht vorher: gemeinsam/speicher.js und gemeinsam/audio.js.
 // Keine ES-Module, damit alles per Doppelklick (file://) läuft.
 // =====================================================
 
@@ -21,64 +23,19 @@
         document.getElementById('buehne').style.transform = 'scale(' + faktor + ')';
     }
 
-    // ---------- Ton ----------
-
-    var STUMM_SCHLUESSEL = 'hub.stumm';
-    var stumm = false;
-    var kontext = null;
-
-    // Stumm-Zustand lesen (localStorage kann blockiert sein → try/catch)
-    try {
-        stumm = localStorage.getItem(STUMM_SCHLUESSEL) === '1';
-    } catch (e) { /* dann eben nicht stumm */ }
-
-    // Der AudioContext darf erst nach der ersten Nutzer-Interaktion
-    // gestartet werden (Browser-Vorgabe).
-    function audioInit() {
-        if (!kontext) {
-            var AC = window.AudioContext || window.webkitAudioContext;
-            if (AC) kontext = new AC();
-        }
-        if (kontext && kontext.state === 'suspended') kontext.resume();
-    }
-
-    // Ein einzelner weicher Ton
-    function ton(frequenz, dauer, lautstaerke, verzoegerung) {
-        if (stumm || !kontext) return;
-        var start = kontext.currentTime + (verzoegerung || 0);
-        var osz = kontext.createOscillator();
-        var huelle = kontext.createGain();
-        osz.type = 'sine';
-        osz.frequency.setValueAtTime(frequenz, start);
-        huelle.gain.setValueAtTime(0, start);
-        huelle.gain.linearRampToValueAtTime(lautstaerke, start + 0.015);
-        huelle.gain.linearRampToValueAtTime(0, start + dauer);
-        osz.connect(huelle);
-        huelle.connect(kontext.destination);
-        osz.start(start);
-        osz.stop(start + dauer + 0.05);
-    }
-
-    // Fröhliches "Pling" beim Antippen einer Kachel
-    function pling() {
-        ton(880, 0.09, 0.18);
-        ton(1318, 0.14, 0.16, 0.07);
-    }
+    // ---------- Ton-Knopf ----------
 
     var tonKnopf = document.getElementById('ton-knopf');
 
     function zeigeTonZustand() {
-        tonKnopf.classList.toggle('stumm', stumm);
+        tonKnopf.classList.toggle('stumm', Sound.stumm);
     }
 
     tonKnopf.addEventListener('click', function () {
-        audioInit();
-        stumm = !stumm;
-        try {
-            localStorage.setItem(STUMM_SCHLUESSEL, stumm ? '1' : '0');
-        } catch (e) { /* ohne Speichern weiter */ }
+        Sound.init();
+        var stumm = Sound.stummUmschalten(); // speichert unter hub.stumm
         zeigeTonZustand();
-        if (!stumm) ton(600, 0.06, 0.1); // kurzer Klick als Bestätigung
+        if (!stumm) Sound.klick();           // kurze Bestätigung, wenn Ton wieder an
     });
 
     // ---------- Kacheln ----------
@@ -89,14 +46,14 @@
     Array.prototype.forEach.call(kacheln, function (kachel) {
         // Schon beim Runterdrücken den AudioContext wecken, damit der
         // Pling beim Klick sicher zu hören ist
-        kachel.addEventListener('pointerdown', audioInit);
+        kachel.addEventListener('pointerdown', function () { Sound.init(); });
 
         kachel.addEventListener('click', function () {
             if (wechselLaeuft) return; // Doppeltipp abfangen
             wechselLaeuft = true;
 
-            audioInit();
-            pling();
+            Sound.init();
+            Sound.sammeln();               // das fröhliche "Pling"
             kachel.classList.add('gedrueckt');
 
             // Kurz eingedrückt zeigen, dann zum Spiel wechseln

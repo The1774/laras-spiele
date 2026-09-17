@@ -1,13 +1,23 @@
 // =====================================================
-// Sound über die Web Audio API – kurze, fröhliche,
-// synthetische Töne. Keine Audiodateien nötig.
-// Alle Sounds sind hier zentral definiert und können
-// leicht verändert oder ausgetauscht werden.
+// Gemeinsamer Sound für alle Spiele – Web Audio API.
+// Kurze, fröhliche, synthetische Töne, keine Audiodateien nötig.
+//
+// Ursprünglich aus der Zauberwiese; jetzt in gemeinsam/, damit
+// Hub und alle Spiele dieselben Sounds und denselben Ton-Knopf-
+// Zustand haben. Stumm-Zustand liegt unter "hub.stumm" (siehe
+// speicher.js) – einmal stumm, überall stumm.
+//
+// Einbinden (klassische Script-Tags, in dieser Reihenfolge):
+//     <script src="../gemeinsam/speicher.js"></script>
+//     <script src="../gemeinsam/audio.js"></script>
 // =====================================================
 
 const Sound = {
     kontext: null,
     stumm: false,
+
+    // Ablage für den gemeinsamen Stumm-Zustand (Präfix "hub.")
+    ablage: (typeof Speicher !== 'undefined') ? Speicher.fuer('hub') : null,
 
     // Der AudioContext darf erst nach der ersten
     // Nutzer-Interaktion gestartet werden (Browser-Vorgabe).
@@ -50,7 +60,7 @@ const Sound = {
 
     // ---------- Die einzelnen Spiel-Sounds ----------
 
-    // Fröhliches "Pling" beim Blumen-Sammeln
+    // Fröhliches "Pling" beim Blumen-Sammeln (und beim Antippen einer Hub-Kachel)
     sammeln() {
         this.ton(880, 0.09, 'sine', 0.18);
         this.ton(1318, 0.14, 'sine', 0.16, 0.07);
@@ -140,9 +150,16 @@ const Sound = {
         this.ton(600, 0.06, 'sine', 0.1);
     },
 
-    // Ton an/aus – gibt den neuen Zustand zurück
+    // ---------- Stumm-Zustand (gemeinsam für alle Spiele) ----------
+
+    // Ton an/aus – gibt den neuen Zustand zurück und merkt ihn sich
+    // unter "hub.stumm", damit er im Hub und in jedem Spiel gleich ist
     stummUmschalten() {
         this.stumm = !this.stumm;
+        if (this.ablage) this.ablage.set('stumm', this.stumm);
         return this.stumm;
     }
 };
+
+// Gespeicherten Stumm-Zustand beim Laden übernehmen
+if (Sound.ablage) Sound.stumm = !!Sound.ablage.get('stumm', false);

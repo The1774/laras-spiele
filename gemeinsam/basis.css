@@ -1,0 +1,105 @@
+/* =====================================================
+   Gemeinsame Basis für alle Spiele von „Laras Spiele"
+
+   - Schrift: Fredoka (per <link> aus Google Fonts geladen,
+     fällt ohne Netz auf Comic Sans MS / System-Schrift zurück)
+   - Farbpalette als CSS-Variablen
+   - Grundstil für Knöpfe (.knopf) und den Haus-Knopf (.haus-knopf)
+
+   Diese Datei setzt bewusst KEINE globalen Regeln (kein Reset,
+   kein body-Stil), damit sie ein bestehendes Spiel nicht verändert.
+   Jedes Spiel bindet sie per <link rel="stylesheet"
+   href="../gemeinsam/basis.css"> VOR seinem eigenen CSS ein.
+   ===================================================== */
+
+:root {
+    /* Schrift */
+    --schrift: 'Fredoka', 'Comic Sans MS', sans-serif;
+
+    /* Hintergrund-Verlauf des Hubs und der Zauberwiese */
+    --flieder:        #e9d5ff;
+    --rosa-hell:      #fdf1f8;
+
+    /* Lila-Töne für Überschriften und Schatten */
+    --lila:           #7c3aed;
+    --lila-dunkel:    #6d3fb8;
+    --lila-text:      #9d5cc9;
+    --lila-schatten:  #c9a9e8;
+
+    /* Bunte Akzente (Mähne, Regenbogen, Blumen) */
+    --pink:           #ff8fcf;
+    --pink-wange:     #ff9ec2;
+    --gelb:           #ffd24a;
+    --himmelblau:     #6ec6f0;
+    --lavendel:       #b388eb;
+    --wiese:          #8fd48a;
+
+    /* Leo Ellas Zimmer */
+    --leo-fell:       #ffd98a;
+    --leo-bauch:      #fff6e6;
+    --zimmer-wand:    #f3efe9;
+    --zimmer-boden:   #d9d3cb;
+    --teppich:        #e3c4c9;
+
+    /* Konturen und Weiß */
+    --outline:        #2b2b3a;
+    --weiss:          #ffffff;
+}
+
+/* ---------- Knopf-Grundstil ---------- */
+
+/* Großer, runder Knopf mit lila Schattenkante (drückt sich beim Tippen ein) */
+.knopf {
+    font-family: var(--schrift);
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--lila-dunkel);
+    background: var(--weiss);
+    border: 4px solid var(--weiss);
+    border-radius: 999px;
+    padding: 12px 32px;
+    box-shadow: 0 8px 0 var(--lila-schatten);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+}
+
+.knopf:active {
+    transform: translateY(5px);
+    box-shadow: 0 3px 0 var(--lila-schatten);
+}
+
+/* ---------- Haus-Knopf: zurück zum Startbildschirm ---------- */
+
+/* Oben links, 64 px, weiß mit dunkler Outline. Wird als <a href="../index.html">
+   eingesetzt – kein Bestätigungsdialog, der Spielstand ist ohnehin gespeichert.
+   z-index 11: liegt auch über den Overlays der Zauberwiese (z-index 10). */
+.haus-knopf {
+    position: absolute;
+    left: 12px;
+    top: 10px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 4px solid var(--outline);
+    background: var(--weiss);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    text-decoration: none;
+    cursor: pointer;
+    z-index: 11;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.25);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.haus-knopf:active {
+    transform: scale(0.92);
+}
+
+.haus-knopf svg {
+    width: 36px;
+    height: 36px;
+    display: block;
+}

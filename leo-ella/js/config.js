@@ -45,11 +45,44 @@ var KONFIG = {
     // Wiedersehensfreude beim Öffnen, wenn die letzte Aktion so lange her ist (Minuten)
     WIEDERSEHEN_NACH_MINUTEN: 10,
 
-    // Was die Aktionen bringen
-    FUTTER_PLUS: 45,
+    // ---------- Füttern (Gegenstände aus dem Korb zu Leos Maul ziehen) ----------
+
+    // Jedes Futter: was es bringt (satt), wie viel es krümelt (sauber sinkt),
+    // und Leos Charakter dazu:
+    //   lieblings  – extra Herzen und Schnurren
+    //   naschen    – nur, wenn Leo nicht schon ziemlich satt ist
+    //   schnuppern – Leo schnuppert erst misstrauisch, frisst dann doch
+    FUTTER: {
+        fisch: { plus: 35, kruemel: 4, lieblings: true,  farbe: '#f4a261' },
+        milch: { plus: 25, kruemel: 0,                   farbe: '#ffffff' },
+        keks:  { plus: 15, kruemel: 10, naschen: true,   farbe: '#c98a4a' },
+        apfel: { plus: 20, kruemel: 3, schnuppern: true, farbe: '#fff6e6' }
+    },
     WASSER_PLUS: 20,
-    ESSEN_MACHT_SCHMUTZIG: 8,      // Krümel! Sauber sinkt beim Essen ein wenig
-    STREICHELN_PLUS_SATT: 0,        // Streicheln macht nicht satt, aber glücklich
+    // So viele Bissen, bis etwas aufgegessen ist, und der Abstand dazwischen
+    BISSE: 3,
+    BISS_MS: 800,
+    // Ab hier ist Leo so satt, dass sie den Kopf wegdreht
+    SATT_VOLL: 92,
+    // Keks nur, wenn satt unter diesem Wert
+    NASCHEN_UNTER: 80,
+    // So nah (Bühnen-Pixel) muss ein Gegenstand ans Maul, damit es aufgeht
+    MAUL_NAEHE: 120,
+    // So lange muss die Flasche am Maul gehalten werden, bis sie leer ist (ms)
+    TRINKEN_MS: 2200,
+    // Bäuerchen-Wahrscheinlichkeit nach dem Aufessen (0–1)
+    BAEUERCHEN_CHANCE: 0.35,
+
+    // ---------- Streicheln (Zonen: kopf, kinn, ohr, ruecken, bauch, pfote) ----------
+
+    // Wie oft ein Herz beim Streicheln erscheint (ms), bei gleichmäßiger
+    // Bewegung öfter
+    HERZ_ABSTAND_MS: 220,
+    // Schnurr-Lautstärke: von … (ruckelig) bis … (schön gleichmäßig)
+    SCHNURR_LEISE: 0.05,
+    SCHNURR_LAUT: 0.16,
+    // Nach so langem Kuscheln am Bauch / Kinn kichert bzw. seufzt Leo (ms)
+    ZONEN_EXTRA_MS: 1800,
 
     // Kitzeln: so viele Tipps auf Leo innerhalb dieses Zeitfensters
     KITZEL_TIPPS: 3,

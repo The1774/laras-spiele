@@ -61,11 +61,48 @@ var Leo = {
         gutenacht:   { schatten: 'nacht', schwanz: null, pfoten: null, ohren: 'nacht',
                        augen: 'zu', mund: 'gaehnen-gross', traene: 'klein', decke: 'hoch',
                        props: ['herz-klein', 'mond'] },
-        blinzeln:    { augen: 'zu' }
+        blinzeln:    { augen: 'zu' },
+
+        // ----- Füttern (Gegenstand am Maul) -----
+        // Etwas kommt näher: Maul auf, große Augen
+        naeh:        { augen: 'gross', mund: 'offen' },
+        // Erst mal schnuppern (Apfel)
+        schnuppern:  { augen: 'seitlich', mund: 'zick', kopf: 'schnuppern' },
+        // Ein Bissen: Augen zu, kauen, Kopf nickt einmal
+        kauen:       { augen: 'zugekniffen', wangen: 'gross', mund: 'kauen', kopf: 'kauen' },
+        // Aufgegessen – ganz normal lecker
+        satt:        { augen: 'lachen', wangen: 'gross', mund: 'lachen', props: ['herzen'], kopf: 'nicken' },
+        // Aufgegessen – das Lieblingsessen!
+        lecker:      { augen: 'herz', wangen: 'gross', mund: 'lachen', schwanz: 'herz',
+                       props: ['herzen', 'funkeln'], kopf: 'nicken', figur: 'huepfen' },
+        // „Mmh-mm" – Leo mag das gerade nicht (zu satt / Keks)
+        naa:         { augen: 'seitlich', mund: 'gerade', kopf: 'wegdrehen' },
+        // Bäuerchen
+        baeuerchen:  { augen: 'zugekniffen', wangen: 'gross', mund: 'klein', figur: 'hicks' },
+        // Trinken aus der Flasche (solange sie gehalten wird)
+        trinkt:      { augen: 'zu', wangen: 'gross', mund: 'zunge' },
+        // Maul ablecken nach dem Trinken
+        lecken:      { augen: 'lachen', mund: 'zunge', kopf: 'nicken' },
+
+        // Die Decke kommt näher: Leo wird schon schläfrig
+        schlaefrig:  { ohren: 'unten', augen: 'muede', mund: 'gaehnen' },
+
+        // ----- Streichel-Zonen (solange der Finger streicht) -----
+        kinn:        { augen: 'zu', wangen: 'gross', mund: 'lachen', schwanz: 'herz',
+                       props: ['vibration'], kopf: 'heben', figur: 'vibrieren' },
+        ohr:         { augen: 'zugekniffen', mund: 'klein', kopf: 'ohrzucken' },
+        ruecken:     { augen: 'lachen', wangen: 'gross', mund: 'lachen', schwanz: 'freude',
+                       props: ['vibration'], figur: 'welle' },
+        bauch:       { augen: 'lachen', wangen: 'gross', mund: 'lachen', schwanz: 'herz',
+                       pfoten: 'hoch', figur: 'zurueck' },
+        pfote:       { augen: 'zugekniffen', wangen: 'gross', mund: 'lachen',
+                       props: ['kitzellinien'], figur: 'wackeln' }
     },
 
     // Diese Schlüssel sind keine SVG-Teile, sondern Bewegungs-Klassen
     BEWEGUNGEN: { kopf: true, figur: true },
+    KOPF_KLASSEN:  ['nicken', 'lehnen', 'heben', 'ohrzucken', 'wegdrehen', 'schnuppern', 'kauen'],
+    FIGUR_KLASSEN: ['huepfen', 'wackeln', 'schuetteln', 'plustern', 'vibrieren', 'welle', 'zurueck', 'hicks'],
 
     init: function () {
         this.svg = document.getElementById('leo');
@@ -100,8 +137,8 @@ var Leo = {
             }
         }
         // Bewegungs-Klassen setzen
-        this.setzeBewegung(this.kopf, ['nicken', 'lehnen'], gesicht.kopf);
-        this.setzeBewegung(this.figur, ['huepfen', 'wackeln', 'schuetteln', 'plustern', 'vibrieren'], gesicht.figur);
+        this.setzeBewegung(this.kopf, this.KOPF_KLASSEN, gesicht.kopf);
+        this.setzeBewegung(this.figur, this.FIGUR_KLASSEN, gesicht.figur);
     },
 
     setzeBewegung: function (el, klassen, aktiv) {
@@ -184,13 +221,67 @@ var Leo = {
         };
     },
 
+    // Leo-SVG-Koordinaten → Bühne
+    zuBuehne: function (lx, ly) {
+        return {
+            x: KONFIG.LEO.x + lx * KONFIG.LEO.faktor,
+            y: KONFIG.LEO.y + ly * KONFIG.LEO.faktor
+        };
+    },
+
+    // Leos Maul auf der Bühne (Ziel fürs Futter)
+    maulPosition: function () { return this.zuBuehne(160, 190); },
+
     // Liegt der Punkt (Bühne) auf Leos Körper/Kopf?
     trifft: function (x, y) {
+        return this.zone(x, y) !== null;
+    },
+
+    // ---------- Körperzonen ----------
+
+    // Welche Zone liegt unter dem Punkt (Bühne)?
+    //   'ohr' | 'kinn' | 'kopf' | 'pfote' | 'bauch' | 'ruecken' | null
+    // Reihenfolge = Priorität: kleine Zonen zuerst, damit sie nicht vom Kopf-
+    // Kreis oder der Körper-Ellipse verdeckt werden.
+    zone: function (x, y) {
         var p = this.zuLeo(x, y);
-        // Kopf (Kreis 160/150 r 84 + Ohren) oder Körper (Ellipse 160/240)
-        var dk = (p.x - 160) * (p.x - 160) + (p.y - 140) * (p.y - 140);
-        if (dk < 104 * 104) return true;
-        var ex = (p.x - 160) / 80, ey = (p.y - 240) / 54;
-        return ex * ex + ey * ey < 1;
+        function inKreis(cx, cy, r) {
+            var dx = p.x - cx, dy = p.y - cy;
+            return dx * dx + dy * dy < r * r;
+        }
+        function inEllipse(cx, cy, rx, ry) {
+            var ex = (p.x - cx) / rx, ey = (p.y - cy) / ry;
+            return ex * ex + ey * ey < 1;
+        }
+        if (inKreis(100, 86, 36) || inKreis(220, 86, 36)) return 'ohr';
+        if (inEllipse(160, 196, 44, 30)) return 'kinn';           // Schnauze + Kinn
+        if (inKreis(160, 150, 88)) return 'kopf';
+        if (inEllipse(126, 276, 24, 15) || inEllipse(194, 276, 24, 15)) return 'pfote';
+        if (inEllipse(160, 250, 40, 27)) return 'bauch';          // heller Bauch
+        if (inEllipse(160, 240, 76, 50)) return 'ruecken';
+        return null;
+    },
+
+    // ---------- Blick: Augen und Kopf folgen einem Punkt ----------
+
+    // x/y in Bühnen-Koordinaten; null = geradeaus schauen.
+    // Die Pupillen (Gruppen .pupille) rutschen ein Stück Richtung Ziel,
+    // der Kopf neigt sich leicht zur Seite.
+    schauZu: function (x, y) {
+        var pupillen = this.svg.querySelectorAll('.pupille');
+        var tx = 0, ty = 0, neigung = 0;
+        if (x !== null && x !== undefined) {
+            var auge = this.zuBuehne(160, 146);
+            var dx = x - auge.x, dy = y - auge.y;
+            var l = Math.sqrt(dx * dx + dy * dy) || 1;
+            var staerke = Math.min(1, l / 260);
+            tx = dx / l * 7 * staerke;
+            ty = dy / l * 6 * staerke;
+            neigung = Math.max(-9, Math.min(9, dx / 30));
+        }
+        for (var i = 0; i < pupillen.length; i++) {
+            pupillen[i].style.transform = 'translate(' + tx.toFixed(1) + 'px, ' + ty.toFixed(1) + 'px)';
+        }
+        this.kopf.style.transform = neigung ? 'rotate(' + neigung.toFixed(1) + 'deg)' : '';
     }
 };

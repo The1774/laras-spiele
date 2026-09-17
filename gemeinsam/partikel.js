@@ -85,6 +85,17 @@ PartikelPool.prototype.tropfen = function (x, y, anzahl) {
     }
 };
 
+// Krümel, die vom Maul herunterrieseln (Essen)
+PartikelPool.prototype.kruemel = function (x, y, anzahl, farbe) {
+    for (var i = 0; i < (anzahl || 6); i++) {
+        this.neu('konfetti', x + zufall(-16, 16), y + zufall(-6, 6), {
+            vx: zufall(-70, 70), vy: zufall(-40, 20),
+            groesse: zufall(5, 9), farbe: farbe || '#c98a4a',
+            leben: zufall(0.5, 0.9), drehGeschw: zufall(-6, 6), schwerkraft: 500
+        });
+    }
+};
+
 // Seifenblasen, die langsam nach oben schweben und verblassen
 PartikelPool.prototype.blasen = function (x, y, anzahl) {
     for (var i = 0; i < (anzahl || 4); i++) {

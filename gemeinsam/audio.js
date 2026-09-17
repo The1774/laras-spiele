@@ -152,12 +152,55 @@ const Sound = {
 
     // ---------- Sounds für Leo Ella (und künftige Kuschel-Spiele) ----------
 
-    // Leises, brummendes Schnurren – viele kurze, tiefe Pulse
-    schnurren(dauer) {
+    // Leises, brummendes Schnurren – viele kurze, tiefe Pulse.
+    // lautstaerke (optional, 0–1) – Leo schnurrt lauter, je gleichmäßiger
+    // gestreichelt wird (Standard 0.09)
+    schnurren(dauer, lautstaerke) {
         const n = Math.max(3, Math.round((dauer || 0.8) / 0.09));
+        const l = lautstaerke === undefined ? 0.09 : lautstaerke;
         for (let i = 0; i < n; i++) {
-            this.ton(96, 0.07, 'triangle', 0.09, i * 0.09, 84);
+            this.ton(96, 0.07, 'triangle', l, i * 0.09, 84);
         }
+    },
+
+    // Kleines „Hicks!" (Bäuerchen nach dem Essen)
+    hicks() {
+        this.ton(700, 0.06, 'square', 0.05, 0, 1100);
+        this.ton(1100, 0.05, 'sine', 0.08, 0.05, 900);
+    },
+
+    // Freundliches „Mmh-mm" (Leo mag das gerade nicht)
+    naa() {
+        this.ton(330, 0.12, 'triangle', 0.09, 0, 300);
+        this.ton(300, 0.16, 'triangle', 0.09, 0.15, 260);
+    },
+
+    // Schnüffeln – zwei kurze Luftzüge
+    schnueffeln() {
+        this.ton(1400, 0.05, 'triangle', 0.04, 0, 1800);
+        this.ton(1500, 0.05, 'triangle', 0.04, 0.12, 1900);
+    },
+
+    // Ein Bissen: ein knackiger Plopp
+    biss() {
+        this.ton(240, 0.08, 'triangle', 0.13, 0, 110);
+    },
+
+    // Lampe klickt (an / aus)
+    lampe(an) {
+        this.ton(an ? 900 : 600, 0.05, 'square', 0.06, 0, an ? 1200 : 400);
+    },
+
+    // Vorhang rutscht über die Stange
+    vorhang() {
+        for (let i = 0; i < 5; i++) {
+            this.ton(2400 + i * 150, 0.05, 'triangle', 0.025, i * 0.07, 2000);
+        }
+    },
+
+    // Wasser plätschert in kleinen Schlucken (Trinken aus der Flasche)
+    schluck() {
+        this.ton(360, 0.09, 'sine', 0.09, 0, 720);
     },
 
     // Kicherndes Auf und Ab beim Kitzeln

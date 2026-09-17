@@ -398,3 +398,234 @@ body {
     pointer-events: none;
     z-index: 8;
 }
+
+/* =====================================================
+   Stufe 1: Ziehen statt Tippen
+   Gegenstände, Blick, Streichel-Zonen, Vorhang, Lampe
+   ===================================================== */
+
+/* ---------- Blick: Pupillen und Kopf folgen dem Finger ---------- */
+
+.pupille {
+    transform-box: fill-box;
+    transition: transform 0.22s ease-out;
+}
+#kopf {
+    transition: transform 0.35s ease-out;
+}
+
+/* ---------- Neue Kopf-Bewegungen ---------- */
+
+/* Kinn kraulen: Kopf hebt sich genüsslich */
+#kopf.heben {
+    animation: heben 0.6s ease-out forwards;
+}
+@keyframes heben {
+    to { transform: translateY(-8px) rotate(-3deg); }
+}
+
+/* Ohr wird berührt: Ohren zucken, Kopf schüttelt sich kurz */
+#kopf.ohrzucken {
+    animation: kopfschuetteln 0.18s ease-in-out 3;
+}
+#kopf.ohrzucken [data-teil="ohren"] {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: zucken 0.16s ease-in-out 4;
+}
+@keyframes kopfschuetteln {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(-4deg); }
+}
+@keyframes zucken {
+    0%, 100% { transform: scale(1, 1); }
+    50%      { transform: scale(1.06, 0.9); }
+}
+
+/* „Mmh-mm": Kopf dreht sich weg */
+#kopf.wegdrehen {
+    animation: wegdrehen 0.4s ease-out forwards;
+}
+@keyframes wegdrehen {
+    to { transform: rotate(14deg) translateX(10px); }
+}
+
+/* Schnuppern: kleine, schnelle Nickbewegungen */
+#kopf.schnuppern {
+    animation: schnuppern 0.22s ease-in-out 4;
+}
+@keyframes schnuppern {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(5px) rotate(2deg); }
+}
+
+/* Ein Bissen: einmal zuschnappen */
+#kopf.kauen {
+    animation: kauen 0.4s ease-in-out;
+}
+@keyframes kauen {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    40%      { transform: rotate(3deg) translateY(6px); }
+}
+
+/* ---------- Neue Figur-Bewegungen ---------- */
+
+/* Rücken streicheln: das Fell wellt sich */
+#leo-figur.welle {
+    animation: welle 0.5s ease-in-out infinite;
+}
+@keyframes welle {
+    0%, 100% { transform: scale(1, 1); }
+    50%      { transform: scale(1.025, 0.975); }
+}
+
+/* Bauch kraulen: Leo lehnt sich zurück */
+#leo-figur.zurueck {
+    animation: zurueck 0.5s ease-out forwards;
+}
+@keyframes zurueck {
+    to { transform: rotate(-9deg) translate(-6px, 4px); }
+}
+
+/* Bäuerchen: kurzer Hüpfer */
+#leo-figur.hicks {
+    animation: hicks 0.3s ease-out;
+}
+@keyframes hicks {
+    0%, 100% { transform: translateY(0) scale(1, 1); }
+    40%      { transform: translateY(-10px) scale(1.04, 0.96); }
+}
+
+/* Die rechte Pfote strampelt beim Bauchkraulen */
+.strampelpfote {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: strampeln 0.32s ease-in-out infinite alternate;
+}
+@keyframes strampeln {
+    from { transform: rotate(-16deg); }
+    to   { transform: rotate(14deg); }
+}
+
+/* Zunge schleckt */
+.zunge {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: schlecken 0.3s ease-in-out infinite alternate;
+}
+@keyframes schlecken {
+    from { transform: scaleY(0.7); }
+    to   { transform: scaleY(1.1); }
+}
+
+/* ---------- Gegenstände zum Anfassen ---------- */
+
+#dinge {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 856px;
+    height: 768px;
+    pointer-events: none;          /* die Bühne nimmt alle Gesten, gegenstand.js findet das Ding */
+    z-index: 4;
+}
+
+#korb {
+    position: absolute;
+    left: 660px;
+    top: 512px;
+    width: 190px;
+    height: 143px;
+    display: block;
+}
+
+.ding {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    margin: -36px 0 0 -36px;
+    transform-origin: 50% 50%;
+    transition: transform 0.15s ease-out;
+    filter: drop-shadow(0 3px 2px rgba(43, 43, 58, 0.18));
+}
+.ding svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+.ding[data-ding="decke"] {
+    width: 120px;
+    height: 70px;
+    margin: -35px 0 0 -60px;
+}
+
+/* In der Hand: größer, schwebt, liegt über allem außer den Partikeln */
+.ding.in-hand {
+    z-index: 7;
+    transform: scale(1.18);
+    filter: drop-shadow(0 10px 8px rgba(43, 43, 58, 0.28));
+}
+
+/* Weich an einen Platz gleiten (zurück in den Korb, ans Maul) */
+.ding.fliegt {
+    transition: left 0.45s cubic-bezier(0.2, 0.8, 0.3, 1), top 0.45s cubic-bezier(0.2, 0.8, 0.3, 1), transform 0.15s ease-out;
+}
+
+.ding.versteckt { display: none; }
+
+/* Frisch im Korb: ploppt auf */
+.ding.ploppt {
+    animation: ploppen 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Hinweis von der Kachel: wackelt und leuchtet */
+.ding.hinweis {
+    animation: hinweis 0.55s ease-in-out 3;
+}
+@keyframes hinweis {
+    0%, 100% { transform: rotate(0deg) scale(1);    filter: drop-shadow(0 0 0 rgba(255, 210, 74, 0)); }
+    25%      { transform: rotate(-8deg) scale(1.1); filter: drop-shadow(0 0 10px rgba(255, 210, 74, 0.9)); }
+    75%      { transform: rotate(8deg) scale(1.1);  filter: drop-shadow(0 0 10px rgba(255, 210, 74, 0.9)); }
+}
+
+/* Futter-Stufen: ganz / angebissen / Rest – nur eine ist sichtbar */
+.ding .stufe { display: none; }
+.ding[data-stufe="0"] .stufe-0,
+.ding[data-stufe="1"] .stufe-1,
+.ding[data-stufe="2"] .stufe-2 { display: block; }
+
+/* Flasche kippt am Maul */
+#flasche-kipp {
+    transform-box: fill-box;
+    transform-origin: 50% 85%;
+    transition: transform 0.35s ease-out;
+}
+.ding.kippt #flasche-kipp { transform: rotate(-62deg); }
+
+/* Nachts liegt alles still im Dunkeln */
+#buehne.nacht #dinge { filter: brightness(0.55); }
+
+/* ---------- Vorhang ---------- */
+
+.vorhang-bahn {
+    transform-box: fill-box;
+    transition: transform 0.4s ease-out;
+}
+#vorhang.zieht .vorhang-bahn { transition: none; }
+#vorhang-links  { transform-origin: 0% 50%; }
+#vorhang-rechts { transform-origin: 100% 50%; }
+
+/* ---------- Lampe und Abdunkeln ---------- */
+
+#lampe-schirm { transition: fill 0.4s; }
+#buehne.lampe-aus #lampe-schirm { fill: #e3d6c4; }
+
+#lampe-schein {
+    transition: opacity 0.8s ease-in-out;
+}
+#buehne.vorhang-zu:not(.lampe-aus) #lampe-schein,
+#buehne.daemmern:not(.lampe-aus) #lampe-schein,
+#buehne.nacht:not(.lampe-aus) #lampe-schein { opacity: 0.55; }
+
+#abdunkeln { transition: opacity 0.9s ease-in-out; }
+#buehne.vorhang-zu #abdunkeln { opacity: 0.16; }
+#buehne.lampe-aus #abdunkeln { opacity: 0.12; }
+#buehne.vorhang-zu.lampe-aus #abdunkeln { opacity: 0.3; }
+#buehne.nacht #abdunkeln { opacity: 0; }   /* nachts übernimmt das Nacht-Overlay */

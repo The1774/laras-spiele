@@ -74,6 +74,23 @@
             <path d="M300 228 q-22 -14 -18 -30 q10 -14 22 -2 q12 -12 22 2 q4 16 -18 30 Z" fill="#ffffff"></path>
             <path d="M286 228 h28 v4 h-28 Z" fill="#e8e2da"></path>
         
+            <!-- Vorhang: zwei Bahnen, die zur Mitte gezogen werden (zimmer.js) -->
+            <g id="vorhang">
+              <g id="vorhang-links" class="vorhang-bahn">
+                <rect x="204" y="40" width="98" height="192" rx="6" fill="#f7cfe0"></rect>
+                <path d="M222 44 v184 M242 44 v184 M262 44 v184 M282 44 v184" stroke="#efb8cf" stroke-width="4" stroke-linecap="round"></path>
+                <path d="M204 40 q49 10 98 0" stroke="#e6a4c4" stroke-width="3" fill="none"></path>
+              </g>
+              <g id="vorhang-rechts" class="vorhang-bahn">
+                <rect x="298" y="40" width="98" height="192" rx="6" fill="#f7cfe0"></rect>
+                <path d="M318 44 v184 M338 44 v184 M358 44 v184 M378 44 v184" stroke="#efb8cf" stroke-width="4" stroke-linecap="round"></path>
+                <path d="M298 40 q49 10 98 0" stroke="#e6a4c4" stroke-width="3" fill="none"></path>
+              </g>
+            </g>
+            <!-- Gardinenstange -->
+            <rect x="188" y="30" width="224" height="8" rx="4" fill="#e0cdbf"></rect>
+            <circle cx="188" cy="34" r="7" fill="#d6b9b2"></circle><circle cx="412" cy="34" r="7" fill="#d6b9b2"></circle>
+
             <path d="M180 36 v30 M178 66 q-14 30 -6 60 M182 66 q16 30 8 64" stroke="#8fa88c" stroke-width="3" fill="none" stroke-linecap="round"></path>
             <ellipse cx="170" cy="86" rx="8" ry="5" fill="#a9bfa3" transform="rotate(-30 170 86)"></ellipse>
             <ellipse cx="192" cy="96" rx="8" ry="5" fill="#a9bfa3" transform="rotate(30 192 96)"></ellipse>
@@ -150,6 +167,18 @@
             </g>
             </g>
           
+            <!-- Stehlampe neben dem Bett – antippen schaltet sie an/aus -->
+            <g id="lampe">
+              <ellipse cx="622" cy="466" rx="24" ry="7" fill="#b9a58f"></ellipse>
+              <rect x="618" y="330" width="8" height="134" rx="4" fill="#cdb9a3"></rect>
+              <circle id="lampe-schein" cx="622" cy="300" r="100" fill="#fff1b8" opacity="0"></circle>
+              <path id="lampe-schirm" d="M596 336 L608 262 L636 262 L648 336 Z" fill="#ffe9a8" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"></path>
+              <path d="M604 330 L612 268 M640 330 L632 268" stroke="#ffd98a" stroke-width="3" stroke-linecap="round"></path>
+            </g>
+
+            <!-- Wird dunkler, wenn der Vorhang zu ist oder die Lampe aus (CSS) -->
+            <rect id="abdunkeln" x="0" y="0" width="856" height="768" fill="#2b2452" opacity="0"></rect>
+
             <!-- ===== Nur nachts sichtbar (zimmer.js schaltet um) ===== -->
             <g class="nur-nacht" id="nacht">
               <!-- Dunkles Overlay über dem ganzen Zimmer -->
@@ -278,6 +307,12 @@
                 <ellipse cx="194" cy="274" rx="20" ry="12" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4"/>
             </g>
 
+            <!-- Pfoten in der Luft (Bauch kraulen) – die rechte strampelt -->
+            <g data-teil="pfoten" data-variante="hoch">
+                <ellipse cx="112" cy="230" rx="13" ry="24" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4" transform="rotate(-24 112 230)"/>
+                <ellipse class="strampelpfote" cx="208" cy="230" rx="13" ry="24" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4" transform="rotate(24 208 230)"/>
+            </g>
+
             <!-- Winkende Pfote (Wiedersehensfreude) -->
             <g data-teil="winkpfote" data-variante="an">
                 <ellipse id="winkpfote" cx="258" cy="150" rx="13" ry="30" fill="var(--leo-fell)" stroke="#2b2b3a" stroke-width="4" transform="rotate(30 258 150)"/>
@@ -348,15 +383,15 @@
                 <!-- Augen -->
                 <g data-teil="augen" data-variante="offen">
                     <ellipse cx="132" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-                    <circle cx="134" cy="149" r="14" fill="#2b2b3a"/><circle cx="129" cy="142" r="5" fill="#ffffff"/><circle cx="138" cy="153" r="2.5" fill="#ffffff"/>
+                    <g class="pupille"><circle cx="134" cy="149" r="14" fill="#2b2b3a"/><circle cx="129" cy="142" r="5" fill="#ffffff"/><circle cx="138" cy="153" r="2.5" fill="#ffffff"/></g>
                     <ellipse cx="188" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-                    <circle cx="190" cy="149" r="14" fill="#2b2b3a"/><circle cx="185" cy="142" r="5" fill="#ffffff"/><circle cx="194" cy="153" r="2.5" fill="#ffffff"/>
+                    <g class="pupille"><circle cx="190" cy="149" r="14" fill="#2b2b3a"/><circle cx="185" cy="142" r="5" fill="#ffffff"/><circle cx="194" cy="153" r="2.5" fill="#ffffff"/></g>
                 </g>
                 <g data-teil="augen" data-variante="gross">
                     <ellipse cx="132" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-                    <circle cx="130" cy="152" r="16" fill="#2b2b3a"/><circle cx="125" cy="145" r="5" fill="#ffffff"/>
+                    <g class="pupille"><circle cx="130" cy="152" r="16" fill="#2b2b3a"/><circle cx="125" cy="145" r="5" fill="#ffffff"/></g>
                     <ellipse cx="188" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-                    <circle cx="186" cy="152" r="16" fill="#2b2b3a"/><circle cx="181" cy="145" r="5" fill="#ffffff"/>
+                    <g class="pupille"><circle cx="186" cy="152" r="16" fill="#2b2b3a"/><circle cx="181" cy="145" r="5" fill="#ffffff"/></g>
                 </g>
                 <g data-teil="augen" data-variante="muede">
                     <ellipse cx="132" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
@@ -370,9 +405,9 @@
                 </g>
                 <g data-teil="augen" data-variante="seitlich">
                     <ellipse cx="132" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-                    <circle cx="126" cy="150" r="14" fill="#2b2b3a"/><circle cx="121" cy="143" r="5" fill="#ffffff"/><circle cx="130" cy="154" r="2.5" fill="#ffffff"/>
+                    <g class="pupille"><circle cx="126" cy="150" r="14" fill="#2b2b3a"/><circle cx="121" cy="143" r="5" fill="#ffffff"/><circle cx="130" cy="154" r="2.5" fill="#ffffff"/></g>
                     <ellipse cx="188" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-                    <circle cx="182" cy="150" r="14" fill="#2b2b3a"/><circle cx="177" cy="143" r="5" fill="#ffffff"/><circle cx="186" cy="154" r="2.5" fill="#ffffff"/>
+                    <g class="pupille"><circle cx="182" cy="150" r="14" fill="#2b2b3a"/><circle cx="177" cy="143" r="5" fill="#ffffff"/><circle cx="186" cy="154" r="2.5" fill="#ffffff"/></g>
                 </g>
                 <g data-teil="augen" data-variante="traurig">
                     <ellipse cx="132" cy="150" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
@@ -382,9 +417,9 @@
                 </g>
                 <g data-teil="augen" data-variante="freude">
                     <ellipse cx="132" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-                    <circle cx="134" cy="149" r="15" fill="#2b2b3a"/><circle cx="128" cy="141" r="6" fill="#ffffff"/><circle cx="139" cy="154" r="3" fill="#ffffff"/>
+                    <g class="pupille"><circle cx="134" cy="149" r="15" fill="#2b2b3a"/><circle cx="128" cy="141" r="6" fill="#ffffff"/><circle cx="139" cy="154" r="3" fill="#ffffff"/></g>
                     <ellipse cx="188" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"/>
-                    <circle cx="190" cy="149" r="15" fill="#2b2b3a"/><circle cx="184" cy="141" r="6" fill="#ffffff"/><circle cx="195" cy="154" r="3" fill="#ffffff"/>
+                    <g class="pupille"><circle cx="190" cy="149" r="15" fill="#2b2b3a"/><circle cx="184" cy="141" r="6" fill="#ffffff"/><circle cx="195" cy="154" r="3" fill="#ffffff"/></g>
                 </g>
                 <g data-teil="augen" data-variante="lachen">
                     <path d="M110 150 Q132 128 154 150" stroke="#2b2b3a" stroke-width="5" fill="none" stroke-linecap="round"/>
@@ -393,6 +428,10 @@
                 <g data-teil="augen" data-variante="zu">
                     <path d="M112 148 Q132 162 152 148" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
                     <path d="M168 148 Q188 162 208 148" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                </g>
+                <g data-teil="augen" data-variante="herz">
+                    <path d="M132 136 c -10 -16 -32 -6 -22 13 c 6 13 22 21 22 21 c 0 0 16 -8 22 -21 c 10 -19 -12 -29 -22 -13 Z" fill="#ff5fa2" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"/>
+                    <path d="M188 136 c -10 -16 -32 -6 -22 13 c 6 13 22 21 22 21 c 0 0 16 -8 22 -21 c 10 -19 -12 -29 -22 -13 Z" fill="#ff5fa2" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"/>
                 </g>
                 <g data-teil="augen" data-variante="zugekniffen">
                     <path d="M112 142 Q132 156 152 142" stroke="#2b2b3a" stroke-width="5" fill="none" stroke-linecap="round"/>
@@ -423,6 +462,18 @@
                 <path data-teil="mund" data-variante="traurig"  d="M150 206 Q155 200 160 204 Q165 200 170 206" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
                 <path data-teil="mund" data-variante="lachen"   d="M138 196 Q149 210 160 196 Q171 210 182 196" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
                 <path data-teil="mund" data-variante="klein"    d="M154 196 Q160 201 166 196" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <!-- Maul auf (Futter kommt näher) -->
+                <g data-teil="mund" data-variante="offen">
+                    <path d="M140 194 Q160 226 180 194 Z" fill="#2b2b3a" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"/>
+                    <path d="M150 204 Q160 216 170 204 Q160 208 150 204 Z" fill="#ff8fcf"/>
+                </g>
+                <!-- Kauen: Mund geschlossen, wellig -->
+                <path data-teil="mund" data-variante="kauen" d="M142 198 Q151 206 160 198 Q169 190 178 198" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <!-- Zunge (schlecken, trinken) -->
+                <g data-teil="mund" data-variante="zunge">
+                    <path d="M146 194 Q153 204 160 194 Q167 204 174 194" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <path class="zunge" d="M152 198 q8 24 16 0 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                </g>
                 <g data-teil="mund" data-variante="gaehnen">
                     <ellipse cx="160" cy="204" rx="12" ry="13" fill="#2b2b3a"/>
                     <ellipse cx="160" cy="211" rx="7" ry="5" fill="#ff8fcf"/>
@@ -553,6 +604,122 @@
         </g>
         </svg>
 
+        <!-- ===== Gegenstände zum Anfassen (js/gegenstand.js) =====
+             Jeder .ding hat einen Heimatplatz (data-heim = Mittelpunkt auf der Bühne) und kehrt dorthin
+             zurück, wenn er irgendwo fallen gelassen wird. Futter hat drei Stufen (ganz, angebissen, Rest). -->
+        <div id="dinge">
+
+            <!-- Der Korb unten rechts – nur Bild, nicht anfassbar -->
+            <svg id="korb" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M18 60 L182 60 L168 138 Q100 150 32 138 Z" fill="#e0b98a" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M30 76 h140 M36 96 h128 M40 116 h120" stroke="#c9995f" stroke-width="4" stroke-linecap="round"/>
+                <path d="M48 62 v72 M76 62 v76 M100 62 v78 M124 62 v76 M152 62 v72" stroke="#c9995f" stroke-width="3" opacity="0.8"/>
+                <path d="M60 60 Q100 8 140 60" stroke="#2b2b3a" stroke-width="12" fill="none" stroke-linecap="round"/>
+                <path d="M60 60 Q100 8 140 60" stroke="#e0b98a" stroke-width="6" fill="none" stroke-linecap="round"/>
+                <rect x="12" y="52" width="176" height="14" rx="7" fill="#e0b98a" stroke="#2b2b3a" stroke-width="4"/>
+            </svg>
+
+            <div class="ding futter" data-ding="fisch" data-heim="712,560" aria-label="Fisch">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <g class="stufe stufe-0">
+                        <path d="M12 40 Q34 12 58 40 Q34 68 12 40 Z" fill="#f4a261" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <path d="M56 40 L74 24 L70 40 L74 56 Z" fill="#f4a261" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <circle cx="26" cy="36" r="4" fill="#2b2b3a"/><circle cx="27" cy="35" r="1.5" fill="#ffffff"/>
+                        <path d="M38 30 q6 10 0 20" stroke="#e07c3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </g>
+                    <g class="stufe stufe-1">
+                        <path d="M12 40 Q34 12 58 40 Q50 50 44 44 Q40 56 36 48 Q30 62 12 40 Z" fill="#f4a261" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <path d="M56 40 L74 24 L70 40 L74 56 Z" fill="#f4a261" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <circle cx="26" cy="36" r="4" fill="#2b2b3a"/><circle cx="27" cy="35" r="1.5" fill="#ffffff"/>
+                    </g>
+                    <g class="stufe stufe-2">
+                        <path d="M28 40 L58 40" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M34 30 v20 M44 28 v24 M52 32 v16" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M56 40 L74 24 L70 40 L74 56 Z" fill="#f4a261" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <circle cx="24" cy="40" r="9" fill="#f4a261" stroke="#2b2b3a" stroke-width="3.5"/><circle cx="24" cy="38" r="3" fill="#2b2b3a"/>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="ding futter" data-ding="milch" data-heim="768,552" aria-label="Milch">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <g class="stufe stufe-0">
+                        <path d="M26 30 L26 70 Q40 76 54 70 L54 30 L46 14 L34 14 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <path d="M26 30 h28" stroke="#2b2b3a" stroke-width="3"/>
+                        <rect x="30" y="38" width="20" height="24" rx="4" fill="#d6f0ff"/>
+                        <path d="M36 44 q4 -4 8 0 q-4 4 -8 0 Z" fill="#6ec6f0"/>
+                    </g>
+                    <g class="stufe stufe-1">
+                        <path d="M26 30 L26 70 Q40 76 54 70 L54 30 L46 14 L34 14 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <path d="M26 30 h28" stroke="#2b2b3a" stroke-width="3"/>
+                        <rect x="30" y="50" width="20" height="12" rx="4" fill="#d6f0ff"/>
+                    </g>
+                    <g class="stufe stufe-2">
+                        <path d="M26 30 L26 70 Q40 76 54 70 L54 30 L46 14 L34 14 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round" opacity="0.7"/>
+                        <path d="M26 30 h28" stroke="#2b2b3a" stroke-width="3"/>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="ding futter" data-ding="keks" data-heim="822,560" aria-label="Keks">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <g class="stufe stufe-0">
+                        <circle cx="40" cy="42" r="24" fill="#e3b06a" stroke="#2b2b3a" stroke-width="3.5"/>
+                        <circle cx="32" cy="34" r="4" fill="#5a3a22"/><circle cx="48" cy="36" r="4" fill="#5a3a22"/><circle cx="38" cy="50" r="4" fill="#5a3a22"/><circle cx="52" cy="50" r="3" fill="#5a3a22"/>
+                    </g>
+                    <g class="stufe stufe-1">
+                        <path d="M40 18 A24 24 0 1 0 62 30 Q54 40 46 30 Q52 20 40 18 Z" fill="#e3b06a" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <circle cx="32" cy="34" r="4" fill="#5a3a22"/><circle cx="38" cy="50" r="4" fill="#5a3a22"/><circle cx="52" cy="50" r="3" fill="#5a3a22"/>
+                    </g>
+                    <g class="stufe stufe-2">
+                        <path d="M20 30 A24 24 0 0 0 40 66 Q36 52 30 46 Q24 40 20 30 Z" fill="#e3b06a" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <circle cx="30" cy="50" r="3.5" fill="#5a3a22"/>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="ding futter" data-ding="apfel" data-heim="736,618" aria-label="Apfel">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <g class="stufe stufe-0">
+                        <path d="M40 24 q-6 -8 -18 -4 q-12 6 -8 24 q4 22 20 26 q6 -2 6 -2 q0 0 6 2 q16 -4 20 -26 q4 -18 -8 -24 q-12 -4 -18 4 Z" fill="#ff6b81" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <path d="M40 24 q0 -10 6 -14" stroke="#5a3a22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                        <path d="M42 14 q10 -6 14 4 q-10 4 -14 -4 Z" fill="#8fd48a" stroke="#2b2b3a" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="M26 34 q-4 8 0 16" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+                    </g>
+                    <g class="stufe stufe-1">
+                        <path d="M40 24 q-6 -8 -18 -4 q-12 6 -8 24 q4 22 20 26 q6 -2 6 -2 q0 0 6 2 q12 -4 16 -20 q-8 6 -12 -2 q-6 -8 2 -12 q-2 -10 -12 -12 Z" fill="#ff6b81" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <path d="M40 24 q0 -10 6 -14" stroke="#5a3a22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                    </g>
+                    <g class="stufe stufe-2">
+                        <path d="M34 22 q-8 -2 -12 6 q4 4 12 4 q4 6 0 12 q-4 4 -12 4 q4 8 12 12 q6 2 12 -4 q6 6 12 4 q8 -4 12 -12 q-8 0 -12 -4 q-4 -6 0 -12 q8 0 12 -4 q-4 -8 -12 -6 q-6 2 -12 8 q-6 -6 -12 -8 Z" fill="#fff6e6" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                        <path d="M40 24 q0 -10 6 -14" stroke="#5a3a22" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                        <circle cx="40" cy="42" r="3" fill="#5a3a22"/>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Wasserflasche: am Maul halten, sie kippt und der Pegel sinkt -->
+            <div class="ding" data-ding="flasche" data-heim="796,612" aria-label="Wasserflasche">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <g id="flasche-kipp">
+                        <path d="M30 10 h20 v10 l6 8 v40 a6 6 0 0 1 -6 6 h-20 a6 6 0 0 1 -6 -6 v-40 l6 -8 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"/>
+                        <clipPath id="flasche-innen"><path d="M30 10 h20 v10 l6 8 v40 a6 6 0 0 1 -6 6 h-20 a6 6 0 0 1 -6 -6 v-40 l6 -8 Z"/></clipPath>
+                        <rect id="flasche-wasser" x="20" y="36" width="40" height="40" fill="#6ec6f0" clip-path="url(#flasche-innen)"/>
+                        <rect x="30" y="6" width="20" height="8" rx="3" fill="#b388eb" stroke="#2b2b3a" stroke-width="3"/>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Decke: liegt gefaltet auf dem Bett, wird über Leo gezogen -->
+            <div class="ding" data-ding="decke" data-heim="790,352" aria-label="Decke">
+                <svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M10 22 Q60 8 110 22 L114 58 L6 58 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"/>
+                    <path d="M10 22 Q60 34 110 22" stroke="#e0507a" stroke-width="3" fill="none" opacity="0.5"/>
+                    <circle cx="34" cy="42" r="5" fill="#ffd6ec"/><circle cx="60" cy="48" r="5" fill="#ffd6ec"/><circle cx="86" cy="42" r="5" fill="#ffd6ec"/>
+                </svg>
+            </div>
+        </div>
+
         <!-- ===== Status-Ringe links (Quelle: design/ui/ring-*.svg) – Füllstand über stroke-dashoffset, Umfang 289 ===== -->
         <div id="ringe">
             <svg id="ring-satt" class="ring" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" aria-label="Satt">
@@ -679,6 +846,7 @@
 <script src="js/config.js"></script>
 <script src="js/leo.js"></script>
 <script src="js/zimmer.js"></script>
+<script src="js/gegenstand.js"></script>
 <script src="js/game.js"></script>
 
 </body>

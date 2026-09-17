@@ -3,13 +3,28 @@
 //
 // Leo hat drei Bedürfnisse (satt, sauber, ausgeschlafen, je 0–100),
 // die in echter Zeit langsam sinken – auch wenn das Spiel zu ist.
-// Lara füttert, gibt Wasser, putzt mit dem Schwamm, streichelt,
-// kitzelt und bringt Leo abends ins Bett. Jede Aktion löst eine
-// kurze Reaktion aus (1–3 Sekunden), danach zeigt Leo wieder ihren
-// Zustand. Es gibt kein Verlieren und nichts Dramatisches.
+//
+// Die Regel für alles, was Lara tut: sie macht es mit der Hand, und Leo
+// reagiert schon währenddessen.
+//   - Füttern:   Fisch, Milch, Keks oder Apfel aus dem Korb zum Maul ziehen.
+//                Leo schaut dem Futter nach, macht das Maul auf, beißt dreimal ab.
+//                Fisch ist das Lieblingsessen, Keks gibt es nur, wenn sie nicht
+//                schon satt ist, am Apfel schnuppert sie erst.
+//   - Trinken:   die Flasche ans Maul halten – sie kippt, der Pegel sinkt.
+//   - Streicheln: mit dem Finger über Leo – jede Körperzone reagiert anders
+//                (Kopf, Kinn, Ohr, Rücken, Bauch, Pfote). Je gleichmäßiger,
+//                desto lauter schnurrt sie.
+//   - Schlafen:  Vorhang am Fenster zuziehen, Lampe antippen, die Decke vom
+//                Bett über Leo ziehen – dann gähnt sie und schläft ein.
+//   - Schwamm:   wie bisher – Kachel, dann Flecken wegwischen.
+// Die Kacheln rechts sind nur noch Hinweise: sie lassen den passenden
+// Gegenstand wackeln, und Leo schaut hin.
+//
+// Es gibt kein Verlieren und nichts Dramatisches.
 //
 // Module: gemeinsam/{speicher,audio,skalierung,eingabe,partikel}.js,
-//         js/config.js (Zahlen), js/leo.js (Figur), js/zimmer.js (Tag/Nacht)
+//         js/config.js (Zahlen), js/leo.js (Figur, Zonen, Blick),
+//         js/zimmer.js (Tag/Nacht, Vorhang, Lampe), js/gegenstand.js (Dinge)
 // =====================================================
 
 (function () {
@@ -34,14 +49,30 @@
 
     var spiel = {
         zustand: 'zufrieden',
-        reaktion: null,
+        reaktion: null,            // Name der laufenden Reaktion (mit Timer)
         reaktionTimer: null,
-        modus: null,           // 'schwamm' während des Putzens
-        schnurrt: false,
-        schnurrTimer: null,
+        gehalten: null,            // Gesicht, das ohne Timer gehalten wird (Maul auf, Zone …)
+        modus: null,               // 'schwamm' | 'vorhang' | null
+        // Streicheln
+        streichelZone: null,
+        streichelt: false,
+        streichelTimer: null,
+        streichelStart: 0,
+        streichelExtra: false,
+        letztePos: null,
+        tempi: [],                 // letzte Fingergeschwindigkeiten (für „gleichmäßig")
         letztesHerz: 0,
         letztesSchnurren: 0,
-        tipps: [],             // Zeitpunkte der letzten Tipps auf Leo (Kitzeln)
+        ohrTimer: null,
+        // Füttern
+        futter: null,              // { ding, amMaul, bissTimer, geschnuppert, verweigert }
+        trinken: null,             // { ding, rest (ms), letzterSchluck, amMaul }
+        // Vorhang ziehen
+        vorhangStart: 0,
+        vorhangStartX: 0,
+        // Sonstiges
+        blickTimer: null,
+        tipps: [],                 // Zeitpunkte der letzten Tipps auf Leo (Kitzeln)
         zzzZaehler: 0,
         speicherZaehler: 0,
         letzteZeit: 0
@@ -113,18 +144,26 @@
         return kandidaten[0].name;
     }
 
-    // Zustand neu berechnen und – wenn gerade keine Reaktion läuft – zeigen
+    // Zustand neu berechnen und – wenn gerade nichts anderes läuft – zeigen
     function zeigeZustand() {
         var neu = zustandBestimmen();
         var gewechselt = neu !== spiel.zustand;
         spiel.zustand = neu;
-        if (!spiel.reaktion && !spiel.schnurrt) {
+        if (!spiel.reaktion && !spiel.gehalten) {
             if (gewechselt || !Leo.aktuellesGesicht) Leo.zeigeZustand(neu);
         }
     }
 
+    // Zurück zum Zustands-Gesicht (wenn nichts gehalten wird)
+    function zurueckZumZustand() {
+        spiel.zustand = zustandBestimmen();
+        if (spiel.gehalten) Leo.zeigeReaktion(spiel.gehalten, spiel.zustand);
+        else Leo.zeigeZustand(spiel.zustand);
+    }
+
     // ---------- Reaktionen ----------
 
+    // Reaktion mit Timer: nach `dauer` ms zurück zum Zustand (oder zum gehaltenen Gesicht)
     function starteReaktion(name, dauer, danach) {
         if (spiel.reaktionTimer) clearTimeout(spiel.reaktionTimer);
         spiel.reaktion = name;
@@ -132,10 +171,21 @@
         spiel.reaktionTimer = setTimeout(function () {
             spiel.reaktion = null;
             spiel.reaktionTimer = null;
-            Leo.zeigeZustand(zustandBestimmen());
-            spiel.zustand = zustandBestimmen();
+            zurueckZumZustand();
             if (danach) danach();
         }, dauer);
+    }
+
+    // Gesicht ohne Timer halten (solange etwas am Maul ist, solange gestreichelt wird)
+    function halteGesicht(name) {
+        spiel.gehalten = name;
+        if (!spiel.reaktion) Leo.zeigeReaktion(name, spiel.zustand);
+    }
+
+    function gesichtLoslassen() {
+        if (!spiel.gehalten) return;
+        spiel.gehalten = null;
+        if (!spiel.reaktion) zurueckZumZustand();
     }
 
     // Lara hat sich gekümmert – zählt gegen „traurig"
@@ -149,35 +199,342 @@
     function kopfY() { return KONFIG.LEO.y + 120 * KONFIG.LEO.faktor; }
 
     function beschaeftigt() {
-        if (spiel.modus === 'schwamm') schwammEnde(); // eine andere Kachel beendet das Putzen
+        if (spiel.modus === 'schwamm') schwammEnde();
         return leo.schlaeft || spiel.reaktion !== null;
     }
 
-    // ---------- Aktionen ----------
+    // ---------- Blick ----------
 
-    function fuettern() {
-        if (beschaeftigt()) return;
-        leo.satt = begrenze(leo.satt + KONFIG.FUTTER_PLUS, 0, 100);
-        leo.sauber = begrenze(leo.sauber - KONFIG.ESSEN_MACHT_SCHMUTZIG, 0, 100);
-        aktion();
-        Sound.schmatzen();
-        setTimeout(function () { Sound.extraherz(); }, 700);
-        partikel.herzen(kopfX(), kopfY() - 40, 3);
-        partikel.funkeln(kopfX(), kopfY(), 8);
-        starteReaktion('danke', KONFIG.DAUER.danke);
+    // Leo schaut kurz zu einem Punkt (oder solange, bis schauGeradeaus kommt)
+    function schauZu(x, y, dauer) {
+        if (leo.schlaeft) return;
+        if (spiel.blickTimer) clearTimeout(spiel.blickTimer);
+        spiel.blickTimer = null;
+        Leo.schauZu(x, y);
+        if (dauer) spiel.blickTimer = setTimeout(schauGeradeaus, dauer);
     }
 
-    function trinken() {
-        if (beschaeftigt()) return;
+    function schauGeradeaus() {
+        if (spiel.blickTimer) clearTimeout(spiel.blickTimer);
+        spiel.blickTimer = setTimeout(function () {
+            spiel.blickTimer = null;
+            Leo.schauZu(null);
+        }, 900);
+    }
+
+    // =====================================================
+    // Füttern
+    // =====================================================
+
+    function futterInfo(d) { return KONFIG.FUTTER[d.name]; }
+
+    // Der Gegenstand in der Hand bewegt sich – ist er nah am Maul?
+    function futterBewegt(d, x, y) {
+        var maul = Leo.maulPosition();
+        var nah = Gegenstand.abstand(d, maul.x, maul.y) < KONFIG.MAUL_NAEHE;
+        var f = spiel.futter;
+        if (nah && !f.amMaul) futterKommtAn(d);
+        else if (!nah && f.amMaul) futterWegGenommen(d);
+    }
+
+    // Etwas kommt ans Maul: Maul auf – oder schnuppern – oder „Mmh-mm"
+    function futterKommtAn(d) {
+        var f = spiel.futter, info = futterInfo(d);
+        f.amMaul = true;
+        var zuSatt = leo.satt >= KONFIG.SATT_VOLL;
+        var keinNaschen = info.naschen && leo.satt >= KONFIG.NASCHEN_UNTER;
+        if (zuSatt || keinNaschen) {
+            f.verweigert = true;
+            Sound.naa();
+            halteGesicht('naa');
+            return;
+        }
+        f.verweigert = false;
+        if (info.schnuppern && !f.geschnuppert) {
+            f.geschnuppert = true;
+            Sound.schnueffeln();
+            halteGesicht('schnuppern');
+            f.bissTimer = setTimeout(function () {
+                if (!f.amMaul) return;
+                halteGesicht('naeh');
+                f.bissTimer = setTimeout(function () { beissen(d); }, 500);
+            }, 1000);
+            return;
+        }
+        halteGesicht('naeh');
+        f.bissTimer = setTimeout(function () { beissen(d); }, 420);
+    }
+
+    function futterWegGenommen(d) {
+        var f = spiel.futter;
+        f.amMaul = false;
+        if (f.bissTimer) clearTimeout(f.bissTimer);
+        f.bissTimer = null;
+        gesichtLoslassen();
+    }
+
+    // Ein Bissen: Stufe weiter, kauen, Krümel – bis alles weg ist
+    function beissen(d) {
+        var f = spiel.futter, info = futterInfo(d);
+        if (!f || f.ding !== d || !f.amMaul) return;
+        var maul = Leo.maulPosition();
+        Sound.biss();
+        setTimeout(function () { Sound.schmatzen(); }, 120);
+        if (info.kruemel) partikel.kruemel(maul.x, maul.y + 10, 4 + info.kruemel, info.farbe);
+        Gegenstand.stufe(d, d.stufe + 1);
+        // Kauen als kurze Reaktion, dann wieder Maul auf
+        spiel.reaktion = 'kauen';
+        Leo.zeigeReaktion('kauen', spiel.zustand);
+        if (spiel.reaktionTimer) clearTimeout(spiel.reaktionTimer);
+        spiel.reaktionTimer = setTimeout(function () {
+            spiel.reaktion = null;
+            spiel.reaktionTimer = null;
+            if (spiel.futter !== f) return;          // inzwischen etwas anderes in der Hand
+            if (d.stufe >= KONFIG.BISSE) aufgegessen(d);
+            else {
+                zurueckZumZustand();
+                if (f.amMaul) f.bissTimer = setTimeout(function () { beissen(d); }, KONFIG.BISS_MS - 450);
+            }
+        }, 450);
+    }
+
+    function aufgegessen(d) {
+        var info = futterInfo(d);
+        leo.satt = begrenze(leo.satt + info.plus, 0, 100);
+        leo.sauber = begrenze(leo.sauber - info.kruemel, 0, 100);
+        aktion();
+        futterEnde();
+        Gegenstand.verstecke(d, true);
+        var maul = Leo.maulPosition();
+        partikel.herzen(kopfX(), kopfY() - 40, info.lieblings ? 6 : 3);
+        partikel.funkeln(kopfX(), kopfY(), info.lieblings ? 14 : 6);
+        if (info.lieblings) {
+            Sound.extraherz();
+            setTimeout(function () { Sound.schnurren(1.2, KONFIG.SCHNURR_LAUT); }, 300);
+            starteReaktion('lecker', KONFIG.DAUER.danke, vielleichtBaeuerchen);
+        } else {
+            Sound.extraherz();
+            starteReaktion('satt', KONFIG.DAUER.danke - 600, vielleichtBaeuerchen);
+        }
+        // Nach einer Weile liegt wieder etwas Frisches im Korb
+        setTimeout(function () { Gegenstand.neuAmPlatz(d); Sound.klick(); }, 1400);
+        void maul;
+    }
+
+    function vielleichtBaeuerchen() {
+        if (leo.schlaeft || Math.random() > KONFIG.BAEUERCHEN_CHANCE) return;
+        setTimeout(function () {
+            if (leo.schlaeft || spiel.reaktion || spiel.gehalten) return;
+            Sound.hicks();
+            partikel.blasen(kopfX() + 40, kopfY() - 20, 3);
+            partikel.herzen(kopfX() + 60, kopfY() - 50, 1, { groesse: 14 });
+            starteReaktion('baeuerchen', 900);
+        }, 500);
+    }
+
+    function futterEnde() {
+        var f = spiel.futter;
+        if (!f) return;
+        if (f.bissTimer) clearTimeout(f.bissTimer);
+        spiel.futter = null;
+        gesichtLoslassen();
+    }
+
+    // Angefangenes Essen/Trinken abbrechen (etwas Neues wird genommen, Gute Nacht …)
+    function futterAbbrechen() {
+        if (spiel.futter) {
+            var alt = spiel.futter.ding;
+            futterEnde();
+            if (!alt.versteckt) Gegenstand.zurueck(alt);
+        }
+        if (spiel.trinken) {
+            var fl = spiel.trinken.ding;
+            spiel.trinken = null;
+            fl.el.classList.remove('kippt');
+            gesichtLoslassen();
+            Gegenstand.zurueck(fl);
+        }
+    }
+
+    // Losgelassen: am Maul → bleibt dort und Leo isst weiter; sonst zurück in den Korb
+    function futterLosgelassen(d) {
+        var f = spiel.futter;
+        if (f && f.amMaul && !f.verweigert) {
+            var maul = Leo.maulPosition();
+            Gegenstand.ablegenBei(d, maul.x + 10, maul.y - 6);
+            return;
+        }
+        futterEnde();
+        Gegenstand.zurueck(d);
+    }
+
+    // =====================================================
+    // Trinken (Flasche)
+    // =====================================================
+
+    function flascheBewegt(d, x, y) {
+        var maul = Leo.maulPosition();
+        var nah = Gegenstand.abstand(d, maul.x, maul.y) < KONFIG.MAUL_NAEHE;
+        var t = spiel.trinken;
+        if (nah && !t.amMaul) {
+            t.amMaul = true;
+            d.el.classList.add('kippt');
+            halteGesicht('trinkt');
+            Sound.schluck();
+            t.letzterSchluck = performance.now();
+        } else if (!nah && t.amMaul) {
+            t.amMaul = false;
+            d.el.classList.remove('kippt');
+            gesichtLoslassen();
+        }
+    }
+
+    // Läuft pro Frame, solange die Flasche am Maul ist
+    function trinkenFortschreiben(dt) {
+        var t = spiel.trinken;
+        if (!t || !t.amMaul) return;
+        t.rest -= dt * 1000;
+        var anteil = Math.max(0, t.rest / KONFIG.TRINKEN_MS);
+        // Wasserpegel in der Flasche (y 36 = voll … 76 = leer)
+        document.getElementById('flasche-wasser').setAttribute('y', 36 + 40 * (1 - anteil));
+        var jetzt = performance.now();
+        if (jetzt - t.letzterSchluck > 450) {
+            t.letzterSchluck = jetzt;
+            Sound.schluck();
+            var maul = Leo.maulPosition();
+            partikel.blasen(maul.x - 10, maul.y, 2);
+            partikel.tropfen(maul.x, maul.y + 10, 2);
+        }
+        if (t.rest <= 0) ausgetrunken(t.ding);
+    }
+
+    function ausgetrunken(d) {
         leo.satt = begrenze(leo.satt + KONFIG.WASSER_PLUS, 0, 100);
         aktion();
+        spiel.trinken = null;
+        gesichtLoslassen();
+        d.el.classList.remove('kippt');
         Sound.blubbern();
-        partikel.blasen(kopfX() - 120, kopfY() + 80, 5);
         partikel.herzen(kopfX(), kopfY() - 40, 2);
-        starteReaktion('trinken', KONFIG.DAUER.trinken);
+        starteReaktion('lecken', 1300);
+        Gegenstand.zurueck(d);
+        // Flasche füllt sich am Platz wieder
+        setTimeout(function () { document.getElementById('flasche-wasser').setAttribute('y', 36); }, 700);
     }
 
-    // Schwamm: Ist Leo schmutzig, wird gewischt – sonst gleich frisch
+    function flascheLosgelassen(d) {
+        if (spiel.trinken) {
+            spiel.trinken = null;
+            d.el.classList.remove('kippt');
+            gesichtLoslassen();
+        }
+        Gegenstand.zurueck(d);
+    }
+
+    // =====================================================
+    // Decke (Schlafen gehen)
+    // =====================================================
+
+    function deckeBewegt(d, x, y) {
+        var ueberLeo = Leo.trifft(x, y);
+        if (ueberLeo && spiel.gehalten !== 'schlaefrig') {
+            halteGesicht('schlaefrig');
+            Sound.gaehnen();
+        } else if (!ueberLeo && spiel.gehalten === 'schlaefrig') {
+            gesichtLoslassen();
+        }
+    }
+
+    function deckeLosgelassen(d, x, y) {
+        if (Leo.trifft(x, y) || Gegenstand.abstand(d, kopfX(), kopfY() + 120) < 200) {
+            gesichtLoslassen();
+            Gegenstand.verstecke(d, true);
+            guteNacht();
+        } else {
+            gesichtLoslassen();
+            Gegenstand.zurueck(d);
+        }
+    }
+
+    // Gute Nacht – Leo gähnt, das Licht dimmt, dann schläft sie
+    function guteNacht() {
+        if (spiel.reaktionTimer) clearTimeout(spiel.reaktionTimer);
+        spiel.reaktion = null;
+        aktion();
+        schwammEnde();
+        futterAbbrechen();
+        Sound.gaehnen();
+        setTimeout(function () { Sound.schlaflied(); }, 900);
+        partikel.herzen(kopfX() + 100, kopfY() - 60, 1, { groesse: 16 });
+        starteReaktion('gutenacht', KONFIG.DAUER.gutenacht, schlafen);
+        // Licht dimmt schon während des Gähnens
+        setTimeout(function () { Zimmer.setzeDaemmerung(true); }, 1400);
+    }
+
+    function schlafen() {
+        leo.schlaeft = true;
+        Leo.schauZu(null);
+        Zimmer.setzeNacht(true);
+        Zimmer.setzeVorhang(1, false);
+        spiel.zustand = 'schlafend';
+        Leo.zeigeZustand('schlafend');
+        speichern();
+    }
+
+    // Guten Morgen – Leo wacht ausgeschlafen auf und freut sich
+    function aufwachen() {
+        if (!leo.schlaeft) return;
+        leo.schlaeft = false;
+        leo.ausgeschlafen = 100;
+        aktion();
+        Zimmer.setzeNacht(false);
+        Zimmer.setzeVorhang(0, false);
+        Zimmer.setzeLampe(true);
+        Gegenstand.neuAmPlatz(Gegenstand.finde('decke'));
+        partikel.leeren();
+        Sound.morgen();
+        spiel.zustand = zustandBestimmen();
+        Leo.zeigeZustand(spiel.zustand);
+        setTimeout(function () {
+            partikel.herzen(kopfX(), kopfY() - 60, 1, { groesse: 34 });
+            starteReaktion('wiedersehen', KONFIG.DAUER.wiedersehen);
+        }, 900);
+    }
+
+    function wiedersehen() {
+        Sound.extraherz();
+        partikel.herzen(kopfX(), kopfY() - 60, 1, { groesse: 34 });
+        partikel.funkeln(kopfX(), kopfY(), 6);
+        starteReaktion('wiedersehen', KONFIG.DAUER.wiedersehen);
+    }
+
+    // ---------- Vorhang und Lampe ----------
+
+    function vorhangAngetippt() {
+        Sound.vorhang();
+        Zimmer.vorhangUmschalten();
+        nachVorhang();
+    }
+
+    // Vorhang auf, während Leo schläft und es Tag ist → sie wacht auf
+    function nachVorhang() {
+        if (leo.schlaeft && !Zimmer.istVorhangZu() && !istAbend()) aufwachen();
+        else if (!leo.schlaeft) {
+            aktion();
+            schauZu(300, 140, 1400);
+        }
+    }
+
+    function lampeAngetippt() {
+        var an = Zimmer.lampeUmschalten();
+        Sound.lampe(an);
+        if (!leo.schlaeft) schauZu(622, 300, 1200);
+    }
+
+    // =====================================================
+    // Schwamm (wie bisher)
+    // =====================================================
+
     function schwammStart() {
         if (leo.schlaeft || spiel.reaktion) return;
         if (spiel.modus === 'schwamm') { schwammEnde(); return; }
@@ -192,7 +549,7 @@
     }
 
     function schwammEnde() {
-        spiel.modus = null;
+        if (spiel.modus === 'schwamm') spiel.modus = null;
         buehne.classList.remove('schwamm-modus');
         document.getElementById('kachel-schwamm').classList.remove('aktiv');
     }
@@ -217,7 +574,6 @@
     function frischGeputzt() {
         leo.sauber = 100;
         aktion();
-        // erst schütteln (Tropfen fliegen), dann aufplustern und glänzen
         Sound.platsch();
         partikel.tropfen(kopfX(), kopfY() + 60, 12);
         starteReaktion('schuetteln', 750, function () {
@@ -228,40 +584,132 @@
         });
     }
 
-    // Streicheln: solange der Finger über Leo streicht, schnurrt sie
+    // =====================================================
+    // Streicheln – jede Zone anders, gleichmäßig = lauter
+    // =====================================================
+
+    var ZONEN_GESICHT = {
+        kopf: 'schnurren', kinn: 'kinn', ohr: 'ohr',
+        ruecken: 'ruecken', bauch: 'bauch', pfote: 'pfote'
+    };
+
+    // Wie gleichmäßig streicht Lara gerade? 0 (ruckelig) … 1 (schön fließend)
+    function gleichmaessigkeit() {
+        var t = spiel.tempi;
+        if (t.length < 4) return 0.5;
+        var summe = 0;
+        for (var i = 0; i < t.length; i++) summe += t[i];
+        var mittel = summe / t.length;
+        if (mittel < 20) return 0.2;
+        var abw = 0;
+        for (var j = 0; j < t.length; j++) abw += (t[j] - mittel) * (t[j] - mittel);
+        var streuung = Math.sqrt(abw / t.length) / mittel;
+        return begrenze(1 - streuung, 0, 1);
+    }
+
     function streichelBewegung(x, y) {
-        if (leo.schlaeft || spiel.modus || (spiel.reaktion && !spiel.schnurrt)) return;
-        if (!Leo.trifft(x, y)) return;
+        if (leo.schlaeft || spiel.modus || spiel.futter || spiel.trinken) return;
+        if (spiel.reaktion && !spiel.streichelt) return;
+        var zone = Leo.zone(x, y);
         var jetzt = performance.now();
-        if (!spiel.schnurrt) {
-            spiel.schnurrt = true;
-            spiel.reaktion = 'schnurren';
-            Leo.zeigeReaktion('schnurren', spiel.zustand);
-            Sound.schnurren(1.0);
-            spiel.letztesSchnurren = jetzt;
+
+        if (!zone) {
+            // Finger hat Leo verlassen – Nachlauf entscheidet
+            spiel.letztePos = null;
+            return;
         }
-        if (jetzt - spiel.letztesHerz > 180) {
-            partikel.herzen(x, y - 20, 1);
+
+        // Tempo mitschreiben
+        if (spiel.letztePos) {
+            var dx = x - spiel.letztePos.x, dy = y - spiel.letztePos.y;
+            var dtm = Math.max(8, jetzt - spiel.letztePos.t);
+            spiel.tempi.push(Math.sqrt(dx * dx + dy * dy) / dtm * 1000);
+            if (spiel.tempi.length > 8) spiel.tempi.shift();
+        }
+        spiel.letztePos = { x: x, y: y, t: jetzt };
+
+        if (!spiel.streichelt) {
+            spiel.streichelt = true;
+            spiel.streichelZone = null;
+            spiel.streichelStart = jetzt;
+            spiel.streichelExtra = false;
+            spiel.tempi = [];
+            spiel.letztesSchnurren = 0;
+        }
+
+        // Zone gewechselt → anderes Gesicht, anderer Ton
+        if (zone !== spiel.streichelZone) {
+            zoneBetreten(zone, x, y);
+        }
+
+        var g = gleichmaessigkeit();
+
+        // Herzen: bei fließender Bewegung dichter
+        if (jetzt - spiel.letztesHerz > KONFIG.HERZ_ABSTAND_MS / (0.5 + g)) {
+            partikel.herzen(x, y - 20, 1, { groesse: 12 + g * 10 });
             spiel.letztesHerz = jetzt;
         }
-        if (jetzt - spiel.letztesSchnurren > 950) {
-            Sound.schnurren(1.0);
+
+        // Schnurren: Lautstärke folgt der Gleichmäßigkeit
+        if (zone !== 'ohr' && zone !== 'pfote' && jetzt - spiel.letztesSchnurren > 950) {
+            var laut = KONFIG.SCHNURR_LEISE + (KONFIG.SCHNURR_LAUT - KONFIG.SCHNURR_LEISE) * g;
+            Sound.schnurren(1.0, laut * (zone === 'kinn' ? 1.3 : 1));
             spiel.letztesSchnurren = jetzt;
         }
-        if (spiel.schnurrTimer) clearTimeout(spiel.schnurrTimer);
-        spiel.schnurrTimer = setTimeout(schnurrEnde, KONFIG.SCHNURR_NACHLAUF_MS);
+
+        // Nach längerem Kuscheln an einer Stelle: kleine Überraschung
+        if (!spiel.streichelExtra && jetzt - spiel.streichelStart > KONFIG.ZONEN_EXTRA_MS) {
+            spiel.streichelExtra = true;
+            if (zone === 'bauch') {
+                Sound.kichern();
+                partikel.herzen(kopfX(), kopfY() + 100, 5);
+            } else if (zone === 'kinn') {
+                Sound.schnurren(1.4, KONFIG.SCHNURR_LAUT);
+                partikel.funkeln(kopfX(), kopfY() + 40, 8);
+            } else if (zone === 'ruecken') {
+                partikel.funkeln(x, y, 5);
+            }
+        }
+
+        if (spiel.streichelTimer) clearTimeout(spiel.streichelTimer);
+        spiel.streichelTimer = setTimeout(streichelEnde, KONFIG.SCHNURR_NACHLAUF_MS);
     }
 
-    function schnurrEnde() {
-        if (!spiel.schnurrt) return;
-        spiel.schnurrt = false;
-        spiel.reaktion = null;
+    function zoneBetreten(zone, x, y) {
+        spiel.streichelZone = zone;
+        spiel.streichelStart = performance.now();
+        spiel.streichelExtra = false;
+        if (spiel.ohrTimer) clearTimeout(spiel.ohrTimer);
+        halteGesicht(ZONEN_GESICHT[zone]);
+        if (zone === 'ohr') {
+            Sound.mrrp();
+            // Ohr zuckt kurz, dann ist es einfach Kopf-Streicheln
+            spiel.ohrTimer = setTimeout(function () {
+                if (spiel.streichelt && spiel.streichelZone === 'ohr') halteGesicht('schnurren');
+            }, 700);
+        } else if (zone === 'pfote') {
+            Sound.kichern();
+            partikel.funkeln(x, y, 4);
+        } else if (zone === 'bauch') {
+            Sound.mrrp();
+            setTimeout(function () { if (spiel.streichelZone === 'bauch') Sound.kichern(); }, 350);
+        } else {
+            Sound.schnurren(1.0, KONFIG.SCHNURR_LEISE + 0.04);
+            spiel.letztesSchnurren = performance.now();
+        }
+    }
+
+    function streichelEnde() {
+        if (!spiel.streichelt) return;
+        spiel.streichelt = false;
+        spiel.streichelZone = null;
+        spiel.letztePos = null;
+        if (spiel.ohrTimer) clearTimeout(spiel.ohrTimer);
         aktion();
-        spiel.zustand = zustandBestimmen();
-        Leo.zeigeZustand(spiel.zustand);
+        gesichtLoslassen();
     }
 
-    // Kachel „Streicheln": ein kurzes Schnurren ohne Finger
+    // Kachel „Streicheln": Leo bittet darum – lehnt sich vor, Herzen
     function streichelnKachel() {
         if (beschaeftigt()) return;
         aktion();
@@ -292,54 +740,125 @@
             kitzeln();
             return;
         }
-        if (beschaeftigt()) return;
+        if (beschaeftigt() || spiel.gehalten) return;
         Sound.mrrp();
         starteReaktion('blinzeln', 180);
     }
 
-    // Decke: Gute Nacht – Leo gähnt, das Licht dimmt, dann schläft sie
-    function decke() {
-        if (beschaeftigt()) return;
-        aktion();
+    // =====================================================
+    // Kacheln: nur noch Hinweise („nimm das hier")
+    // =====================================================
+
+    function hinweisAuf(namen, blickX, blickY) {
+        Sound.klick();
+        for (var i = 0; i < namen.length; i++) {
+            var d = Gegenstand.finde(namen[i]);
+            if (d && !d.versteckt) Gegenstand.hinweis(d);
+        }
+        if (!leo.schlaeft) schauZu(blickX, blickY, 1600);
+    }
+
+    function kachelFutter() {
+        if (leo.schlaeft) return;
         schwammEnde();
+        hinweisAuf(['fisch', 'milch', 'keks', 'apfel'], 760, 580);
+        if (!spiel.reaktion && !spiel.gehalten) {
+            spiel.reaktion = 'naeh';
+            Leo.zeigeReaktion('naeh', spiel.zustand);
+            if (spiel.reaktionTimer) clearTimeout(spiel.reaktionTimer);
+            spiel.reaktionTimer = setTimeout(function () {
+                spiel.reaktion = null; spiel.reaktionTimer = null; zurueckZumZustand();
+            }, 1200);
+        }
+    }
+
+    function kachelWasser() {
+        if (leo.schlaeft) return;
+        schwammEnde();
+        hinweisAuf(['flasche'], 796, 600);
+    }
+
+    function kachelDecke() {
+        if (leo.schlaeft) return;
+        schwammEnde();
+        hinweisAuf(['decke'], 790, 350);
         Sound.gaehnen();
-        setTimeout(function () { Sound.schlaflied(); }, 900);
-        partikel.herzen(kopfX() + 100, kopfY() - 60, 1, { groesse: 16 });
-        starteReaktion('gutenacht', KONFIG.DAUER.gutenacht, schlafen);
-        // Licht dimmt schon während des Gähnens
-        setTimeout(function () { Zimmer.setzeDaemmerung(true); }, 1400);
+        if (!spiel.reaktion && !spiel.gehalten) starteReaktion('gutenacht', 1400);
     }
 
-    function schlafen() {
-        leo.schlaeft = true;
-        Zimmer.setzeNacht(true);
-        spiel.zustand = 'schlafend';
-        Leo.zeigeZustand('schlafend');
-        speichern();
+    // =====================================================
+    // Eingabe: Finger auf der Bühne
+    // =====================================================
+
+    function beiTippen(x, y) {
+        if (Zimmer.istAufLampe(x, y)) { lampeAngetippt(); return; }
+        if (Zimmer.istImFenster(x, y)) { vorhangAngetippt(); return; }
+        var d = Gegenstand.unterPunkt(x, y);
+        if (d && !leo.schlaeft) {
+            Sound.klick();
+            Gegenstand.hinweis(d);
+            schauZu(d.x, d.y, 1300);
+            return;
+        }
+        if (Leo.trifft(x, y)) leoAngetippt();
     }
 
-    // Sonne: Guten Morgen – Leo wacht ausgeschlafen auf und freut sich
-    function aufwachen() {
-        if (!leo.schlaeft) return;
-        leo.schlaeft = false;
-        leo.ausgeschlafen = 100;
-        aktion();
-        Zimmer.setzeNacht(false);
-        partikel.leeren();
-        Sound.morgen();
-        spiel.zustand = zustandBestimmen();
-        Leo.zeigeZustand(spiel.zustand);
-        setTimeout(function () {
-            partikel.herzen(kopfX(), kopfY() - 60, 1, { groesse: 34 });
-            starteReaktion('wiedersehen', KONFIG.DAUER.wiedersehen);
-        }, 900);
+    function ziehStart(x, y, sx, sy) {
+        if (spiel.modus === 'schwamm') return;
+        // Gegenstand unter dem Finger?
+        var d = Gegenstand.unterPunkt(sx, sy);
+        if (d && !leo.schlaeft) {
+            schwammEnde();
+            streichelEnde();
+            futterAbbrechen();
+            Gegenstand.aufheben(d, x, y);
+            if (d.istFutter) spiel.futter = { ding: d, amMaul: false, bissTimer: null, geschnuppert: false, verweigert: false };
+            else if (d.name === 'flasche') spiel.trinken = { ding: d, rest: KONFIG.TRINKEN_MS, letzterSchluck: 0, amMaul: false };
+            spiel.modus = 'hand';
+            return;
+        }
+        if (Zimmer.istImFenster(sx, sy)) {
+            spiel.modus = 'vorhang';
+            spiel.vorhangStart = Zimmer.vorhangAnteil;
+            spiel.vorhangStartX = sx;
+            Sound.vorhang();
+        }
     }
 
-    function wiedersehen() {
-        Sound.extraherz();
-        partikel.herzen(kopfX(), kopfY() - 60, 1, { groesse: 34 });
-        partikel.funkeln(kopfX(), kopfY(), 6);
-        starteReaktion('wiedersehen', KONFIG.DAUER.wiedersehen);
+    function ziehBewegt(x, y) {
+        if (spiel.modus === 'schwamm') { schwammBewegen(x, y); return; }
+        if (spiel.modus === 'vorhang') { Zimmer.vorhangZiehen(spiel.vorhangStart, spiel.vorhangStartX, x); return; }
+        if (spiel.modus === 'hand') {
+            var d = Gegenstand.inHand;
+            if (!d) return;
+            Gegenstand.bewegen(x, y);
+            schauZu(d.x, d.y);
+            if (d.istFutter) futterBewegt(d, x, y);
+            else if (d.name === 'flasche') flascheBewegt(d, x, y);
+            else if (d.name === 'decke') deckeBewegt(d, x, y);
+            return;
+        }
+        streichelBewegung(x, y);
+    }
+
+    function ziehEnde(x, y) {
+        if (spiel.modus === 'vorhang') {
+            spiel.modus = null;
+            Zimmer.vorhangEinrasten();
+            nachVorhang();
+            return;
+        }
+        if (spiel.modus === 'hand') {
+            spiel.modus = null;
+            var d = Gegenstand.loslassen();
+            if (!d) return;
+            if (d.istFutter) futterLosgelassen(d);
+            else if (d.name === 'flasche') flascheLosgelassen(d);
+            else if (d.name === 'decke') deckeLosgelassen(d, x, y);
+            schauGeradeaus();
+            return;
+        }
+        // Streicheln endet über den Nachlauf-Timer
     }
 
     // ---------- Status-Ringe ----------
@@ -371,6 +890,7 @@
         spiel.letzteZeit = zeit;
 
         fortschreiben(Date.now(), true);
+        trinkenFortschreiben(dt);
 
         // Zzz vom Bett aufsteigen lassen
         if (leo.schlaeft) {
@@ -410,16 +930,16 @@
         Skalierung.init(buehne, KONFIG.BREITE, KONFIG.HOEHE);
         Leo.init();
         Zimmer.init();
+        Gegenstand.init(document.getElementById('dinge'));
         laden();
 
         // Gesten auf der Bühne (Knöpfe regeln sich selbst per click)
         Eingabe.init(buehne, {
-            beiTippen: function (x, y) {
-                if (Leo.trifft(x, y)) leoAngetippt();
-            },
+            beiTippen: beiTippen,
             beiZiehen: function (x, y, sx, sy, phase) {
-                if (spiel.modus === 'schwamm') { schwammBewegen(x, y); return; }
-                if (phase !== 'ende') streichelBewegung(x, y);
+                if (phase === 'start') ziehStart(x, y, sx, sy);
+                else if (phase === 'bewegt') ziehBewegt(x, y);
+                else ziehEnde(x, y);
             }
         });
 
@@ -429,11 +949,11 @@
                 fn();
             });
         }
-        knopf('kachel-futter', fuettern);
-        knopf('kachel-wasser', trinken);
+        knopf('kachel-futter', kachelFutter);
+        knopf('kachel-wasser', kachelWasser);
         knopf('kachel-schwamm', schwammStart);
         knopf('kachel-streicheln', streichelnKachel);
-        knopf('kachel-decke', decke);
+        knopf('kachel-decke', kachelDecke);
         knopf('kachel-sonne', aufwachen);
         knopf('ton-knopf', function () {
             Sound.stummUmschalten();
@@ -443,6 +963,10 @@
 
         tonAnzeigen();
         Zimmer.setzeNacht(leo.schlaeft);
+        if (leo.schlaeft) {
+            Zimmer.setzeVorhang(1, true);
+            Gegenstand.verstecke(Gegenstand.finde('decke'), true);
+        }
         spiel.zustand = zustandBestimmen();
         Leo.zeigeZustand(spiel.zustand);
         ringeAktualisieren();

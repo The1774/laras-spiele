@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="font-family: Fredoka, 'Comic Sans MS', sans-serif;" viewBox="0 0 1024 768" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#ffffff" opacity="0.7">
+      <ellipse cx="140" cy="90" rx="70" ry="26"></ellipse><ellipse cx="180" cy="74" rx="46" ry="24"></ellipse>
+      <ellipse cx="880" cy="120" rx="80" ry="28"></ellipse><ellipse cx="840" cy="102" rx="48" ry="26"></ellipse>
+      <ellipse cx="520" cy="700" rx="90" ry="26"></ellipse><ellipse cx="560" cy="686" rx="50" ry="24"></ellipse>
+    </g>
+    <path d="M60 300 L64 312 L76 316 L64 320 L60 332 L56 320 L44 316 L56 312 Z" fill="#ffd24a" opacity="0.8"></path>
+    <path d="M960 420 L963 428 L971 431 L963 434 L960 442 L957 434 L949 431 L957 428 Z" fill="#ff8fcf" opacity="0.8"></path>
+    <path d="M500 60 L503 68 L511 71 L503 74 L500 82 L497 74 L489 71 L497 68 Z" fill="#b388eb" opacity="0.8"></path>
+  </svg>

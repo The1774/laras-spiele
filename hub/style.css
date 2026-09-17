@@ -149,23 +149,25 @@ h1 {
 
 /* ---------- Winken beim Laden ---------- */
 
-/* Der Arm dreht sich um seinen oberen Ansatz am Körper */
-.winke-arm {
+/* Die ganze Figur wippt kurz um ihren Fußpunkt – ein fröhliches Hallo.
+   Die Figuren-Gruppen kommen 1:1 aus leo-ella/design/hub/, deshalb wird
+   nicht ein einzelner Arm, sondern die Hüll-Gruppe .figur animiert. */
+.figur {
     transform-box: fill-box;
-    transform-origin: 50% 0%;
+    transform-origin: 50% 100%;
     animation: winken 1.6s ease-in-out 0.4s 1 both;
 }
 
 /* Leo winkt einen Tick später als Bella */
-.kachel-leo .winke-arm {
+.kachel-leo .figur {
     animation-delay: 0.7s;
 }
 
 @keyframes winken {
-    0%   { transform: rotate(0deg); }
-    30%  { transform: rotate(-80deg); }
-    50%  { transform: rotate(-55deg); }
-    70%  { transform: rotate(-85deg); }
-    85%  { transform: rotate(-60deg); }
-    100% { transform: rotate(0deg); }
+    0%   { transform: rotate(0deg)  translateY(0); }
+    20%  { transform: rotate(-7deg) translateY(-10px); }
+    40%  { transform: rotate(7deg)  translateY(-6px); }
+    60%  { transform: rotate(-6deg) translateY(-10px); }
+    80%  { transform: rotate(5deg)  translateY(-4px); }
+    100% { transform: rotate(0deg)  translateY(0); }
 }

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="font-family: Fredoka, 'Comic Sans MS', sans-serif;" viewBox="0 0 420 520" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#ffffff" opacity="0.9">
+        <circle cx="40" cy="60" r="2"></circle><circle cx="120" cy="30" r="2"></circle><circle cx="200" cy="70" r="2"></circle><circle cx="300" cy="40" r="2"></circle><circle cx="380" cy="90" r="2"></circle>
+        <circle cx="70" cy="140" r="2"></circle><circle cx="160" cy="120" r="2"></circle><circle cx="260" cy="150" r="2"></circle><circle cx="350" cy="170" r="2"></circle><circle cx="30" cy="230" r="2"></circle>
+        <circle cx="390" cy="250" r="2"></circle><circle cx="110" cy="260" r="2"></circle><circle cx="330" cy="290" r="2"></circle>
+      </g>
+      <path d="M300 200 L360 140 L420 200 Z" fill="#d6b9b2"></path>
+      <path d="M300 200 L360 140 L420 200" stroke="#ffffff" stroke-width="8" fill="none" stroke-linejoin="round"></path>
+      <rect x="304" y="200" width="116" height="80" fill="#d6b9b2"></rect>
+      <rect x="304" y="280" width="116" height="34" fill="#efe6dc"></rect>
+      <rect x="300" y="310" width="120" height="10" fill="#ffffff"></rect>
+      <ellipse cx="200" cy="440" rx="180" ry="46" fill="#e3c4c9"></ellipse>
+      <g transform="translate(60 150) scale(0.9)">
+        <ellipse cx="160" cy="284" rx="86" ry="10" fill="#b89aa0" opacity="0.5"></ellipse>
+        <path d="M232 250 Q290 250 282 200 Q276 172 250 184" stroke="#2b2b3a" stroke-width="18" fill="none" stroke-linecap="round"></path>
+        <path d="M232 250 Q290 250 282 200 Q276 172 250 184" stroke="#ffd98a" stroke-width="10" fill="none" stroke-linecap="round"></path>
+        <circle cx="270" cy="236" r="5" fill="#5a3a22"></circle><circle cx="283" cy="210" r="5" fill="#5a3a22"></circle>
+        <ellipse cx="160" cy="240" rx="72" ry="46" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <ellipse cx="160" cy="250" rx="38" ry="26" fill="#fff6e6"></ellipse>
+        <circle cx="104" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle>
+        <circle cx="216" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle>
+        <ellipse cx="126" cy="274" rx="20" ry="12" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <ellipse cx="194" cy="274" rx="20" ry="12" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <circle cx="100" cy="86" r="30" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></circle><circle cx="100" cy="86" r="16" fill="#ff9ec2"></circle>
+        <circle cx="220" cy="86" r="30" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></circle><circle cx="220" cy="86" r="16" fill="#ff9ec2"></circle>
+        <circle cx="160" cy="150" r="84" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="98" cy="128" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle><circle cx="90" cy="158" r="5" fill="#5a3a22"></circle>
+        <circle cx="222" cy="128" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle><circle cx="230" cy="158" r="5" fill="#5a3a22"></circle>
+        <circle cx="132" cy="86" r="6" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle><circle cx="160" cy="74" r="5" fill="#5a3a22"></circle>
+        <circle cx="188" cy="86" r="6" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle>
+        <ellipse cx="212" cy="46" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(-30 212 46)"></ellipse>
+        <ellipse cx="240" cy="58" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(30 240 58)"></ellipse>
+        <circle cx="226" cy="54" r="7" fill="#ffd24a" stroke="#2b2b3a" stroke-width="3"></circle>
+        <ellipse cx="160" cy="186" rx="34" ry="24" fill="#fff6e6"></ellipse>
+        <ellipse cx="132" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <circle cx="134" cy="149" r="14" fill="#2b2b3a"></circle><circle cx="129" cy="142" r="5" fill="#ffffff"></circle><circle cx="138" cy="153" r="2.5" fill="#ffffff"></circle>
+        <ellipse cx="188" cy="146" rx="21" ry="26" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <circle cx="190" cy="149" r="14" fill="#2b2b3a"></circle><circle cx="185" cy="142" r="5" fill="#ffffff"></circle><circle cx="194" cy="153" r="2.5" fill="#ffffff"></circle>
+        <circle cx="102" cy="182" r="12" fill="#ff9ec2" opacity="0.7"></circle><circle cx="218" cy="182" r="12" fill="#ff9ec2" opacity="0.7"></circle>
+        <path d="M152 178 L168 178 L160 188 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"></path>
+        <path d="M146 194 Q153 204 160 194 Q167 204 174 194" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"></path>
+        <path d="M60 176 L100 186 M60 196 L100 196" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"></path>
+        <path d="M260 176 L220 186 M260 196 L220 196" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"></path>
+      </g>
+    </svg>

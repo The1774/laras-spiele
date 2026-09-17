@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="font-family: Fredoka, 'Comic Sans MS', sans-serif;" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="40" cy="44" rx="30" ry="10" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3"></ellipse>
+        <path d="M10 44 a30 10 0 0 0 60 0 v10 a30 10 0 0 1 -60 0 Z" fill="#ff5fa2" stroke="#2b2b3a" stroke-width="3"></path>
+        <circle cx="30" cy="40" r="5" fill="#ffd24a" stroke="#2b2b3a" stroke-width="2"></circle>
+        <circle cx="44" cy="37" r="5" fill="#ffd24a" stroke="#2b2b3a" stroke-width="2"></circle>
+        <circle cx="52" cy="42" r="4" fill="#ffd24a" stroke="#2b2b3a" stroke-width="2"></circle>
+      </svg>

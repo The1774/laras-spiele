@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="font-family: Fredoka, 'Comic Sans MS', sans-serif;" viewBox="0 0 420 520" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="340" cy="80" r="40" fill="#ffe066"></circle>
+      <ellipse cx="90" cy="110" rx="46" ry="18" fill="#ffffff" opacity="0.9"></ellipse>
+      <path d="M0 300 Q210 250 420 300 L420 520 L0 520 Z" fill="#8fd48a"></path>
+      <g stroke="#2b2b3a" stroke-width="3">
+        <circle cx="50" cy="360" r="12" fill="#ff8fcf"></circle><circle cx="50" cy="360" r="4" fill="#ffd24a" stroke="none"></circle>
+        <circle cx="370" cy="380" r="12" fill="#b388eb"></circle><circle cx="370" cy="380" r="4" fill="#ffd24a" stroke="none"></circle>
+        <circle cx="90" cy="450" r="10" fill="#ffd24a"></circle><circle cx="90" cy="450" r="3.5" fill="#ff8fcf" stroke="none"></circle>
+        <circle cx="330" cy="470" r="10" fill="#ff8fcf"></circle><circle cx="330" cy="470" r="3.5" fill="#ffd24a" stroke="none"></circle>
+      </g>
+      <path d="M100 210 A110 110 0 0 1 320 210" stroke="#ff8fcf" stroke-width="10" fill="none" opacity="0.8"></path>
+      <path d="M112 210 A98 98 0 0 1 308 210" stroke="#ffd24a" stroke-width="10" fill="none" opacity="0.8"></path>
+      <path d="M124 210 A86 86 0 0 1 296 210" stroke="#6ec6f0" stroke-width="10" fill="none" opacity="0.8"></path>
+      <path d="M136 210 A74 74 0 0 1 284 210" stroke="#b388eb" stroke-width="10" fill="none" opacity="0.8"></path>
+      <g transform="translate(70 180) scale(0.9)">
+        <defs>
+          <linearGradient id="hornHub" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffd24a"></stop><stop offset="1" stop-color="#ff8fb0"></stop>
+          </linearGradient>
+        </defs>
+        <ellipse cx="160" cy="284" rx="84" ry="10" fill="#5fae5a" opacity="0.5"></ellipse>
+        <ellipse cx="160" cy="236" rx="64" ry="48" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <ellipse cx="132" cy="272" rx="17" ry="12" fill="#b59bd6" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <ellipse cx="188" cy="272" rx="17" ry="12" fill="#b59bd6" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <circle cx="98" cy="112" r="17" fill="#ff8fbf" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="90" cy="146" r="16" fill="#ffd24a" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="98" cy="180" r="15" fill="#6ec6f0" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="222" cy="112" r="17" fill="#b388eb" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="230" cy="146" r="16" fill="#ff8fbf" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="222" cy="180" r="15" fill="#ffd24a" stroke="#2b2b3a" stroke-width="4"></circle>
+        <path d="M110 84 L116 40 L142 74 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"></path>
+        <path d="M210 84 L204 40 L178 74 Z" fill="#ffffff" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"></path>
+        <path d="M148 68 L160 14 L172 68 Z" fill="url(#hornHub)" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round"></path>
+        <circle cx="160" cy="142" r="82" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="130" cy="76" r="16" fill="#ff8fbf" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="112" cy="98" r="14" fill="#6ec6f0" stroke="#2b2b3a" stroke-width="4"></circle>
+        <path d="M112 150 Q135 130 158 150" stroke="#2b2b3a" stroke-width="5" fill="none" stroke-linecap="round"></path>
+        <path d="M162 150 Q185 130 208 150" stroke="#2b2b3a" stroke-width="5" fill="none" stroke-linecap="round"></path>
+        <circle cx="110" cy="176" r="12" fill="#ff9ec2" opacity="0.7"></circle>
+        <circle cx="210" cy="176" r="12" fill="#ff9ec2" opacity="0.7"></circle>
+        <path d="M146 182 Q160 198 174 182" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"></path>
+      </g>
+    </svg>

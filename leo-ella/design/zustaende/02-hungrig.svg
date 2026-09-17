@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="font-family: Fredoka, 'Comic Sans MS', sans-serif;" viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="160" cy="284" rx="86" ry="10" fill="#f0d9b0"></ellipse>
+        <path d="M232 250 Q290 250 282 200 Q276 172 250 184" stroke="#2b2b3a" stroke-width="18" fill="none" stroke-linecap="round"></path>
+        <path d="M232 250 Q290 250 282 200 Q276 172 250 184" stroke="#ffd98a" stroke-width="10" fill="none" stroke-linecap="round"></path>
+        <circle cx="270" cy="236" r="5" fill="#5a3a22"></circle>
+        <circle cx="283" cy="210" r="5" fill="#5a3a22"></circle>
+        <ellipse cx="160" cy="240" rx="72" ry="46" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <ellipse cx="160" cy="250" rx="38" ry="26" fill="#fff6e6"></ellipse>
+        <circle cx="104" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle>
+        <circle cx="216" cy="230" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle>
+        <path d="M142 246 q5 -7 10 0 t10 0" stroke="#8f5fd6" stroke-width="3" fill="none" stroke-linecap="round"></path>
+        <path d="M148 258 q5 -7 10 0 t10 0" stroke="#8f5fd6" stroke-width="3" fill="none" stroke-linecap="round"></path>
+        <ellipse cx="126" cy="274" rx="20" ry="12" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <ellipse cx="194" cy="274" rx="20" ry="12" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <circle cx="100" cy="86" r="30" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="100" cy="86" r="16" fill="#ff9ec2"></circle>
+        <circle cx="220" cy="86" r="30" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="220" cy="86" r="16" fill="#ff9ec2"></circle>
+        <circle cx="160" cy="150" r="84" fill="#ffd98a" stroke="#2b2b3a" stroke-width="4"></circle>
+        <circle cx="98" cy="128" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle>
+        <circle cx="90" cy="158" r="5" fill="#5a3a22"></circle>
+        <circle cx="222" cy="128" r="7" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle>
+        <circle cx="230" cy="158" r="5" fill="#5a3a22"></circle>
+        <circle cx="132" cy="86" r="6" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle>
+        <circle cx="160" cy="74" r="5" fill="#5a3a22"></circle>
+        <circle cx="188" cy="86" r="6" fill="#c98a4a" stroke="#5a3a22" stroke-width="3.5"></circle>
+        <ellipse cx="212" cy="46" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(-30 212 46)"></ellipse>
+        <ellipse cx="240" cy="58" rx="16" ry="11" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4" transform="rotate(30 240 58)"></ellipse>
+        <circle cx="226" cy="54" r="7" fill="#ffd24a" stroke="#2b2b3a" stroke-width="3"></circle>
+        <ellipse cx="160" cy="186" rx="34" ry="24" fill="#fff6e6"></ellipse>
+        <ellipse cx="132" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <circle cx="130" cy="152" r="16" fill="#2b2b3a"></circle>
+        <circle cx="125" cy="145" r="5" fill="#ffffff"></circle>
+        <ellipse cx="188" cy="146" rx="22" ry="27" fill="#ffffff" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <circle cx="186" cy="152" r="16" fill="#2b2b3a"></circle>
+        <circle cx="181" cy="145" r="5" fill="#ffffff"></circle>
+        <circle cx="102" cy="182" r="12" fill="#ff9ec2" opacity="0.7"></circle>
+        <circle cx="218" cy="182" r="12" fill="#ff9ec2" opacity="0.7"></circle>
+        <path d="M152 178 L168 178 L160 188 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"></path>
+        <path d="M144 198 Q152 190 160 198 Q168 206 176 198" stroke="#2b2b3a" stroke-width="4" fill="none" stroke-linecap="round"></path>
+        <path d="M60 176 L100 186 M60 196 L100 196" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"></path>
+        <path d="M260 176 L220 186 M260 196 L220 196" stroke="#2b2b3a" stroke-width="3" stroke-linecap="round"></path>
+        <ellipse cx="52" cy="272" rx="30" ry="12" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="4"></ellipse>
+        <ellipse cx="52" cy="268" rx="22" ry="6" fill="#ffd6ec"></ellipse>
+      </svg>

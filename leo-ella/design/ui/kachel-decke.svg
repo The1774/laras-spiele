@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="font-family: Fredoka, 'Comic Sans MS', sans-serif;" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 36 Q40 26 66 36 L68 62 L12 62 Z" fill="#ff8fcf" stroke="#2b2b3a" stroke-width="3" stroke-linejoin="round"></path>
+        <circle cx="30" cy="50" r="3" fill="#ffd6ec"></circle>
+        <circle cx="50" cy="50" r="3" fill="#ffd6ec"></circle>
+        <path d="M60 12 A12 12 0 1 0 70 28 A9 9 0 0 1 60 12 Z" fill="#ffe066" stroke="#2b2b3a" stroke-width="3"></path>
+      </svg>

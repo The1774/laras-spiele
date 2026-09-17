@@ -16,7 +16,9 @@
 //                desto lauter schnurrt sie.
 //   - Schlafen:  Vorhang am Fenster zuziehen, Lampe antippen, die Decke vom
 //                Bett über Leo ziehen – dann gähnt sie und schläft ein.
-//   - Schwamm:   wie bisher – Kachel, dann Flecken wegwischen.
+//   - Baden:     die Kachel holt die Wanne ins Zimmer, Leo hüpft rein. Hahn
+//                antippen, Seife über Leo halten, Schaum mit dem Finger reiben,
+//                Duschkopf halten, Föhn halten – dann ist sie frisch geputzt.
 // Die Kacheln rechts sind nur noch Hinweise: sie lassen den passenden
 // Gegenstand wackeln, und Leo schaut hin.
 //
@@ -24,7 +26,8 @@
 //
 // Module: gemeinsam/{speicher,audio,skalierung,eingabe,partikel}.js,
 //         js/config.js (Zahlen), js/leo.js (Figur, Zonen, Blick),
-//         js/zimmer.js (Tag/Nacht, Vorhang, Lampe), js/gegenstand.js (Dinge)
+//         js/zimmer.js (Tag/Nacht, Vorhang, Lampe), js/gegenstand.js (Dinge),
+//         js/bad.js (Wanne, Wasser, Schaum, nasses Fell)
 // =====================================================
 
 (function () {
@@ -52,7 +55,8 @@
         reaktion: null,            // Name der laufenden Reaktion (mit Timer)
         reaktionTimer: null,
         gehalten: null,            // Gesicht, das ohne Timer gehalten wird (Maul auf, Zone …)
-        modus: null,               // 'schwamm' | 'vorhang' | null
+        modus: null,               // 'hand' | 'schrubben' | 'vorhang' | null
+        bad: null,                 // laufendes Baden (siehe Abschnitt Baden), sonst null
         // Streicheln
         streichelZone: null,
         streichelt: false,
@@ -199,7 +203,6 @@
     function kopfY() { return KONFIG.LEO.y + 120 * KONFIG.LEO.faktor; }
 
     function beschaeftigt() {
-        if (spiel.modus === 'schwamm') schwammEnde();
         return leo.schlaeft || spiel.reaktion !== null;
     }
 
@@ -461,7 +464,7 @@
         if (spiel.reaktionTimer) clearTimeout(spiel.reaktionTimer);
         spiel.reaktion = null;
         aktion();
-        schwammEnde();
+        badAbbrechen();
         futterAbbrechen();
         Sound.gaehnen();
         setTimeout(function () { Sound.schlaflied(); }, 900);
@@ -532,46 +535,322 @@
     }
 
     // =====================================================
-    // Schwamm (wie bisher)
+    // Baden – Wanne, Hahn, Seife, Schaum reiben, Dusche, Föhn
+    //
+    // Fünf Handgriffe, jeder mit eigener Bewegung (Bild: js/bad.js):
+    //   1. Hahn antippen → Wasser läuft, Leo schaut zu und planscht
+    //   2. Seifenflasche über Leo halten → Schaumkleckse wachsen;
+    //      mit dem Finger (Schwamm) reiben → Schaumberge werden groß.
+    //      Bei viel Schaum niest Leo einmal (Überraschung – ein Berg fliegt weg)
+    //   3. Duschkopf über Leo halten → es regnet, Schaum und Flecken spülen weg,
+    //      das Fell wird nass und dunkel, Tropfen hängen an den Ohren
+    //   4. Föhn über Leo halten → warme Luft, Fell wird wieder hell und fluffig
+    //   5. Frisch geputzt: Schütteln, Aufplustern, Glitzer, sauber = 100,
+    //      die Wanne fährt wieder raus
+    // Wenn Lara nicht weiterweiß, wackelt nach ein paar Sekunden das Ding,
+    // das als Nächstes dran ist, und Leo schaut hin.
     // =====================================================
 
-    function schwammStart() {
+    var BADEZEUG = ['seife', 'dusche', 'foehn'];
+
+    function badet() { return spiel.bad !== null; }
+    function istBadezeug(d) { return BADEZEUG.indexOf(d.name) >= 0; }
+
+    function badStart() {
         if (leo.schlaeft || spiel.reaktion) return;
-        if (spiel.modus === 'schwamm') { schwammEnde(); return; }
-        if (spiel.zustand !== 'schmutzig' || Leo.fleckenUebrig() === 0) {
-            frischGeputzt();
-            return;
-        }
-        spiel.modus = 'schwamm';
-        buehne.classList.add('schwamm-modus');
+        if (badet()) { badHinweis(); return; }
+        futterAbbrechen();
+        streichelEnde();
+        spiel.bad = {
+            schritt: 'wasser',        // 'wasser' | 'schaum' | 'spuelen' | 'trocknen' | 'fertig'
+            geniest: false,
+            trocken: 0,               // 0 … 1 beim Föhnen
+            letzterFortschritt: performance.now(),
+            hinweisTimer: null,
+            letzterTon: 0,
+            letztePartikel: 0,
+            letzterSchrubb: 0,
+            gehalten: false           // Seife / Dusche / Föhn gerade über Leo (Gesicht wird gehalten)
+        };
+        Leo.waescht = true;
+        Bad.zeigen();
         document.getElementById('kachel-schwamm').classList.add('aktiv');
         Sound.klick();
+        aktion();
+        // Leo hüpft in die Wanne, dann ploppt das Badezeug auf den Hocker
+        setTimeout(function () {
+            if (!badet()) return;
+            Sound.sprung();
+            starteReaktion('badefreude', KONFIG.DAUER.badefreude, badHinweis);
+        }, 450);
+        BADEZEUG.forEach(function (name, i) {
+            setTimeout(function () {
+                if (badet()) Gegenstand.neuAmPlatz(Gegenstand.finde(name));
+            }, 650 + i * 130);
+        });
+        spiel.bad.hinweisTimer = setInterval(function () {
+            if (badet() && performance.now() - spiel.bad.letzterFortschritt > KONFIG.BAD_HINWEIS_MS) badHinweis();
+        }, 1500);
     }
 
-    function schwammEnde() {
-        if (spiel.modus === 'schwamm') spiel.modus = null;
-        buehne.classList.remove('schwamm-modus');
-        document.getElementById('kachel-schwamm').classList.remove('aktiv');
+    // Das nächste Ding wackelt, Leo schaut hin
+    function badHinweis() {
+        var b = spiel.bad;
+        if (!b || leo.schlaeft) return;
+        b.letzterFortschritt = performance.now();
+        if (b.schritt === 'wasser') {
+            Bad.hahnHinweis();
+            schauZu(Bad.HAHN.x + 60, Bad.HAHN.y + 50, 1600);
+        } else if (b.schritt === 'schaum') {
+            if (Bad.schaumMax() < KONFIG.SEIFE_MAX - 0.05) dingWackeln('seife');
+            else { Bad.schaumHinweis(); Sound.mrrp(); }
+        } else if (b.schritt === 'spuelen') {
+            dingWackeln('dusche');
+        } else if (b.schritt === 'trocknen') {
+            dingWackeln('foehn');
+        }
     }
 
-    function schwammBewegen(x, y) {
+    function dingWackeln(name) {
+        var d = Gegenstand.finde(name);
+        if (!d || d.versteckt || Gegenstand.inHand === d) return;
+        Gegenstand.hinweis(d);
+        schauZu(d.x, d.y, 1600);
+    }
+
+    function badFortschritt() {
+        if (spiel.bad) spiel.bad.letzterFortschritt = performance.now();
+    }
+
+    // Nächster Schritt: kleiner Glitzer, kurz danach der Hinweis, was jetzt dran ist
+    function badSchritt(neu) {
+        var b = spiel.bad;
+        b.schritt = neu;
+        badFortschritt();
+        Sound.stern();
+        partikel.funkeln(kopfX(), kopfY() - 50, 6);
+        setTimeout(function () { if (badet() && spiel.bad.schritt === neu) badHinweis(); }, 900);
+    }
+
+    // ---------- 1. Wasser ----------
+
+    function badHahn() {
+        var b = spiel.bad;
+        if (!b || b.schritt !== 'wasser' || !Bad.hahnAuf()) return;
+        badFortschritt();
+        aktion();
+        Sound.wasserlauf();
+        schauZu(Bad.STRAHL.x, Bad.STRAHL.y);
+        if (!spiel.reaktion && !spiel.gehalten) halteGesicht('neugierig');
+    }
+
+    function wasserVoll() {
+        gesichtLoslassen();
+        var pfote = Leo.zuBuehne(214, 236);
+        Sound.platsch();
+        partikel.tropfen(pfote.x, pfote.y, 10);
+        starteReaktion('planschen', KONFIG.DAUER.planschen, function () { badSchritt('schaum'); });
+        setTimeout(function () {
+            if (badet()) { Sound.platsch(); partikel.tropfen(pfote.x, pfote.y, 8); }
+        }, 550);
+    }
+
+    // ---------- pro Frame (aus der Spielschleife) ----------
+
+    function badFortschreiben(dt) {
+        var b = spiel.bad;
+        if (!b) return;
+        var jetzt = performance.now();
+
+        if (Bad.laeuft) {
+            if (jetzt - b.letzterTon > 600) { Sound.wasserlauf(); b.letzterTon = jetzt; }
+            if (jetzt - b.letztePartikel > 140) { partikel.tropfen(Bad.STRAHL.x, Bad.STRAHL.y, 2); b.letztePartikel = jetzt; }
+        }
+        if (Bad.update(dt)) wasserVoll();
+
+        var d = Gegenstand.inHand;
+        if (d && d.name === 'seife' && b.schritt === 'schaum') seifeHalten(d, dt, jetzt);
+        else if (d && d.name === 'dusche' && b.schritt === 'spuelen') duscheHalten(d, dt, jetzt);
+        else if (d && d.name === 'foehn' && b.schritt === 'trocknen') foehnHalten(d, dt, jetzt);
+        else badGehaltenLos();
+
+        // Nass und wartend: Ohren hängen, bis der Föhn kommt
+        if (b.schritt === 'trocknen' && !spiel.gehalten && !spiel.reaktion && !spiel.streichelt) halteGesicht('nass');
+    }
+
+    // Seife / Dusche / Föhn nicht mehr über Leo → gehaltenes Gesicht loslassen
+    function badGehaltenLos() {
+        var b = spiel.bad;
+        if (!b || !b.gehalten) return;
+        b.gehalten = false;
+        gesichtLoslassen();
+    }
+
+    // ---------- 2. Seife und Schaum ----------
+
+    function seifeHalten(d, dt, jetzt) {
+        var b = spiel.bad;
+        var i = Bad.naechsterBlob(d.x, d.y + 10, KONFIG.SEIFE_NAEHE);
+        if (i < 0) { badGehaltenLos(); return; }
+        if (!b.gehalten) { b.gehalten = true; halteGesicht('neugierig'); }
+        var wert = Bad.blobs[i].wert;
+        if (wert < KONFIG.SEIFE_MAX) {
+            Bad.schaum(i, Math.min(KONFIG.SEIFE_MAX, wert + KONFIG.SEIFE_PRO_SEKUNDE * dt));
+            badFortschritt();
+            if (jetzt - b.letztePartikel > 180) { partikel.blasen(d.x, d.y + 20, 2); b.letztePartikel = jetzt; }
+            if (jetzt - b.letzterTon > 650) { Sound.quietsch(); b.letzterTon = jetzt; }
+        }
+        schaumPruefen();
+    }
+
+    // Mit dem Finger (Schwamm) über Leo reiben: Schaum wird groß, Flecken gehen weg
+    function schrubben(x, y) {
+        var b = spiel.bad;
+        if (!b || b.schritt !== 'schaum') return;
         var c = document.getElementById('schwamm-cursor');
         c.style.left = x + 'px';
         c.style.top = y + 'px';
+        var jetzt = performance.now();
+        var dt = b.letzterSchrubb ? Math.min(0.06, (jetzt - b.letzterSchrubb) / 1000) : 0;
+        b.letzterSchrubb = jetzt;
         if (!Leo.trifft(x, y)) return;
+        if (spiel.gehalten !== 'schnurren') halteGesicht('schnurren');
+
         var p = Leo.zuLeo(x, y);
         if (Leo.fleckWischen(p.x, p.y)) {
             Sound.platsch();
-            partikel.tropfen(x, y, 5);
-            partikel.blasen(x, y, 3);
-            if (Leo.fleckenUebrig() === 0) {
-                schwammEnde();
-                frischGeputzt();
+            partikel.tropfen(x, y, 4);
+            badFortschritt();
+        }
+        var i = Bad.naechsterBlob(x, y, KONFIG.SCHRUBB_NAEHE);
+        if (i >= 0 && Bad.blobs[i].wert > 0.02 && Bad.blobs[i].wert < 1) {
+            Bad.schaum(i, Bad.blobs[i].wert + KONFIG.SCHRUBB_PRO_SEKUNDE * dt);
+            badFortschritt();
+            if (jetzt - b.letztePartikel > 120) { partikel.blasen(x, y - 10, 2); b.letztePartikel = jetzt; }
+            if (jetzt - b.letzterTon > 500) { Sound.blubbern(); b.letzterTon = jetzt; }
+        }
+        schaumPruefen();
+    }
+
+    function schaumPruefen() {
+        var b = spiel.bad;
+        if (!b || b.schritt !== 'schaum') return;
+        if (!b.geniest && Bad.schaumGesamt() >= KONFIG.NIES_AB_SCHAUM) { niesen(); return; }
+        if (Bad.schaumAlleUeber(KONFIG.SCHAUM_FERTIG)) badSchritt('spuelen');
+    }
+
+    // Überraschung: bei viel Schaum kitzelt es in der Nase
+    function niesen() {
+        spiel.bad.geniest = true;
+        setTimeout(function () {
+            if (!badet()) return;
+            Sound.niesen();
+            partikel.blasen(kopfX(), kopfY() + 20, 14);
+            partikel.tropfen(kopfX(), kopfY() + 30, 4);
+            // Der größte Schaumberg fliegt zum Teil weg – da muss Lara nochmal reiben
+            var groesster = 0;
+            for (var i = 1; i < Bad.blobs.length; i++) if (Bad.blobs[i].wert > Bad.blobs[groesster].wert) groesster = i;
+            Bad.schaum(groesster, Math.max(0.15, Bad.blobs[groesster].wert - 0.4));
+            starteReaktion('niesen', KONFIG.DAUER.niesen, function () { setTimeout(schaumPruefen, 100); });
+        }, 400);
+    }
+
+    // ---------- 3. Abspülen ----------
+
+    function duscheHalten(d, dt, jetzt) {
+        var b = spiel.bad;
+        var qx = d.x, qy = d.y + 24;        // der Duschkopf sitzt unten am Gegenstand
+        var ueberLeo = Leo.trifft(qx, qy) || Leo.trifft(qx, qy + 70) || Leo.trifft(qx, qy + 140);
+        if (!ueberLeo) { badGehaltenLos(); return; }
+        if (!b.gehalten) { b.gehalten = true; halteGesicht('dusche'); }
+        badFortschritt();
+        if (jetzt - b.letztePartikel > 50) { partikel.regen(qx, qy, 3); b.letztePartikel = jetzt; }
+        if (jetzt - b.letzterTon > 420) { Sound.dusche(); b.letzterTon = jetzt; }
+        Bad.setzeFeuchte(Math.min(1, Bad.feuchte + dt * 0.9));
+
+        // Schaum unter dem Regen schrumpft
+        for (var i = 0; i < Bad.blobs.length; i++) {
+            var p = Bad.blobPosition(i);
+            if (Math.abs(p.x - qx) < KONFIG.DUSCHE_BREITE && p.y > qy - 20 && Bad.blobs[i].wert > 0) {
+                Bad.schaum(i, Bad.blobs[i].wert - KONFIG.DUSCHE_PRO_SEKUNDE * dt);
             }
+        }
+        // Flecken unter dem Regen gehen weg
+        var l = Leo.zuLeo(qx, qy);
+        while (Leo.fleckSpuelen(l.x, l.y - 14, KONFIG.DUSCHE_BREITE / KONFIG.LEO.faktor)) {
+            Sound.platsch();
+            partikel.tropfen(qx, qy + 90, 5);
+        }
+        var voll = KONFIG.SCHAUM_FERTIG * Bad.blobs.length;
+        Bad.oberflaechenSchaum((voll - Bad.schaumGesamt()) / voll);
+
+        var fleckenUebrig = spiel.zustand === 'schmutzig' ? Leo.fleckenUebrig() : 0;
+        if (Bad.schaumGesamt() < 0.05 && fleckenUebrig === 0) {
+            leo.sauber = Math.max(leo.sauber, KONFIG.SAUBER_NACH_SPUELEN);
+            aktion();
+            Bad.schaumWeg();
+            badGehaltenLos();
+            badSchritt('trocknen');
         }
     }
 
-    function frischGeputzt() {
+    // ---------- 4. Föhnen ----------
+
+    function foehnHalten(d, dt, jetzt) {
+        var b = spiel.bad;
+        var mitte = Leo.zuBuehne(160, 170);
+        var dx = mitte.x - d.x, dy = mitte.y - d.y;
+        var abstand = Math.sqrt(dx * dx + dy * dy);
+        // Der Föhn zeigt immer zu Leo
+        d.el.classList.toggle('gespiegelt', d.x > mitte.x);
+        if (abstand > KONFIG.FOEHN_NAEHE) { badGehaltenLos(); return; }
+        if (!b.gehalten) { b.gehalten = true; halteGesicht('foehn'); }
+        badFortschritt();
+        var duese = d.x + (d.x > mitte.x ? -34 : 34);
+        if (jetzt - b.letztePartikel > 40) { partikel.wind(duese, d.y - 2, dx, dy, 2); b.letztePartikel = jetzt; }
+        if (jetzt - b.letzterTon > 430) { Sound.foehn(); b.letzterTon = jetzt; }
+        b.trocken = Math.min(1, b.trocken + dt / KONFIG.FOEHN_SEKUNDEN);
+        Bad.setzeFeuchte(1 - b.trocken);
+        if (b.trocken >= 1) badFertig();
+    }
+
+    // ---------- 5. Fertig ----------
+
+    function badFertig() {
+        var b = spiel.bad;
+        b.schritt = 'fertig';
+        badGehaltenLos();
+        var d = Gegenstand.inHand;
+        if (d && istBadezeug(d)) { d.el.classList.remove('gespiegelt'); Gegenstand.zurueck(d); }
+        frischGeputzt(badEnde);
+    }
+
+    function badEnde() {
+        var b = spiel.bad;
+        if (!b) return;
+        if (b.hinweisTimer) clearInterval(b.hinweisTimer);
+        badGehaltenLos();
+        if (spiel.gehalten === 'nass' || spiel.gehalten === 'neugierig') spiel.gehalten = null;
+        spiel.bad = null;
+        Leo.waescht = false;
+        var d = Gegenstand.inHand;
+        if (d && istBadezeug(d)) { spiel.modus = null; Gegenstand.loslassen(); }
+        for (var i = 0; i < BADEZEUG.length; i++) Gegenstand.verstecke(Gegenstand.finde(BADEZEUG[i]), true);
+        if (spiel.modus === 'schrubben') { spiel.modus = null; buehne.classList.remove('schwamm-modus'); }
+        Bad.verstecken();
+        document.getElementById('kachel-schwamm').classList.remove('aktiv');
+        if (!spiel.reaktion) zurueckZumZustand();
+    }
+
+    // Abbruch (z. B. Schlafen gehen mitten im Bad)
+    function badAbbrechen() {
+        if (!badet()) return;
+        Bad.schaumWeg();
+        badEnde();
+    }
+
+    // Frisch geputzt: Schütteln wie ein nasser Hund, dann Aufplustern und Glitzer
+    function frischGeputzt(danach) {
         leo.sauber = 100;
         aktion();
         Sound.platsch();
@@ -580,7 +859,7 @@
             Sound.stern();
             partikel.funkeln(kopfX(), kopfY(), 14);
             partikel.blasen(kopfX(), kopfY() + 40, 6);
-            starteReaktion('frisch', KONFIG.DAUER.frisch);
+            starteReaktion('frisch', KONFIG.DAUER.frisch, danach);
         });
     }
 
@@ -760,7 +1039,6 @@
 
     function kachelFutter() {
         if (leo.schlaeft) return;
-        schwammEnde();
         hinweisAuf(['fisch', 'milch', 'keks', 'apfel'], 760, 580);
         if (!spiel.reaktion && !spiel.gehalten) {
             spiel.reaktion = 'naeh';
@@ -774,13 +1052,11 @@
 
     function kachelWasser() {
         if (leo.schlaeft) return;
-        schwammEnde();
         hinweisAuf(['flasche'], 796, 600);
     }
 
     function kachelDecke() {
         if (leo.schlaeft) return;
-        schwammEnde();
         hinweisAuf(['decke'], 790, 350);
         Sound.gaehnen();
         if (!spiel.reaktion && !spiel.gehalten) starteReaktion('gutenacht', 1400);
@@ -791,6 +1067,7 @@
     // =====================================================
 
     function beiTippen(x, y) {
+        if (badet() && Bad.istAufHahn(x, y)) { badHahn(); return; }
         if (Zimmer.istAufLampe(x, y)) { lampeAngetippt(); return; }
         if (Zimmer.istImFenster(x, y)) { vorhangAngetippt(); return; }
         var d = Gegenstand.unterPunkt(x, y);
@@ -804,17 +1081,25 @@
     }
 
     function ziehStart(x, y, sx, sy) {
-        if (spiel.modus === 'schwamm') return;
         // Gegenstand unter dem Finger?
         var d = Gegenstand.unterPunkt(sx, sy);
         if (d && !leo.schlaeft) {
-            schwammEnde();
             streichelEnde();
             futterAbbrechen();
             Gegenstand.aufheben(d, x, y);
             if (d.istFutter) spiel.futter = { ding: d, amMaul: false, bissTimer: null, geschnuppert: false, verweigert: false };
             else if (d.name === 'flasche') spiel.trinken = { ding: d, rest: KONFIG.TRINKEN_MS, letzterSchluck: 0, amMaul: false };
             spiel.modus = 'hand';
+            return;
+        }
+        // Beim Baden: am Hahn ziehen = aufdrehen, Finger auf Leo = Schwamm
+        if (badet() && Bad.istAufHahn(sx, sy)) { badHahn(); return; }
+        if (badet() && spiel.bad.schritt === 'schaum' && Leo.trifft(sx, sy)) {
+            streichelEnde();
+            spiel.modus = 'schrubben';
+            spiel.bad.letzterSchrubb = 0;
+            buehne.classList.add('schwamm-modus');
+            schrubben(x, y);
             return;
         }
         if (Zimmer.istImFenster(sx, sy)) {
@@ -826,7 +1111,7 @@
     }
 
     function ziehBewegt(x, y) {
-        if (spiel.modus === 'schwamm') { schwammBewegen(x, y); return; }
+        if (spiel.modus === 'schrubben') { schrubben(x, y); return; }
         if (spiel.modus === 'vorhang') { Zimmer.vorhangZiehen(spiel.vorhangStart, spiel.vorhangStartX, x); return; }
         if (spiel.modus === 'hand') {
             var d = Gegenstand.inHand;
@@ -842,6 +1127,13 @@
     }
 
     function ziehEnde(x, y) {
+        if (spiel.modus === 'schrubben') {
+            spiel.modus = null;
+            buehne.classList.remove('schwamm-modus');
+            aktion();
+            gesichtLoslassen();
+            return;
+        }
         if (spiel.modus === 'vorhang') {
             spiel.modus = null;
             Zimmer.vorhangEinrasten();
@@ -855,6 +1147,7 @@
             if (d.istFutter) futterLosgelassen(d);
             else if (d.name === 'flasche') flascheLosgelassen(d);
             else if (d.name === 'decke') deckeLosgelassen(d, x, y);
+            else if (istBadezeug(d)) { badGehaltenLos(); d.el.classList.remove('gespiegelt'); Gegenstand.zurueck(d); }
             schauGeradeaus();
             return;
         }
@@ -891,6 +1184,7 @@
 
         fortschreiben(Date.now(), true);
         trinkenFortschreiben(dt);
+        badFortschreiben(dt);
 
         // Zzz vom Bett aufsteigen lassen
         if (leo.schlaeft) {
@@ -931,6 +1225,8 @@
         Leo.init();
         Zimmer.init();
         Gegenstand.init(document.getElementById('dinge'));
+        Bad.init();
+        for (var i = 0; i < BADEZEUG.length; i++) Gegenstand.verstecke(Gegenstand.finde(BADEZEUG[i]), true);
         laden();
 
         // Gesten auf der Bühne (Knöpfe regeln sich selbst per click)
@@ -951,7 +1247,7 @@
         }
         knopf('kachel-futter', kachelFutter);
         knopf('kachel-wasser', kachelWasser);
-        knopf('kachel-schwamm', schwammStart);
+        knopf('kachel-schwamm', badStart);
         knopf('kachel-streicheln', streichelnKachel);
         knopf('kachel-decke', kachelDecke);
         knopf('kachel-sonne', aufwachen);

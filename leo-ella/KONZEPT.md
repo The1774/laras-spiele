@@ -48,6 +48,8 @@ Was bleibt: kein Text, kein Verlieren, kein Zeitdruck, kein Verwahrlosen. Bedür
 
 **Heute:** Schwamm-Kachel, dann Flecken wegwischen. Das ist schon der richtige Ansatz, nur zu kurz.
 
+*Umgesetzt am 17.09.2026 als Bade-Szene im Zimmer (die Wanne fährt herein, kein eigener Raum): Hahn antippen, Seife halten, Schaum mit dem Finger reiben (mit Niesen), Duschkopf halten, Föhn halten. Statt Handtuch ein Föhn, weil „trocken pusten“ die schönere Bewegung ist. Bedienung: DOKU.md.*
+
 **Neu:** Waschen wird ein kleiner Ablauf von 4 Schritten, jeder mit eigener Handbewegung:
 
 1. **Wasser einlassen:** Lara zieht am Wasserhahn (Hebel nach unten). Die Wanne füllt sich sichtbar, Wasser rauscht. Sie kann den Hahn auch wieder zudrehen. Leo schaut neugierig in die Wanne, tapst mit der Pfote ins Wasser.
@@ -147,8 +149,8 @@ Was davon abweicht: Statt Regal ein Korb unten rechts, in dem auch die Flasche l
 
 ### Stufe 3: Das Bad als eigene Szene
 
-- Zweiter Raum, per Wischen erreichbar.
-- Hahn, Seife, Schwamm, Dusche, Handtuch, Niesen.
+- ~~Hahn, Seife, Schwamm, Dusche, Handtuch, Niesen.~~ Vorgezogen und am 17.09.2026 im Zimmer umgesetzt (Wanne fährt herein, Föhn statt Handtuch).
+- Zweiter Raum, per Wischen erreichbar (die Wanne zieht dann dorthin um).
 - Bürsten und erste Schleifen-Auswahl.
 
 ### Stufe 4: Küche, Federangel, Sticker-Album
@@ -177,7 +179,7 @@ Für Stufe 1 (alles im Stil der vorhandenen SVGs, gleiche Koordinaten für Leos 
 
 Für Stufe 2: Leo **gehend** (2 Posen), **geduckt** (vor dem Sprung), Ball, Sofa mit Lücke darunter.
 
-Für Stufe 3: Badezimmer, Wanne, Hahn, Seifenflasche, Duschkopf, Handtuch, Bürste, Leo **nass** und **fluffig**, Schleifen in 4 Farben.
+Für Stufe 3: Badezimmer, Bürste, Schleifen in 4 Farben. Wanne, Hahn, Seifenflasche, Duschkopf, Föhn, Schaum und Leo **nass** sind vorerst direkt in `index.html` gezeichnet und können von der Leinwand ersetzt werden.
 
 ## Offene Fragen an Lara (am besten beim Testen von Stufe 1 beobachten)
 

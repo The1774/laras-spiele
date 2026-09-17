@@ -629,3 +629,145 @@ body {
 #buehne.lampe-aus #abdunkeln { opacity: 0.12; }
 #buehne.vorhang-zu.lampe-aus #abdunkeln { opacity: 0.3; }
 #buehne.nacht #abdunkeln { opacity: 0; }   /* nachts übernimmt das Nacht-Overlay */
+
+/* =====================================================
+   Baden: Wanne, Hahn, Schaum, nasses Fell, Badezeug (js/bad.js)
+   ===================================================== */
+
+/* Die Wanne (hinten hinter Leo, vorne davor) fährt von unten ins Zimmer */
+#wanne-hinten,
+#wanne-vorne {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1024px;
+    height: 768px;
+    display: block;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(180px);
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.35s ease-out;
+}
+#buehne.badet #wanne-hinten,
+#buehne.badet #wanne-vorne {
+    opacity: 1;
+    transform: none;
+}
+
+/* Hocker mit dem Badezeug, links neben der Wanne */
+#badhocker {
+    position: absolute;
+    left: 120px;
+    top: 600px;
+    width: 180px;
+    height: 110px;
+    display: block;
+    opacity: 0;
+    transform: translateY(180px);
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.35s ease-out;
+}
+#buehne.badet #badhocker {
+    opacity: 1;
+    transform: none;
+}
+
+/* Wasserstrahl nur, solange der Hahn offen ist */
+#hahn-strahl { transition: opacity 0.2s; }
+#wanne-vorne.laeuft #hahn-strahl {
+    opacity: 1;
+    animation: strahl 0.3s ease-in-out infinite alternate;
+}
+@keyframes strahl {
+    from { opacity: 0.75; }
+    to   { opacity: 1; }
+}
+
+/* Hahn wackelt als Hinweis */
+#hahn {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+}
+#hahn.hinweis {
+    animation: hahnwackeln 0.5s ease-in-out 3;
+}
+@keyframes hahnwackeln {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-8deg); }
+    75%      { transform: rotate(8deg); }
+}
+
+/* Schaum auf dem Badewasser blendet weich ein */
+#wanne-schaum { transition: opacity 0.4s; }
+
+/* Schaumberge auf Leo: nur beim Baden, Größe setzt bad.js per transform */
+#schaum { display: none; }
+#leo.badet #schaum { display: block; }
+.schaumblob {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.12s linear;
+}
+.schaum-wackler {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+#schaum.wackelt .schaum-wackler {
+    animation: schaumwackeln 0.45s ease-in-out 3;
+}
+@keyframes schaumwackeln {
+    0%, 100% { transform: translate(0, 0); }
+    25%      { transform: translate(-3px, -4px); }
+    75%      { transform: translate(3px, -2px); }
+}
+
+/* Nasses Fell: Tropfen hängen an Ohren und Kinn und tropfen ab */
+#leo-nass { display: none; }
+#leo.nass #leo-nass { display: block; }
+.nasstropfen {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: tropfnass 1.1s ease-in infinite;
+}
+.nasstropfen:nth-child(2) { animation-delay: 0.35s; }
+.nasstropfen:nth-child(3) { animation-delay: 0.7s; }
+@keyframes tropfnass {
+    0%   { transform: translateY(0) scaleY(0.6); opacity: 0; }
+    30%  { transform: translateY(2px) scaleY(1);  opacity: 1; }
+    100% { transform: translateY(16px) scaleY(1); opacity: 0; }
+}
+
+/* Planschen: die Pfote patscht ins Wasser */
+.planschpfote {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: planschen 0.3s ease-in-out infinite alternate;
+}
+@keyframes planschen {
+    from { transform: rotate(-18deg) translateY(-6px); }
+    to   { transform: rotate(12deg) translateY(8px); }
+}
+
+/* Föhnen: Leo flattert im warmen Wind, die Schleife auch */
+#leo-figur.flattern {
+    animation: flattern 0.16s linear infinite;
+}
+@keyframes flattern {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    50%      { transform: translateX(-2px) rotate(-1.5deg); }
+}
+#leo-figur.flattern .schleife {
+    transform-box: fill-box;
+    transform-origin: 40% 60%;
+    animation: schleifeflattern 0.2s ease-in-out infinite alternate;
+}
+@keyframes schleifeflattern {
+    from { transform: rotate(-8deg); }
+    to   { transform: rotate(8deg); }
+}
+
+/* Der Föhn zeigt immer zu Leo (game.js spiegelt ihn rechts von ihr) */
+.ding.gespiegelt svg { transform: scaleX(-1); }
+
+/* Beim Baden sind Stinke-Linien und Fliegen weg – die Matschflecken bleiben, bis sie abgespült sind */
+#leo.badet .stink,
+#leo.badet .fliegen { display: none; }

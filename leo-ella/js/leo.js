@@ -22,6 +22,7 @@ var Leo = {
     kopf: null,
     teile: {},          // { augen: { offen: [el, …], gross: [el, …] }, … }
     aktuellesGesicht: null,
+    waescht: false,     // beim Baden bleiben weggewischte Flecken weg, auch wenn der Zustand neu gezeigt wird
 
     // ---------- Gesichter der Zustände ----------
 
@@ -96,13 +97,29 @@ var Leo = {
         bauch:       { augen: 'lachen', wangen: 'gross', mund: 'lachen', schwanz: 'herz',
                        pfoten: 'hoch', figur: 'zurueck' },
         pfote:       { augen: 'zugekniffen', wangen: 'gross', mund: 'lachen',
-                       props: ['kitzellinien'], figur: 'wackeln' }
+                       props: ['kitzellinien'], figur: 'wackeln' },
+
+        // ----- Baden -----
+        // Die Wanne ist da: Freudenhüpfer hinein
+        badefreude:  { augen: 'freude', wangen: 'gross', mund: 'lachen', schwanz: 'freude', figur: 'huepfen' },
+        // Große Augen: das Wasser läuft, die Seife kommt
+        neugierig:   { augen: 'gross', mund: 'klein' },
+        // Die Wanne ist voll: Pfote patscht ins Wasser
+        planschen:   { augen: 'lachen', wangen: 'gross', mund: 'lachen', pfoten: 'plansch' },
+        // Hatschi! – der Schaum kitzelt in der Nase
+        niesen:      { augen: 'zugekniffen', mund: 'offen', blase: 'hatschi', figur: 'schuetteln' },
+        // Unter der Dusche: Augen zu, Ohren hängen
+        dusche:      { ohren: 'unten', augen: 'zugekniffen', mund: 'klein' },
+        // Nass und wartend auf den Föhn
+        nass:        { ohren: 'unten', augen: 'gross', mund: 'klein' },
+        // Im warmen Föhnwind: Ohren hoch, alles flattert
+        foehn:       { ohren: 'hoch', augen: 'zugekniffen', wangen: 'gross', mund: 'lachen', figur: 'flattern' }
     },
 
     // Diese Schlüssel sind keine SVG-Teile, sondern Bewegungs-Klassen
     BEWEGUNGEN: { kopf: true, figur: true },
     KOPF_KLASSEN:  ['nicken', 'lehnen', 'heben', 'ohrzucken', 'wegdrehen', 'schnuppern', 'kauen'],
-    FIGUR_KLASSEN: ['huepfen', 'wackeln', 'schuetteln', 'plustern', 'vibrieren', 'welle', 'zurueck', 'hicks'],
+    FIGUR_KLASSEN: ['huepfen', 'wackeln', 'schuetteln', 'plustern', 'vibrieren', 'welle', 'zurueck', 'hicks', 'flattern'],
 
     init: function () {
         this.svg = document.getElementById('leo');
@@ -154,7 +171,7 @@ var Leo = {
     zeigeZustand: function (name) {
         var g = this.mische(this.BASIS, this.ZUSTAENDE[name] || {});
         this.setze(g);
-        this.matschZuruecksetzen();
+        if (!this.waescht) this.matschZuruecksetzen();
     },
 
     // Reaktion = Basis + Zustands-Reste + Reaktions-Abweichungen.
@@ -198,14 +215,30 @@ var Leo = {
 
     // Fleck unter einer Position (in Leo-SVG-Koordinaten) entfernen.
     // Gibt true zurück, wenn einer getroffen wurde.
-    fleckWischen: function (lx, ly) {
+    fleckWischen: function (lx, ly, radius) {
+        var r = radius || 34;
+        return this.fleckEntfernen(function (cx, cy) {
+            var dx = lx - cx, dy = ly - cy;
+            return dx * dx + dy * dy < r * r;
+        });
+    },
+
+    // Fleck im Duschregen entfernen: alles, was unterhalb von lyAb liegt und
+    // seitlich höchstens halbeBreite von lx entfernt ist (Leo-Koordinaten)
+    fleckSpuelen: function (lx, lyAb, halbeBreite) {
+        return this.fleckEntfernen(function (cx, cy) {
+            return Math.abs(cx - lx) < halbeBreite && cy > lyAb;
+        });
+    },
+
+    // Den ersten sichtbaren Fleck ausblenden, auf den `trifft(cx, cy)` zutrifft
+    fleckEntfernen: function (trifft) {
         var f = this.flecken();
         for (var i = 0; i < f.length; i++) {
             if (f[i].style.display === 'none') continue;
             var cx = parseFloat(f[i].getAttribute('data-x'));
             var cy = parseFloat(f[i].getAttribute('data-y'));
-            var dx = lx - cx, dy = ly - cy;
-            if (dx * dx + dy * dy < 34 * 34) {
+            if (trifft(cx, cy)) {
                 f[i].style.display = 'none';
                 return true;
             }

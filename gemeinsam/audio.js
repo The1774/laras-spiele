@@ -252,6 +252,40 @@ const Sound = {
         this.ton(520, 0.14, 'triangle', 0.09, 0, 780);
     },
 
+    // ---------- Baden (Leo Ella) ----------
+
+    // Wasser rauscht in die Wanne: schnelle, aufsteigende Plinks
+    // (mehrfach aufrufen, solange es läuft)
+    wasserlauf() {
+        for (let i = 0; i < 6; i++) {
+            this.ton(500 + i * 70 + Math.random() * 80, 0.07, 'sine', 0.05, i * 0.09, 700 + i * 60);
+        }
+    },
+
+    // Seifenflasche quietscht beim Drücken
+    quietsch() {
+        this.ton(700, 0.12, 'sine', 0.07, 0, 1300);
+    },
+
+    // Hatschi! – kurzes Hochziehen, dann ein Platzer nach unten
+    niesen() {
+        this.ton(600, 0.16, 'triangle', 0.06, 0, 900);
+        this.ton(1000, 0.18, 'square', 0.07, 0.18, 250);
+    },
+
+    // Duschregen: leises Prasseln
+    dusche() {
+        for (let i = 0; i < 5; i++) {
+            this.ton(1500 + Math.random() * 900, 0.04, 'sine', 0.025, i * 0.06);
+        }
+    },
+
+    // Föhn brummt warm (mehrfach aufrufen, solange er läuft)
+    foehn() {
+        this.ton(130, 0.45, 'triangle', 0.045, 0, 140);
+        this.ton(262, 0.45, 'sine', 0.02, 0, 280);
+    },
+
     // ---------- Stumm-Zustand (gemeinsam für alle Spiele) ----------
 
     // Ton an/aus – gibt den neuen Zustand zurück und merkt ihn sich

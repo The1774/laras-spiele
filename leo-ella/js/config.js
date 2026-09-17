@@ -91,6 +91,31 @@ var KONFIG = {
     // Schnurren endet so lange nach der letzten Streichel-Bewegung (ms)
     SCHNURR_NACHLAUF_MS: 700,
 
+    // ---------- Baden (Wanne im Zimmer: Hahn, Seife, Schaum reiben, Dusche, Föhn) ----------
+
+    // Nach so langer Pause wackelt das Ding, das als Nächstes dran ist (ms)
+    BAD_HINWEIS_MS: 6000,
+    // So nah (Pixel) muss die Seifenflasche an einen Schaumfleck, damit er wächst
+    SEIFE_NAEHE: 150,
+    // So groß wird ein Schaumberg allein durch Seife (0–1) – der Rest kommt vom Reiben
+    SEIFE_MAX: 0.6,
+    SEIFE_PRO_SEKUNDE: 0.55,
+    // Reiben mit dem Finger (Schwamm): Reichweite (Pixel) und Tempo
+    SCHRUBB_NAEHE: 95,
+    SCHRUBB_PRO_SEKUNDE: 1.1,
+    // Alle Schaumberge mindestens so groß → abspülen
+    SCHAUM_FERTIG: 0.92,
+    // Summe aller Schaumberge (je 0–1), ab der Leo einmal niest
+    NIES_AB_SCHAUM: 2.6,
+    // Duschregen: halbe Breite (Pixel) und wie schnell Schaum darunter wegspült
+    DUSCHE_BREITE: 110,
+    DUSCHE_PRO_SEKUNDE: 0.7,
+    // So sauber ist Leo nach dem Abspülen (100 gibt es erst nach dem Föhnen)
+    SAUBER_NACH_SPUELEN: 75,
+    // Föhn: so nah (Pixel) an Leos Kopf wirkt er, so lange (s) bis sie trocken ist
+    FOEHN_NAEHE: 300,
+    FOEHN_SEKUNDEN: 3.2,
+
     // Dauer der Reaktionen in Millisekunden
     DAUER: {
         danke: 2600,
@@ -99,7 +124,10 @@ var KONFIG = {
         wiedersehen: 2800,
         kitzeln: 1600,
         gutenacht: 3200,
-        aufwachen: 2600
+        aufwachen: 2600,
+        badefreude: 1300,
+        planschen: 1300,
+        niesen: 1100
     },
 
     // Speicher-Schlüssel (Präfix „leoella." setzt gemeinsam/speicher.js)

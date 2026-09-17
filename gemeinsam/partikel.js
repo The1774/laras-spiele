@@ -8,6 +8,8 @@
 //     p.funkeln(x, y, 8);
 //     p.tropfen(x, y, 6);
 //     p.blasen(x, y, 4);
+//     p.regen(x, y, 3);                 // Tropfen fallen nach unten (Dusche)
+//     p.wind(x, y, rx, ry, 2);          // Luftzug in Richtung rx/ry (Föhn)
 //     p.zzz(x, y);                       // ein schwebendes „z"
 //     p.noten(x, y, 2);
 //     p.konfetti(x, y, 20);
@@ -103,6 +105,32 @@ PartikelPool.prototype.blasen = function (x, y, anzahl) {
             vx: zufall(-15, 15), vy: zufall(-60, -30),
             groesse: zufall(8, 18), farbe: '#6ec6f0',
             leben: zufall(1.5, 2.5), schwebeAmplitude: 14
+        });
+    }
+};
+
+// Regen aus dem Duschkopf: Tropfen fallen nach unten
+PartikelPool.prototype.regen = function (x, y, anzahl) {
+    for (var i = 0; i < (anzahl || 3); i++) {
+        this.neu('tropfen', x + zufall(-26, 26), y, {
+            vx: zufall(-20, 20), vy: zufall(120, 200),
+            groesse: zufall(5, 9), farbe: '#6ec6f0',
+            leben: zufall(0.35, 0.55), schwerkraft: 500
+        });
+    }
+};
+
+// Warmer Luftzug (Föhn): kurze helle Striche, die in eine Richtung wehen
+PartikelPool.prototype.wind = function (x, y, richtungX, richtungY, anzahl) {
+    var l = Math.sqrt(richtungX * richtungX + richtungY * richtungY) || 1;
+    for (var i = 0; i < (anzahl || 2); i++) {
+        var tempo = zufall(260, 380);
+        var vx = richtungX / l * tempo + zufall(-40, 40);
+        var vy = richtungY / l * tempo + zufall(-40, 40);
+        this.neu('konfetti', x + zufall(-6, 6), y + zufall(-10, 10), {
+            vx: vx, vy: vy,
+            groesse: zufall(10, 18), farbe: 'rgba(255, 255, 255, 0.85)',
+            leben: zufall(0.3, 0.5), drehung: Math.atan2(vy, vx)
         });
     }
 };

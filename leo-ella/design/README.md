@@ -21,3 +21,7 @@ Alle Zeichnungen aus der Designsession als eigenständige SVG-Dateien. Sie sind 
 6. Textelemente (Zzz, Sprechblasen) nutzen Fredoka mit Fallback – sie stehen in den Dateien nur als Beispiel; im Spiel werden Sprechblasen dynamisch erzeugt.
 
 Die Dateien sind gerendert exakt so, wie Lara die Figur auf der Design-Leinwand ausgesucht hat. Änderungen an Form oder Gesicht bitte nur nach Rücksprache.
+
+## Noch nicht von der Leinwand
+
+Für die Bade-Szene (17.09.2026) wurden direkt in `index.html` im Stil der Vorlagen gezeichnet: Badewanne mit Hahn, Hocker, Seifenflasche, Duschkopf, Föhn, Schaumberge auf Leo, Nass-Tropfen, Plansch-Pfote und die „Hatschi!“-Blase. Wenn Lara sie auf der Leinwand anders haben will, werden sie dort ersetzt.

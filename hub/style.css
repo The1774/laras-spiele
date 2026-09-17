@@ -1,0 +1,171 @@
+/* =====================================================
+   Laras Spiele – Startbildschirm (Hub)
+   Flieder-zu-Rosa-Verlauf, zwei große Kacheln, kleiner
+   Ton-Knopf. Feste Bühne 1024 × 768, per JS skaliert.
+   ===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: linear-gradient(#e9d5ff, #fdf1f8);
+    font-family: 'Fredoka', 'Comic Sans MS', sans-serif;
+    touch-action: manipulation;       /* kein Doppeltipp-Zoom auf Tablets */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;      /* kein "Kopieren/Teilen"-Menü bei langem Tippen */
+    overscroll-behavior: none;        /* kein Gummiband-Wackeln (iOS) */
+}
+
+/* Hält die Bühne mittig; die Bühne wird per JS skaliert */
+#skalier-rahmen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Feste interne Größe – alles darin skaliert automatisch mit */
+#buehne {
+    position: relative;
+    width: 1024px;
+    height: 768px;
+    flex: none;
+    background: linear-gradient(#e9d5ff, #fdf1f8);
+    overflow: hidden;
+}
+
+.hintergrund {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Die drei Sterne funkeln ganz sanft */
+.hintergrund .stern {
+    animation: funkeln 2.6s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+.hintergrund .stern:nth-child(3) { animation-delay: 0.8s; }
+.hintergrund .stern:nth-child(4) { animation-delay: 1.6s; }
+
+@keyframes funkeln {
+    0%, 100% { transform: scale(1);   opacity: 0.8; }
+    50%      { transform: scale(1.4); opacity: 1;   }
+}
+
+h1 {
+    position: absolute;
+    left: 0;
+    top: 44px;
+    width: 100%;
+    text-align: center;
+    font-size: 44px;
+    font-weight: 700;
+    color: #6d3fb8;
+    letter-spacing: 1px;
+    pointer-events: none;
+}
+
+/* ---------- Ton-Knopf oben links ---------- */
+
+.ton-knopf {
+    position: absolute;
+    left: 24px;
+    top: 24px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 4px solid #2b2b3a;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ton-knopf:active {
+    transform: scale(0.92);
+}
+
+/* Stumm: Schallwellen weg, roter Strich drüber */
+.ton-knopf .ton-strich { display: none; }
+.ton-knopf.stumm .ton-strich { display: block; }
+.ton-knopf.stumm .ton-wellen { display: none; }
+
+/* ---------- Spiele-Kacheln ---------- */
+
+.kachel {
+    position: absolute;
+    top: 140px;
+    width: 420px;
+    height: 520px;
+    border-radius: 44px;
+    border: 6px solid #ffffff;
+    box-shadow: 0 12px 0 #c9a9e8;     /* lila Schattenkante */
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+}
+
+.kachel svg {
+    display: block;
+    width: 408px;
+    height: 508px;
+}
+
+/* Beim Tippen drückt sich die Kachel in die Schattenkante hinein */
+.kachel:active,
+.kachel.gedrueckt {
+    transform: translateY(8px);
+    box-shadow: 0 4px 0 #c9a9e8;
+}
+
+.kachel-zauberwiese {
+    left: 72px;
+    background: linear-gradient(#cfe9ff 0px, #cfe9ff 300px, #a7e3a0 300px, #6cc06a 520px);
+}
+
+.kachel-leo {
+    left: 532px;
+    background: linear-gradient(#f3efe9 0px, #f3efe9 320px, #d9d3cb 320px, #d9d3cb 520px);
+}
+
+/* ---------- Winken beim Laden ---------- */
+
+/* Der Arm dreht sich um seinen oberen Ansatz am Körper */
+.winke-arm {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: winken 1.6s ease-in-out 0.4s 1 both;
+}
+
+/* Leo winkt einen Tick später als Bella */
+.kachel-leo .winke-arm {
+    animation-delay: 0.7s;
+}
+
+@keyframes winken {
+    0%   { transform: rotate(0deg); }
+    30%  { transform: rotate(-80deg); }
+    50%  { transform: rotate(-55deg); }
+    70%  { transform: rotate(-85deg); }
+    85%  { transform: rotate(-60deg); }
+    100% { transform: rotate(0deg); }
+}

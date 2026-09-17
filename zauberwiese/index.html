@@ -18,6 +18,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
 
+    <!-- Gemeinsame Basis (Haus-Knopf) – bewusst vor dem eigenen Stil -->
+    <link rel="stylesheet" href="../gemeinsam/basis.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -28,6 +30,16 @@
 
         <!-- Das eigentliche Spielfeld (feste interne Auflösung) -->
         <canvas id="spiel-canvas" width="960" height="540"></canvas>
+
+        <!-- Haus-Knopf oben links: zurück zum Startbildschirm der Sammlung.
+             Stil aus ../gemeinsam/basis.css, kein Bestätigungsdialog. -->
+        <a class="haus-knopf" href="../index.html" title="Zurück zu Laras Spielen" aria-label="Zurück zu Laras Spielen">
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M6 20 L20 7 L34 20" fill="none" stroke="#2b2b3a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 18 V33 H30 V18" fill="none" stroke="#2b2b3a" stroke-width="3.5" stroke-linejoin="round"/>
+                <rect x="17" y="24" width="6" height="9" rx="1" fill="#ff8fcf"/>
+            </svg>
+        </a>
 
         <!-- Kleine Knöpfe oben rechts: Pause + Ton + Stimmen -->
         <div id="hud-knoepfe">
